@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/gameplay_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/space_background">
+
+    <!-- Game Header -->
+    <LinearLayout
+        android:id="@+id/game_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            style="@style/SecondaryButton" />
+
+        <!-- Level Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/current_letter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="G"
+                style="@style/CurrentLetter" />
+
+            <TextView
+                android:id="@+id/level_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/level_progress"
+                style="@style/LevelProgress" />
+
+        </LinearLayout>
+
+        <!-- Settings Button -->
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            style="@style/SettingsButton" />
+
+    </LinearLayout>
+
+    <!-- Main Game Area -->
+    <FrameLayout
+        android:id="@+id/game_canvas"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/game_header"
+        android:layout_above="@id/game_controls">
+
+        <!-- Custom Game View (will be added programmatically) -->
+        
+    </FrameLayout>
+
+    <!-- Game Controls -->
+    <LinearLayout
+        android:id="@+id/game_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="16dp">
+
+        <!-- Audio Control -->
+        <Button
+            android:id="@+id/audio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/play_audio"
+            style="@style/AudioButton"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Hint Button -->
+        <Button
+            android:id="@+id/hint_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hint"
+            style="@style/HintButton"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Next Word Button -->
+        <Button
+            android:id="@+id/next_word_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/next_word"
+            style="@style/NextWordButton" />
+
+    </LinearLayout>
+
+    <!-- Score Display -->
+    <LinearLayout
+        android:id="@+id/score_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/game_header"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/score_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/score"
+            style="@style/ScoreLabel" />
+
+        <TextView
+            android:id="@+id/score_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            style="@style/ScoreValue" />
+
+    </LinearLayout>
+
+    <!-- Game Status Text -->
+    <TextView
+        android:id="@+id/game_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/game_header"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="@string/tap_to_start"
+        style="@style/GameStatus"
+        android:visibility="visible" />
+
+</RelativeLayout>

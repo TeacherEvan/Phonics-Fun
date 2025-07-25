@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Fun - Audio Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        h2 {
+            color: #444;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .volume-control label {
+            margin-right: 10px;
+            width: 120px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+        }
+        
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .word-button {
+            background-color: #2196F3;
+        }
+        
+        .phoneme-button {
+            background-color: #FF9800;
+        }
+        
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            min-height: 60px;
+        }
+        
+        #log {
+            font-family: monospace;
+            white-space: pre-wrap;
+            height: 150px;
+            overflow-y: auto;
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phonics Fun - Audio Test</h1>
+        
+        <div class="test-section">
+            <h2>Web Audio API Test</h2>
+            <div class="controls">
+                <button id="test-web-audio">Test Web Audio Support</button>
+                <button id="generate-phoneme-g">Generate "G" Phoneme</button>
+                <button id="generate-explosion">Generate Explosion</button>
+            </div>
+            <div class="status" id="web-audio-status">Status: Not tested</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Speech Synthesis Test</h2>
+            <div class="controls">
+                <button id="test-speech-synthesis">Test Speech Synthesis</button>
+                <button id="speak-phoneme-g">Speak "G is for"</button>
+                <input type="text" id="speak-text" placeholder="Enter text to speak" value="G is for Goat!">
+                <button id="speak-custom">Speak</button>
+            </div>
+            <div class="status" id="speech-status">Status: Not tested</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Audio Element Test</h2>
+            <div class="volume-control">
+                <label for="volume">Volume:</label>
+                <input type="range" id="volume" min="0" max="100" value="70">
+                <span id="volume-display">70%</span>
+            </div>
+            <div class="controls">
+                <button id="test-html-audio">Test HTML Audio</button>
+                <button id="test-ogg-support">Test OGG Support</button>
+                <button class="phoneme-button" id="play-phoneme-g">Play "G" Phoneme</button>
+            </div>
+            <div class="word-list">
+                <button class="word-button" data-word="grape">Grape</button>
+                <button class="word-button" data-word="goat">Goat</button>
+                <button class="word-button" data-word="gold">Gold</button>
+                <button class="word-button" data-word="girl">Girl</button>
+                <button class="word-button" data-word="grandpa">Grandpa</button>
+            </div>
+            <div class="status" id="audio-status">Status: Not tested</div>
+        </div>
+        
+        <div id="log">Audio test log will appear here...</div>
+    </div>
+
+    <script>
+        // Initialize logging
+        const log = document.getElementById('log');
+        function logMessage(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // Web Audio API Test
+        document.getElementById('test-web-audio').addEventListener('click', () => {
+            const status = document.getElementById('web-audio-status');
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                status.textContent = `Status: Web Audio API supported. Sample rate: ${audioContext.sampleRate}Hz`;
+                logMessage('Web Audio API is supported');
+                audioContext.close();
+            } catch (error) {
+                status.textContent = `Status: Web Audio API not supported. Error: ${error.message}`;
+                logMessage(`Web Audio API error: ${error.message}`);
+            }
+        });
+        
+        // Generate G Phoneme
+        document.getElementById('generate-phoneme-g').addEventListener('click', () => {
+            const status = document.getElementById('web-audio-status');
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const duration = 0.5;
+                const sampleRate = audioContext.sampleRate;
+                const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                const frequency = 220; // G phoneme frequency
+                
+                for (let i = 0; i < buffer.length; i++) {
+                    const t = i / sampleRate;
+                    const envelope = Math.exp(-t * 3) * (1 - Math.exp(-t * 50));
+                    // Create a throaty sound for 'g'
+                    const oscillation = Math.sin(t * 2 * Math.PI * frequency) + 
+                                      0.5 * Math.sin(t * 2 * Math.PI * (frequency * 1.5)) +
+                                      0.25 * Math.sin(t * 2 * Math.PI * (frequency * 0.5));
+                    data[i] = oscillation * envelope * 0.3;
+                }
+                
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                
+                status.textContent = 'Status: Playing generated G phoneme';
+                logMessage('Generated G phoneme played');
+                
+                source.onended = () => {
+                    audioContext.close();
+                };
+            } catch (error) {
+                status.textContent = `Status: Error generating phoneme. Error: ${error.message}`;
+                logMessage(`Phoneme generation error: ${error.message}`);
+            }
+        });
+        
+        // Generate Explosion Sound
+        document.getElementById('generate-explosion').addEventListener('click', () => {
+            const status = document.getElementById('web-audio-status');
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const duration = 1.0;
+                const sampleRate = audioContext.sampleRate;
+                const buffer = audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < buffer.length; i++) {
+                    const t = i / sampleRate;
+                    const envelope = Math.exp(-t * 5);
+                    const noise = (Math.random() - 0.5) * 2;
+                    data[i] = noise * envelope * 0.3;
+                }
+                
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                
+                status.textContent = 'Status: Playing generated explosion sound';
+                logMessage('Generated explosion sound played');
+                
+                source.onended = () => {
+                    audioContext.close();
+                };
+            } catch (error) {
+                status.textContent = `Status: Error generating explosion. Error: ${error.message}`;
+                logMessage(`Explosion generation error: ${error.message}`);
+            }
+        });
+        
+        // Speech Synthesis Test
+        document.getElementById('test-speech-synthesis').addEventListener('click', () => {
+            const status = document.getElementById('speech-status');
+            if ('speechSynthesis' in window) {
+                const voices = window.speechSynthesis.getVoices();
+                status.textContent = `Status: Speech synthesis is supported. Available voices: ${voices.length}`;
+                logMessage(`Speech synthesis supported with ${voices.length} voices`);
+                
+                // List available voices
+                voices.forEach(voice => {
+                    logMessage(`Voice: ${voice.name} (${voice.lang}) ${voice.default ? '- DEFAULT' : ''}`);
+                });
+            } else {
+                status.textContent = 'Status: Speech synthesis is not supported in this browser';
+                logMessage('Speech synthesis not supported');
+            }
+        });
+        
+        // Speak G is for
+        document.getElementById('speak-phoneme-g').addEventListener('click', () => {
+            const status = document.getElementById('speech-status');
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('G is for');
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                
+                // Try to find a female voice
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('female') || 
+                    voice.name.toLowerCase().includes('girl') ||
+                    voice.name.toLowerCase().includes('woman')
+                );
+                
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                    status.textContent = `Status: Using female voice: ${femaleVoice.name}`;
+                } else {
+                    status.textContent = 'Status: No female voice found, using default voice';
+                }
+                
+                window.speechSynthesis.speak(utterance);
+                logMessage(`Speaking "G is for" with ${utterance.voice ? utterance.voice.name : 'default voice'}`);
+            } else {
+                status.textContent = 'Status: Speech synthesis is not supported in this browser';
+                logMessage('Speech synthesis not supported');
+            }
+        });
+        
+        // Speak Custom Text
+        document.getElementById('speak-custom').addEventListener('click', () => {
+            const status = document.getElementById('speech-status');
+            const text = document.getElementById('speak-text').value;
+            
+            if (!text) {
+                status.textContent = 'Status: No text entered';
+                return;
+            }
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 0.9;
+                utterance.pitch = 1.1;
+                
+                // Try to find a female voice
+                const voices = window.speechSynthesis.getVoices();
+                const femaleVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('female') || 
+                    voice.name.toLowerCase().includes('girl') ||
+                    voice.name.toLowerCase().includes('woman')
+                );
+                
+                if (femaleVoice) {
+                    utterance.voice = femaleVoice;
+                }
+                
+                window.speechSynthesis.speak(utterance);
+                status.textContent = `Status: Speaking "${text}"`;
+                logMessage(`Speaking "${text}" with ${utterance.voice ? utterance.voice.name : 'default voice'}`);
+            } else {
+                status.textContent = 'Status: Speech synthesis is not supported in this browser';
+                logMessage('Speech synthesis not supported');
+            }
+        });
+        
+        // HTML Audio Test
+        document.getElementById('test-html-audio').addEventListener('click', () => {
+            const status = document.getElementById('audio-status');
+            const audio = new Audio();
+            
+            audio.addEventListener('canplaythrough', () => {
+                status.textContent = 'Status: HTML Audio is supported';
+                logMessage('HTML Audio is supported');
+            });
+            
+            audio.addEventListener('error', (e) => {
+                status.textContent = `Status: HTML Audio error: ${e.type}`;
+                logMessage(`HTML Audio error: ${e.type}`);
+            });
+            
+            // Use a simple sound file for testing
+            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+            audio.play().catch(e => {
+                status.textContent = `Status: HTML Audio playback error: ${e.message}`;
+                logMessage(`HTML Audio playback error: ${e.message}`);
+            });
+        });
+        
+        // Test OGG Support
+        document.getElementById('test-ogg-support').addEventListener('click', () => {
+            const status = document.getElementById('audio-status');
+            const audio = new Audio();
+            
+            if (audio.canPlayType('audio/ogg') === '') {
+                status.textContent = 'Status: OGG format is NOT supported';
+                logMessage('OGG format is NOT supported');
+            } else if (audio.canPlayType('audio/ogg') === 'maybe') {
+                status.textContent = 'Status: OGG format is probably supported';
+                logMessage('OGG format is probably supported');
+            } else if (audio.canPlayType('audio/ogg') === 'probably') {
+                status.textContent = 'Status: OGG format is definitely supported';
+                logMessage('OGG format is definitely supported');
+            }
+            
+            // Also check MP3
+            logMessage(`MP3 support: ${audio.canPlayType('audio/mpeg')}`);
+            logMessage(`AAC support: ${audio.canPlayType('audio/aac')}`);
+            logMessage(`WAV support: ${audio.canPlayType('audio/wav')}`);
+        });
+        
+        // Play G Phoneme
+        document.getElementById('play-phoneme-g').addEventListener('click', () => {
+            const status = document.getElementById('audio-status');
+            const audio = new Audio();
+            const volume = document.getElementById('volume').value / 100;
+            audio.volume = volume;
+            
+            audio.addEventListener('canplaythrough', () => {
+                status.textContent = 'Status: Phoneme loaded, playing...';
+                audio.play().catch(e => {
+                    status.textContent = `Status: Phoneme playback error: ${e.message}`;
+                    logMessage(`Phoneme playback error: ${e.message}`);
+                });
+            });
+            
+            audio.addEventListener('ended', () => {
+                status.textContent = 'Status: Phoneme played successfully';
+                logMessage('Phoneme played successfully');
+            });
+            
+            audio.addEventListener('error', (e) => {
+                status.textContent = `Status: Phoneme loading error: ${e.type}`;
+                logMessage(`Phoneme loading error: ${e.type}`);
+            });
+            
+            // Try to load the actual phoneme sound
+            audio.src = '../assets/sounds/phoneme-g.mp3';
+            logMessage('Attempting to load phoneme-g.mp3');
+        });
+        
+        // Word buttons
+        document.querySelectorAll('.word-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const word = button.getAttribute('data-word');
+                const status = document.getElementById('audio-status');
+                const audio = new Audio();
+                const volume = document.getElementById('volume').value / 100;
+                audio.volume = volume;
+                
+                audio.addEventListener('canplaythrough', () => {
+                    status.textContent = `Status: Word "${word}" loaded, playing...`;
+                    audio.play().catch(e => {
+                        status.textContent = `Status: Word playback error: ${e.message}`;
+                        logMessage(`Word playback error: ${e.message}`);
+                    });
+                });
+                
+                audio.addEventListener('ended', () => {
+                    status.textContent = `Status: Word "${word}" played successfully`;
+                    logMessage(`Word "${word}" played successfully`);
+                });
+                
+                audio.addEventListener('error', (e) => {
+                    status.textContent = `Status: Word loading error: ${e.type}`;
+                    logMessage(`Word loading error for "${word}": ${e.type}`);
+                    
+                    // Fallback to speech synthesis
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(`G is for ${word}!`);
+                        utterance.rate = 0.9;
+                        utterance.pitch = 1.1;
+                        window.speechSynthesis.speak(utterance);
+                        status.textContent = `Status: Fallback to speech synthesis for "${word}"`;
+                        logMessage(`Fallback to speech synthesis for "${word}"`);
+                    }
+                });
+                
+                // Try to load the actual word sound
+                audio.src = `../assets/sounds/voice-${word}.mp3`;
+                logMessage(`Attempting to load voice-${word}.mp3`);
+            });
+        });
+        
+        // Volume control
+        document.getElementById('volume').addEventListener('input', (e) => {
+            document.getElementById('volume-display').textContent = `${e.target.value}%`;
+        });
+        
+        // Initialize speech synthesis
+        if ('speechSynthesis' in window) {
+            // Force loading voices
+            speechSynthesis.onvoiceschanged = () => {
+                const voices = window.speechSynthesis.getVoices();
+                logMessage(`Loaded ${voices.length} voices for speech synthesis`);
+            };
+            window.speechSynthesis.getVoices();
+        }
+        
+        // Log initial message
+        logMessage('Audio test page loaded successfully');
+    </script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base App Theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/primary_color</item>
+        <item name="colorPrimaryDark">@color/primary_dark_color</item>
+        <item name="colorAccent">@color/accent_color</item>
+        <item name="android:windowBackground">@color/background_color</item>
+        <item name="android:textColor">@color/text_color</item>
+    </style>
+    
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    
+    <!-- Welcome Screen Styles -->
+    <style name="WelcomeTitle">
+        <item name="android:textSize">36sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="TeacherName">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/accent_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <!-- Button Styles -->
+    <style name="PrimaryButton">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_margin">8dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="SecondaryButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="LetterButton">
+        <item name="android:textSize">48sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_letter</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="SettingsButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="AudioButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="HintButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="NextWordButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="PreviewButton">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <style name="DangerButton">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:background">@drawable/button_primary</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:layout_margin">4dp</item>
+    </style>
+    
+    <!-- Text Styles -->
+    <style name="ScreenTitle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="CurrentLetter">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">@color/accent_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="LevelProgress">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="ScoreLabel">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="ScoreValue">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">@color/accent_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="GameStatus">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <style name="ProgressText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center</item>
+    </style>
+    
+    <!-- Settings Styles -->
+    <style name="SettingsLabel">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    
+    <style name="SettingsValue">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+    
+    <style name="SettingsDescription">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+    
+    <!-- Game Text -->
+    <style name="GameText">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:gravity">center</item>
+    </style>
+</resources>

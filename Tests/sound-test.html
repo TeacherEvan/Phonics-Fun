@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sound Generation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background: #e8f5e8;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phonics Fun - Sound Generation Test</h1>
+    <p>Click the buttons below to test the Web Audio API sound generation:</p>
+    
+    <button class="test-button" onclick="generateExplosion()">Test Explosion Sound</button>
+    <button class="test-button" onclick="generatePhoneme()">Test G Phoneme</button>
+    <button class="test-button" onclick="generateVoice()">Test Voice Message</button>
+    <button class="test-button" onclick="testParticles()">Test Particle System</button>
+    
+    <div id="result"></div>
+    
+    <script>
+        let audioContext;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+        
+        function generateExplosion() {
+            const context = initAudio();
+            const duration = 1.0;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Improved explosion sound with better decay and frequency distribution
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                // Enhanced envelope with faster initial attack and longer decay
+                const envelope = Math.exp(-t * 4) * (1 - Math.exp(-t * 30));
+                // More complex noise pattern with low frequency bias for richer sound
+                const noise = (Math.random() - 0.5) * 2;
+                const lowPassNoise = noise * (1 - t * 0.7); // Simple low-pass effect
+                data[i] = lowPassNoise * envelope * 0.5; // Increased volume to 0.5
+            }
+            
+            // Add compression for better loudness without distortion
+            const compressor = context.createDynamicsCompressor();
+            compressor.threshold.value = -24;
+            compressor.knee.value = 30;
+            compressor.ratio.value = 12;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.25;
+            compressor.connect(context.destination);
+            
+            const source = context.createBufferSource();
+            source.buffer = buffer;
+            source.connect(compressor);
+            source.start();
+            
+            showResult('Explosion sound generated and played with enhanced quality!');
+        }
+        
+        function generatePhoneme() {
+            const context = initAudio();
+            const duration = 0.5;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Improved G phoneme with formant frequencies for more natural sound
+            const fundamental = 150; // Base frequency for 'G' sound
+            const formant1 = 700;    // First formant frequency
+            const formant2 = 1700;   // Second formant frequency
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                // Better envelope with attack and decay phases
+                const attack = Math.min(1, t * 10); // Fast 0.1s attack
+                const decay = Math.max(0, 1 - (t - 0.3) * 3); // Decay starting at 0.3s
+                const envelope = attack * decay;
+                
+                // Combine fundamental with formants for more natural vowel sound
+                const fundamental_wave = Math.sin(2 * Math.PI * fundamental * t);
+                const formant1_wave = Math.sin(2 * Math.PI * formant1 * t) * 0.3;
+                const formant2_wave = Math.sin(2 * Math.PI * formant2 * t) * 0.15;
+                
+                data[i] = (fundamental_wave + formant1_wave + formant2_wave) * envelope * 0.4;
+            }
+            
+            // Add a slight reverb effect for more natural sound
+            const convolver = context.createConvolver();
+            const reverbBuffer = createReverbBuffer(context, 0.2, 0.1);
+            convolver.buffer = reverbBuffer;
+            
+            const gainNode = context.createGain();
+            gainNode.gain.value = 0.9;
+            
+            const source = context.createBufferSource();
+            source.buffer = buffer;
+            source.connect(gainNode);
+            
+            // Split the signal - some direct, some with reverb
+            gainNode.connect(context.destination);
+            gainNode.connect(convolver);
+            convolver.connect(context.destination);
+            
+            source.start();
+            
+            showResult('G phoneme sound generated and played with enhanced clarity!');
+        }
+        
+        // Helper function to create a simple reverb impulse response
+        function createReverbBuffer(context, duration, decay) {
+            const sampleRate = context.sampleRate;
+            const length = sampleRate * duration;
+            const impulse = context.createBuffer(2, length, sampleRate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+            
+            for (let i = 0; i < length; i++) {
+                const n = i / length;
+                // Exponential decay
+                left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+                right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+            }
+            
+            return impulse;
+        }
+        
+        function generateVoice() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance('G is for grape!');
+                
+                // Get available voices and choose a child-friendly one if available
+                let voices = speechSynthesis.getVoices();
+                if (voices.length === 0) {
+                    // Voice list might not be loaded yet, wait and try again
+                    speechSynthesis.addEventListener('voiceschanged', () => {
+                        voices = speechSynthesis.getVoices();
+                        selectAndSpeakVoice(utterance, voices);
+                    });
+                } else {
+                    selectAndSpeakVoice(utterance, voices);
+                }
+            } else {
+                showResult('Speech synthesis not supported in this browser');
+            }
+        }
+        
+        function selectAndSpeakVoice(utterance, voices) {
+            // Try to find child-friendly voice, defaulting to first female voice, then any voice
+            let selectedVoice = null;
+            
+            // Look for voices with "child" in the name
+            selectedVoice = voices.find(voice => 
+                voice.name.toLowerCase().includes('child') ||
+                voice.name.toLowerCase().includes('kid')
+            );
+            
+            // If no child voice found, try a female voice
+            if (!selectedVoice) {
+                selectedVoice = voices.find(voice => 
+                    voice.name.toLowerCase().includes('female') ||
+                    voice.name.toLowerCase().includes('woman')
+                );
+            }
+            
+            // If still no match, just use the first voice
+            if (!selectedVoice && voices.length > 0) {
+                selectedVoice = voices[0];
+            }
+            
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+            
+            // Optimize settings for children's learning
+            utterance.rate = 0.85;      // Slightly slower for better comprehension
+            utterance.pitch = 1.2;      // Slightly higher pitch for child-friendly sound
+            utterance.volume = 1.0;     // Maximum volume
+            
+            speechSynthesis.speak(utterance);
+            showResult(`Voice message generated and played with optimized settings for children!`);
+        }
+        
+        function testParticles() {
+            showResult('Particle system test - check main game for visual effects!');
+            // This would integrate with the main particle system
+        }
+        
+        function showResult(message) {
+            document.getElementById('result').innerHTML = `<div class="result">${message}</div>`;
+        }
+        
+        // Initialize audio context on user interaction
+        document.addEventListener('click', () => {
+            if (!audioContext) {
+                initAudio();
+            }
+        });
+    </script>
+</body>
+</html>

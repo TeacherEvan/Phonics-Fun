@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary_color">#3F51B5</color>
+    <color name="primary_dark_color">#303F9F</color>
+    <color name="accent_color">#FF4081</color>
+    <color name="background_color">#000014</color>
+    <color name="space_blue">#001122</color>
+    <color name="space_purple">#2D1B69</color>
+    <color name="star_color">#FFFF88</color>
+    <color name="planet_color">#4CAF50</color>
+    <color name="text_color">#FFFFFF</color>
+    <color name="button_color">#FF6B35</color>
+    <color name="button_pressed">#E55A2B</color>
+    <color name="correct_color">#4CAF50</color>
+    <color name="incorrect_color">#F44336</color>
+    <color name="letter_button_color">#9C27B0</color>
+    <color name="letter_button_pressed">#7B1FA2</color>
+</resources>

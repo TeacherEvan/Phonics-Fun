@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Fun - Audio Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .generate-btn {
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            display: block;
+            width: 100%;
+        }
+        .generate-btn:hover {
+            background: #2980b9;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: #ecf0f1;
+            min-height: 50px;
+        }
+        .success {
+            background: #d5f4e6;
+            color: #27ae60;
+        }
+        .error {
+            background: #fadbd8;
+            color: #e74c3c;
+        }
+        .progress {
+            background: #fff3cd;
+            color: #856404;
+        }
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .audio-controls {
+            margin: 20px 0;
+        }
+        .download-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Phonics Fun Audio Generator</h1>
+        
+        <div class="status" id="status">
+            Ready to generate audio files! Click "Generate All Audio Files" to create all sounds.
+        </div>
+        
+        <button class="generate-btn" onclick="generateAllAudioFiles()">
+            🎵 Generate All Audio Files
+        </button>
+        
+        <div class="audio-controls" id="audioControls" style="display: none;">
+            <h3>Generated Audio Files:</h3>
+            <div id="audioList"></div>
+        </div>
+        
+        <div class="download-section" id="downloadSection" style="display: none;">
+            <h3>Download Instructions:</h3>
+            <p>1. Right-click on each audio player above and select "Save audio as..."</p>
+            <p>2. Save the files to: <strong>assets/sounds/</strong></p>
+            <p>3. Use the exact filenames shown</p>
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let generatedAudioFiles = [];
+        
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+        
+        function updateStatus(message, type = 'progress') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+        
+        function createAudioElement(buffer, filename, description) {
+            const audioList = document.getElementById('audioList');
+            
+            // Convert buffer to blob
+            const blob = bufferToBlob(buffer);
+            const url = URL.createObjectURL(blob);
+            
+            const audioContainer = document.createElement('div');
+            audioContainer.innerHTML = `
+                <h4>${description}</h4>
+                <p><strong>Filename:</strong> ${filename}</p>
+                <audio controls>
+                    <source src="${url}" type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            `;
+            
+            audioList.appendChild(audioContainer);
+            
+            // Store for cleanup
+            generatedAudioFiles.push({ url, filename, description });
+        }
+        
+        function bufferToBlob(buffer) {
+            const length = buffer.length;
+            const arrayBuffer = new ArrayBuffer(44 + length * 2);
+            const view = new DataView(arrayBuffer);
+            
+            // WAV header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + length * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, audioContext.sampleRate, true);
+            view.setUint32(28, audioContext.sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, length * 2, true);
+            
+            // Convert float32 to int16
+            const data = buffer.getChannelData(0);
+            let offset = 44;
+            for (let i = 0; i < length; i++) {
+                const sample = Math.max(-1, Math.min(1, data[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                offset += 2;
+            }
+            
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
+        }
+        
+        function generatePhonemeG() {
+            const context = initAudioContext();
+            const duration = 0.6;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Enhanced G phoneme with formant frequencies
+            const fundamental = 120;    // Low frequency for G
+            const formant1 = 700;       // First formant
+            const formant2 = 1200;      // Second formant
+            const formant3 = 2500;      // Third formant
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                
+                // Envelope with natural attack and decay
+                const attack = Math.min(1, t * 15);
+                const decay = Math.max(0, 1 - Math.pow((t - 0.2) / 0.4, 2));
+                const envelope = attack * decay;
+                
+                // Create complex G sound with multiple formants
+                const fund = Math.sin(2 * Math.PI * fundamental * t);
+                const form1 = Math.sin(2 * Math.PI * formant1 * t) * 0.4;
+                const form2 = Math.sin(2 * Math.PI * formant2 * t) * 0.2;
+                const form3 = Math.sin(2 * Math.PI * formant3 * t) * 0.1;
+                
+                // Add slight noise for realism
+                const noise = (Math.random() - 0.5) * 0.05;
+                
+                data[i] = (fund + form1 + form2 + form3 + noise) * envelope * 0.3;
+            }
+            
+            return buffer;
+        }
+        
+        function generateExplosion() {
+            const context = initAudioContext();
+            const duration = 1.2;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 4) * (1 - Math.exp(-t * 20));
+                
+                // Create explosion with multiple frequency components
+                const noise = (Math.random() - 0.5) * 2;
+                const lowFreq = Math.sin(2 * Math.PI * 60 * t) * 0.3;
+                const midFreq = Math.sin(2 * Math.PI * 200 * t) * 0.2;
+                
+                data[i] = (noise + lowFreq + midFreq) * envelope * 0.4;
+            }
+            
+            return buffer;
+        }
+        
+        function generateCelebration() {
+            const context = initAudioContext();
+            const duration = 2.5;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Happy melody notes (C major scale)
+            const notes = [262, 294, 330, 349, 392, 440, 494, 523, 587, 659];
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                const noteIndex = Math.floor(t * 4) % notes.length;
+                const frequency = notes[noteIndex];
+                
+                // Create bell-like sound
+                const envelope = Math.exp(-t * 0.5) * Math.sin(t * Math.PI * 2);
+                const harmonic1 = Math.sin(2 * Math.PI * frequency * t);
+                const harmonic2 = Math.sin(2 * Math.PI * frequency * 2 * t) * 0.3;
+                const harmonic3 = Math.sin(2 * Math.PI * frequency * 3 * t) * 0.1;
+                
+                data[i] = (harmonic1 + harmonic2 + harmonic3) * envelope * 0.25;
+            }
+            
+            return buffer;
+        }
+        
+        function generateVoiceMessage(word) {
+            return new Promise((resolve) => {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(`G is for ${word}!`);
+                    
+                    // Optimize for children
+                    utterance.rate = 0.8;
+                    utterance.pitch = 1.3;
+                    utterance.volume = 1.0;
+                    
+                    // Try to find a female voice
+                    const voices = speechSynthesis.getVoices();
+                    const femaleVoice = voices.find(voice => 
+                        voice.name.toLowerCase().includes('female') ||
+                        voice.name.toLowerCase().includes('woman') ||
+                        voice.name.toLowerCase().includes('girl') ||
+                        (voice.name.toLowerCase().includes('zira') && voice.lang.includes('en'))
+                    );
+                    
+                    if (femaleVoice) {
+                        utterance.voice = femaleVoice;
+                    }
+                    
+                    utterance.onend = () => {
+                        resolve(true);
+                    };
+                    
+                    utterance.onerror = () => {
+                        resolve(false);
+                    };
+                    
+                    speechSynthesis.speak(utterance);
+                } else {
+                    resolve(false);
+                }
+            });
+        }
+        
+        async function generateAllAudioFiles() {
+            try {
+                updateStatus('Initializing audio context...', 'progress');
+                const context = initAudioContext();
+                
+                // Clear previous audio files
+                generatedAudioFiles.forEach(file => {
+                    URL.revokeObjectURL(file.url);
+                });
+                generatedAudioFiles = [];
+                document.getElementById('audioList').innerHTML = '';
+                
+                // Generate phoneme G
+                updateStatus('Generating G phoneme sound...', 'progress');
+                const phonemeBuffer = generatePhonemeG();
+                createAudioElement(phonemeBuffer, 'phoneme-g.wav', 'G Phoneme Sound');
+                
+                // Generate explosion
+                updateStatus('Generating explosion sound...', 'progress');
+                const explosionBuffer = generateExplosion();
+                createAudioElement(explosionBuffer, 'explosion.wav', 'Explosion Sound Effect');
+                
+                // Generate celebration
+                updateStatus('Generating celebration sound...', 'progress');
+                const celebrationBuffer = generateCelebration();
+                createAudioElement(celebrationBuffer, 'celebration.wav', 'Celebration Sound');
+                
+                // Generate voice messages
+                const words = ['grape', 'goat', 'gold', 'girl', 'grandpa'];
+                for (const word of words) {
+                    updateStatus(`Generating voice message for "${word}"...`, 'progress');
+                    await generateVoiceMessage(word);
+                    await new Promise(resolve => setTimeout(resolve, 500)); // Small delay
+                }
+                
+                // Show controls and download section
+                document.getElementById('audioControls').style.display = 'block';
+                document.getElementById('downloadSection').style.display = 'block';
+                
+                updateStatus('✅ All audio files generated successfully! Use the audio players above to preview and download.', 'success');
+                
+                // Add voice message note
+                const voiceNote = document.createElement('div');
+                voiceNote.innerHTML = `
+                    <h4>Voice Messages Note:</h4>
+                    <p>Voice messages for words (grape, goat, gold, girl, grandpa) were generated using your browser's speech synthesis. 
+                    For better quality, you can use online TTS services or record them manually.</p>
+                `;
+                document.getElementById('audioList').appendChild(voiceNote);
+                
+            } catch (error) {
+                updateStatus(`Error generating audio files: ${error.message}`, 'error');
+                console.error('Audio generation error:', error);
+            }
+        }
+        
+        // Initialize speech synthesis voices
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = () => {
+                const voices = speechSynthesis.getVoices();
+                console.log(`Loaded ${voices.length} voices`);
+            };
+        }
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            generatedAudioFiles.forEach(file => {
+                URL.revokeObjectURL(file.url);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Android Touch & Audio Test</title>
+    <style>
+        body { font-family: sans-serif; background-color: #1a1a1a; color: #fff; text-align: center; padding: 20px; }
+        h1 { color: #4CAF50; }
+        #touch-area { width: 80%; height: 200px; background-color: #333; border: 2px dashed #4CAF50; margin: 20px auto; user-select: none; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+        button { background-color: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 1em; cursor: pointer; margin: 10px; }
+        button:hover { background-color: #45a049; }
+        #log { margin-top: 20px; background-color: #222; padding: 10px; border-radius: 5px; text-align: left; height: 150px; overflow-y: scroll; font-family: monospace; }
+        .log-entry { padding: 2px; border-bottom: 1px solid #444; }
+        .log-entry.error { color: #ff6b6b; }
+        .log-entry.success { color: #6bff6b; }
+    </style>
+</head>
+<body>
+    <h1>Android Compatibility Test</h1>
+    <p>This page will help diagnose touch and audio issues on your Android device.</p>
+
+    <div id="touch-area">Touch or Click Here</div>
+
+    <button id="play-sound-btn">Play Test Sound</button>
+
+    <h2>Event Log:</h2>
+    <div id="log"></div>
+
+    <audio id="test-sound" preload="auto">
+        <source src="assets/sounds/celebration.wav" type="audio/wav">
+        <source src="assets/sounds/celebration.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const touchArea = document.getElementById('touch-area');
+        const playSoundBtn = document.getElementById('play-sound-btn');
+        const log = document.getElementById('log');
+        const testSound = document.getElementById('test-sound');
+
+        function logEvent(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        logEvent('Test page loaded.');
+
+        // Touch and Mouse Event Testing
+        touchArea.addEventListener('mousedown', () => logEvent('Event: mousedown'));
+        touchArea.addEventListener('mouseup', () => logEvent('Event: mouseup'));
+        touchArea.addEventListener('click', () => logEvent('Event: click (Success!)', 'success'));
+        touchArea.addEventListener('touchstart', () => logEvent('Event: touchstart (Success!)', 'success'));
+        touchArea.addEventListener('touchend', () => logEvent('Event: touchend'));
+
+        // Audio Testing
+        playSoundBtn.addEventListener('click', () => {
+            logEvent('Attempting to play sound...');
+            testSound.play()
+                .then(() => {
+                    logEvent('Audio playback started successfully!', 'success');
+                })
+                .catch(error => {
+                    logEvent(`Audio playback failed: ${error.message}`, 'error');
+                    console.error('Audio playback error:', error);
+                });
+        });
+
+        // Test for Web Audio API
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            logEvent('Web Audio API is supported.', 'success');
+            audioContext.close();
+        } catch (e) {
+            logEvent('Web Audio API is NOT supported.', 'error');
+        }
+    </script>
+</body>
+</html>

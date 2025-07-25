@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/space_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="24dp">
+
+            <!-- Back Button -->
+            <Button
+                android:id="@+id/back_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/back"
+                style="@style/SecondaryButton" />
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/settings_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/settings"
+                style="@style/ScreenTitle"
+                android:gravity="center" />
+
+        </LinearLayout>
+
+        <!-- Voice Template Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/voice_template_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/voice_template"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Voice Template Spinner -->
+            <Spinner
+                android:id="@+id/voice_template_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Voice Template Preview Button -->
+            <Button
+                android:id="@+id/voice_preview_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/preview_voice"
+                style="@style/PreviewButton" />
+
+        </LinearLayout>
+
+        <!-- Audio Volume Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/audio_volume_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/audio_volume"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <SeekBar
+                android:id="@+id/audio_volume_seekbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="80" />
+
+            <TextView
+                android:id="@+id/audio_volume_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="80%"
+                style="@style/SettingsValue"
+                android:layout_gravity="end" />
+
+        </LinearLayout>
+
+        <!-- Background Music Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/background_music_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/background_music"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <Switch
+                android:id="@+id/background_music_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/enable_background_music" />
+
+        </LinearLayout>
+
+        <!-- Game Speed Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/game_speed_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/game_speed"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <RadioGroup
+                android:id="@+id/game_speed_group"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/speed_slow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/slow"
+                    android:layout_marginEnd="16dp" />
+
+                <RadioButton
+                    android:id="@+id/speed_medium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/medium"
+                    android:checked="true"
+                    android:layout_marginEnd="16dp" />
+
+                <RadioButton
+                    android:id="@+id/speed_fast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fast" />
+
+            </RadioGroup>
+
+        </LinearLayout>
+
+        <!-- Difficulty Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/difficulty_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/difficulty"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <Spinner
+                android:id="@+id/difficulty_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <!-- Reset Progress Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/reset_progress_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reset_progress"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <Button
+                android:id="@+id/reset_progress_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/reset_all_progress"
+                style="@style/DangerButton" />
+
+        </LinearLayout>
+
+        <!-- About Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/about_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/about"
+                style="@style/SettingsLabel"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/app_version"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_version"
+                style="@style/SettingsValue"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/app_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/app_description"
+                style="@style/SettingsDescription" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,54 @@
+You are an AI coding agent. Build a small, offline-first web game called “Phonics Fun” that teaches the letter “G”.  
+Stack: plain HTML5, CSS3, vanilla JavaScript. No external libraries.  
+
+Frontend flow
+1. Welcome Screen  
+   • Text: “Welcome To Teacher Evan's Fun with phonics!” (pulsating through 6 vibrant colours).  
+   • Large “Start Game” button.  
+
+2. Level Select Screen  
+   • Heading: “Select a letter to play with!”  
+   • Grid A-Z. Only “G” is playable; others show a wood-style popup “COMING SOON!”.  
+   • On “G” click show “READY??!!” overlay for 5 s while preloading assets, then open gameplay.  
+
+3. Gameplay Screen (space theme)  
+   • Static galaxy background.  
+   • 5 moving planets show letter “G”.  
+   • Touch / click a “G” planet → fiery asteroid (random side, 20 % planet size, fast) collides → big explosion animation + sound + low-pitched “/g/” phoneme + female voice message (“G is for Grape!”, Goat, Gold, Girl, Grandpa).  
+   • Show a large semi-transparent image of the triggered word in background until next correct hit.  
+   • Non-G planets exist; hitting them spawns a dull, slow asteroid that breaks apart silently, planet remains.  
+   • After all 5 correct hits show “Level Complete!” popup with celebratory sound, options:  
+     – “Next Level” → back to Level Select  
+     – “Exit” → back to Welcome  
+
+Cross-browser & devices  
+• Must run on latest Chrome, Safari, Firefox, Edge and BenQ Massive Android display.  
+• Responsive layout, touch friendly.  
+
+Assets  
+• Store all images & sounds locally in /assets (optimize for size).  
+
+Technical  
+• Folder structure:  
+  ├─ index.html, /css, /js, /assets, /docs, Dockerfile, README.md  
+• Semantic HTML, descriptive class/ID names.  
+• CSS animations & transitions for colour pulses, planet motion, explosions.  
+• JavaScript: event listeners for all interactions; simple state machine; basic error handling; console logging of key events for debugging.  
+• No user accounts, scoring, analytics, or network calls.  
+• Provide basic test cases to verify main flows in the top 4 browsers.  
+• Comment code clearly.  
+
+Deployment  
+• Include a minimal Dockerfile (static server) for plug-and-play deployment.  
+• README with setup, run, and troubleshooting notes.  
+
+
+
+
+
+
+
+
+
+Hey bud. Start off by planning, Draft the folder structure and the main HTML file.  
+Then, create the CSS file with basic styles for the welcome screen and level select screen.

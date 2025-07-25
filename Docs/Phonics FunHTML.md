@@ -1,0 +1,60 @@
+# Assist with prompt creation. Prompt must be detailed and easily understandible for an AI coding agent.
+
+HTML format with suggestions if needed. Must be playable on the top 4 browsers: Chrome, Safari, Firefox, and Edge.
+# Phonics Fun Game Design Document
+## Overview
+Phonics Fun is an interactive educational game designed to teach young children phonics in a fun and engaging way. The game will focus on the letter "G" in this version, providing a simple yet effective learning experience. The game will be developed using HTML, CSS, and JavaScript, ensuring compatibility with popular web browsers and the BenQ Massive android display.
+## Game Structure
+The game consists of three main screens:
+1. **Welcome Screen**: A vibrant and colorful introduction to the game, inviting users to start their phonics adventure.
+2. **Level Select Screen**: A screen where users can choose the letter they want to play with. For this version, we will focus solely on the letter "G". Other letters will display a "COMING SOON!" message when clicked.
+3. **Interactive Gameplay Screen**: The main gameplay are will be space themed. Following has to have there own respective sections:
+   - **Planets**: Five different planets will float across the screen, each displaying the letter "G". When a player interacts with a planet, an asteroid will collide with it, causing an explosion and displaying a phonics-related message.
+   - **Asteroids**: When interacting with planets that do not have the letter "G", a dull asteroid will appear but without any explosion or sound effect.
+   - **Text Bubbles**: After a planet explodes, a text bubble will appear with phonics words related to the letter "G", such as "G is for Grape!", "G is for Goat!", etc. The player can click on the text bubble to continue to the next planet.
+   - **Background Image**: A large transparent image of the word related to the exploded planet will be displayed in the background. A quality galaxy image will be used to enhance the space theme and be displayed in the background permanently.
+## Game Features
+- **Interactive Elements**: The game will feature interactive planets and asteroids, providing a hands-on learning experience.
+Phonics fun Is interactive gameplay consisting of 3 main windows acting as the frontend.
+- **Sound Effects**: Engaging sound effects will be used to enhance the gameplay experience, including phonics sounds and explosion effects.
+- **Visual Feedback**: Clear visual feedback will be provided for user actions, such as button clicks and planet interactions, to enhance engagement and understanding of the game mechanics.
+- **Responsive Design**: The game will be designed to be responsive, ensuring it looks great on various screen sizes, including mobile devices and large displays like the BenQ Massive android display.
+
+## Technical Specifications
+- **HTML Structure**: The game will be built using semantic HTML elements for better accessibility and SEO optimization.
+
+Welcome Screen - text: "Welcome To Teacher Evan's Fun with phonics!" Exciting, fun, pulsating through 6 different vibrant colors. Font and then "click" to continue indicated in a fun, child-friendly manner. The background should be colorful and engaging, with playful animations to capture the attention of young users. A large button labeled "Start Game" should be prominently displayed, inviting users to click and proceed to the next screen.
+- **CSS Styling**: CSS will be used for styling the game, ensuring a visually appealing interface with vibrant colors and engaging animations.
+- **JavaScript Interactivity**: JavaScript will handle user interactions, such as clicking buttons and interacting with planets, ensuring a smooth and responsive experience.
+- **Images and Sounds**: All images and sounds will be stored locally within the application directory in the downloadable assets folder, ensuring offline functionality. Images will be optimized for performance, and sound files will be in a compatible format for web browsers.
+- **Dockerization**: The application will be dockerized for easy deployment, allowing users to run the game in a containerized environment without complex setup procedures. PLUG AND PLAY!
+
+ 
+2nd screen -  "Level Select" screen with the text: "Select a letter to play with!" in a fun, child-friendly font. The background should be colorful and engaging, with playful animations to capture the attention of young users. Below this text, there will be a row of clickable letters from A-Z. Each letter will be displayed in a large, bold font with vibrant colors. The letters will be arranged in a grid format for easy navigation.
+The letters will be clickable, and when hovered over, they will change color to indicate interactivity
+"Level select:" Followed by "A-Z" Clickable
+but we will only focus on the letter "G" for now.
+All letters except for "G" when interacted with will have a woody 'road sign' looking pop up displaying "COMING SOON!" If you click on "G" a pop screen displaying "READY??!!"  running for 5 seconds giving the backend time to load.
+
+3rd screen -The 3rd window will be a exciting space themed ui where 5 different types of planets float across the screen with "The letter selected in the level select screen, however for now we will only be working with the letter "G". If the player touches any of the planet with "G" on, an astroid (5th of the size of the planet and on fire) comes from the side (Random side origin and fast) collides with the planet.
+The planet then explodes in dramatic fashion Releasing a explosion sound followed by a sound: (Phonic of "G" - sounds like a low pitched "ghh" sound) and a sound is triggered of a female voice saying "Ghu is for Goat!", or "Ghu is for Grandpa!" or "ghu is for Gold!" or "gHu is for Girl" In the background in transparent a big image (Automatically adjust display depending on the image)
+The image will appear in the background as the voice read it out lou while saying its phonic twice. So if "grape" is triggered it appear in the background transparent and a sound is played "Grape! gHuh -Ghu Grape, and so on for all 5 images in that will fall in the G" class. 
+The large transparent image of a grape (Or whichever image is triggered) will be displayed in the background until the player successfully interacts with another planet that has the letter G displayed on it. To make it easier for the player, the letter "G" (or whatever level/alphabet symbol the player chose in the "Level select" screen) will be pulsating in light to dark yellow colors to indicate the letter they are currently playing with. All other letters will be clearly displayed on other planets floating on the main screen but when they are interacted with an astroid that is dull and slow is shot out from the side (random side origin) and collides with the planet, but no explosion or sound effect will occur. The dull asteroid will simply break apart and disappear whilst the planet remains untouched.
+
+Gameplay will be in phases of 5 planets. After all planets have been/destroyed, a pop-up will appear saying "Level Complete!" with a celebratory sound effect. The player can then click "Next Level" to return to the Level Select screen or "Exit" to return to the Welcome Screen. Along side the 5 planets, there will be a large background image of a galaxy to enhance the space theme. The background will be static but visually appealing, with stars and planets to create an immersive experience.
+and 5 other planets displaying other letters that will be clearly visible but not interactive. The planets will be designed to be visually distinct, with different colors and styles to make them easily recognizable..
+
+## Development Guidelines
+- **Code Organization**: Use multiple folders to organize the codebase, separating HTML, CSS, JavaScript, images, and sounds for better maintainability.
+
+MAKE IT CLEAR!
+No profile saving, no user accounts, no data collection. This is a simple interactive game for educational purposes. No difficulties, no scores, just fun and learning phonics. Sounds and visuals should be engaging and suitable for children. Dockerize the application for easy deployment. Adequately comment the code for clarity and future reference. Backend should be minimal, focusing on loading the necessary assets and handling the game logic without any complex server-side operations. Frontend should be responsive and visually appealing, with a focus on user experience. Images and sounds should be optimized for performance, ensuring quick loading times and smooth gameplay. Downloadable assets should be stored locally within the application to ensure offline functionality. Use multiple color schemes to enhance visual appeal, ensuring they are vibrant and engaging for children. Optimize the game for touch interactions, considering the target devices and their capabilities. Creat e a README file with clear instructions on how to run the game, including prerequisites and setup steps. Provide examples of the expected gameplay flow and user interactions. Include a section for troubleshooting common issues that may arise during gameplay or setup. Ensure the code is modular and maintainable, allowing for easy updates and additions in the future.
+Multiple levels can be added later, but for now, focus solely on the letter "G".
+event listeners should be used to handle user interactions, ensuring a smooth and responsive experience. Use semantic HTML elements for better accessibility and SEO optimization. Ensure the game is lightweight, with minimal dependencies to enhance performance across various devices. Implement basic error handling to manage unexpected issues gracefully without disrupting the gameplay experience. Provide clear visual feedback for user actions, such as button clicks and planet interactions, to enhance engagement and understanding of the game mechanics. Use CSS animations and transitions to create a dynamic and visually appealing interface that captures children's attention. Ensure the game is fully functional without requiring any external libraries or frameworks, relying solely on vanilla JavaScript, HTML, and CSS.
+
+Use multiple folders to organize the codebase, separating HTML, CSS, JavaScript, images, and sounds for better maintainability. Ensure that the game is fully functional offline, with all assets stored locally within the application directory. Provide a simple yet effective error logging mechanism to help identify and resolve issues during development and testing. Use descriptive class and ID names in the HTML and CSS to enhance readability and maintainability of the code. NO SCORING SYSTEM! 
+Ensure that all interactive elements are easily accessible and intuitive for young users, with clear visual cues indicating clickable areas. Use responsive design techniques to ensure the game looks great on various screen sizes, including mobile devices and large displays like the BenQ Massive android display. Provide a simple way to reset the game state, allowing users to replay levels without needing to refresh the page or restart the application.
+
+Create test cases to ensure the game functions correctly across different browsers and devices, focusing on compatibility with Chrome, Safari, Firefox, and Edge. Implement a simple logging mechanism to track user interactions and game events for debugging purposes. Ensure that the game is lightweight, with minimal dependencies to enhance performance across various devices. Use semantic HTML elements for better accessibility and SEO optimization. Implement basic error handling to manage unexpected issues gracefully without disrupting the gameplay experience. Provide clear visual feedback for user actions, such as button clicks and planet interactions, to enhance engagement and understanding of the game mechanics. Use CSS animations and transitions to create a dynamic and visually appealing interface that captures children's attention.
+
+Save prompt in Phonics FunHTMLprompt.txt 

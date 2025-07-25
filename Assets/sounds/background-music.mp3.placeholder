@@ -1,0 +1,10 @@
+# Background Music Placeholder
+
+This file represents where the background music would be stored. The actual audio file should be:
+- A 20-second loop
+- Soft, trippy, sci-fi ambient sound
+- In MP3 and OGG formats for browser compatibility
+
+The game will automatically generate background music using Web Audio API if this file is not available.
+
+File should be named: background-music.mp3 (and background-music.ogg)

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/welcome_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/space_background">
+
+    <!-- Background View for Animations -->
+    <ImageView
+        android:id="@+id/background_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/galaxy_background" />
+
+    <!-- Welcome Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <!-- Title Text -->
+        <TextView
+            android:id="@+id/welcome_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/welcome_title"
+            style="@style/WelcomeTitle"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Teacher Name -->
+        <TextView
+            android:id="@+id/teacher_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/teacher_name"
+            style="@style/TeacherName"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Start Game Button -->
+        <Button
+            android:id="@+id/start_game_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_game"
+            style="@style/PrimaryButton"
+            android:layout_marginBottom="16dp" />
+
+    </LinearLayout>
+
+    <!-- Settings Button -->
+    <Button
+        android:id="@+id/settings_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/settings"
+        style="@style/SettingsButton"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp" />
+
+    <!-- Stars Container (for animation) -->
+    <FrameLayout
+        android:id="@+id/stars_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>

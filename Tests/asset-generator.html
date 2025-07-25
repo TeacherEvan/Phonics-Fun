@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Fun - Asset Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .generate-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .generate-btn:hover {
+            background: #45a049;
+        }
+        .audio-preview {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phonics Fun - Asset Generator</h1>
+    
+    <div class="instructions">
+        <h3>Instructions</h3>
+        <p>This tool helps generate placeholder audio files for testing purposes. For production, replace these with high-quality audio files.</p>
+        <p><strong>Note:</strong> The generated sounds are simple beeps and synthesized audio for testing only.</p>
+    </div>
+
+    <div class="section">
+        <h2>Sound Effects</h2>
+        <p>Generate basic sound effects for game interactions:</p>
+        
+        <button class="generate-btn" onclick="generateExplosion()">Generate Explosion Sound</button>
+        <button class="generate-btn" onclick="generatePhoneme()">Generate G Phoneme</button>
+        <button class="generate-btn" onclick="generateCelebration()">Generate Celebration Sound</button>
+        
+        <div id="sound-preview"></div>
+    </div>
+
+    <div class="section">
+        <h2>Voice Messages</h2>
+        <p>Generate simple voice messages using Text-to-Speech:</p>
+        
+        <button class="generate-btn" onclick="generateVoice('grape')">Generate "G is for Grape!"</button>
+        <button class="generate-btn" onclick="generateVoice('goat')">Generate "G is for Goat!"</button>
+        <button class="generate-btn" onclick="generateVoice('gold')">Generate "G is for Gold!"</button>
+        <button class="generate-btn" onclick="generateVoice('girl')">Generate "G is for Girl!"</button>
+        <button class="generate-btn" onclick="generateVoice('grandpa')">Generate "G is for Grandpa!"</button>
+        
+        <div id="voice-preview"></div>
+    </div>
+
+    <div class="section">
+        <h2>Image Placeholders</h2>
+        <p>Generate simple placeholder images:</p>
+        
+        <button class="generate-btn" onclick="generateImage('grape')">Generate Grape Image</button>
+        <button class="generate-btn" onclick="generateImage('goat')">Generate Goat Image</button>
+        <button class="generate-btn" onclick="generateImage('gold')">Generate Gold Image</button>
+        <button class="generate-btn" onclick="generateImage('girl')">Generate Girl Image</button>
+        <button class="generate-btn" onclick="generateImage('grandpa')">Generate Grandpa Image</button>
+        
+        <div id="image-preview"></div>
+    </div>
+
+    <div class="section">
+        <h2>Asset Requirements</h2>
+        <h3>Audio Files Needed:</h3>
+        <ul>
+            <li><strong>explosion.mp3</strong> - Explosion sound effect</li>
+            <li><strong>phoneme-g.mp3</strong> - Low-pitched "/g/" sound</li>
+            <li><strong>celebration.mp3</strong> - Level completion sound</li>
+            <li><strong>voice-grape.mp3</strong> - "G is for Grape!" voice</li>
+            <li><strong>voice-goat.mp3</strong> - "G is for Goat!" voice</li>
+            <li><strong>voice-gold.mp3</strong> - "G is for Gold!" voice</li>
+            <li><strong>voice-girl.mp3</strong> - "G is for Girl!" voice</li>
+            <li><strong>voice-grandpa.mp3</strong> - "G is for Grandpa!" voice</li>
+        </ul>
+        
+        <h3>Image Files Needed:</h3>
+        <ul>
+            <li><strong>grape.png</strong> - Grape illustration (300x300px)</li>
+            <li><strong>goat.png</strong> - Goat illustration (300x300px)</li>
+            <li><strong>gold.png</strong> - Gold illustration (300x300px)</li>
+            <li><strong>girl.png</strong> - Girl illustration (300x300px)</li>
+            <li><strong>grandpa.png</strong> - Grandpa illustration (300x300px)</li>
+        </ul>
+    </div>
+
+    <script>
+        // Audio context for generating sounds
+        let audioContext;
+        
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+
+        function generateExplosion() {
+            const context = initAudioContext();
+            const duration = 1.0;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate explosion-like noise
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 5); // Decay envelope
+                const noise = (Math.random() - 0.5) * 2; // White noise
+                data[i] = noise * envelope * 0.3;
+            }
+            
+            playBuffer(buffer);
+            showAudioPreview('Explosion sound generated!');
+        }
+
+        function generatePhoneme() {
+            const context = initAudioContext();
+            const duration = 0.5;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate low-pitched "G" sound (approximation)
+            const frequency = 150; // Low frequency for "G"
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                const envelope = Math.exp(-t * 2);
+                data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.3;
+            }
+            
+            playBuffer(buffer);
+            showAudioPreview('G phoneme sound generated!');
+        }
+
+        function generateCelebration() {
+            const context = initAudioContext();
+            const duration = 2.0;
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Generate celebration melody
+            const notes = [262, 294, 330, 349, 392, 440, 494, 523]; // C major scale
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                const noteIndex = Math.floor(t * 4) % notes.length;
+                const frequency = notes[noteIndex];
+                const envelope = Math.sin(t * Math.PI * 2);
+                data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.2;
+            }
+            
+            playBuffer(buffer);
+            showAudioPreview('Celebration sound generated!');
+        }
+
+        function generateVoice(word) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(`G is for ${word}!`);
+                utterance.rate = 0.8;
+                utterance.pitch = 1.2;
+                utterance.voice = speechSynthesis.getVoices().find(voice => 
+                    voice.name.includes('female') || voice.name.includes('Female')
+                ) || speechSynthesis.getVoices()[0];
+                
+                speechSynthesis.speak(utterance);
+                showVoicePreview(`Voice message for "${word}" generated!`);
+            } else {
+                showVoicePreview('Speech synthesis not supported in this browser');
+            }
+        }
+
+        function generateImage(word) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 300;
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 300, 300);
+            gradient.addColorStop(0, '#4CAF50');
+            gradient.addColorStop(1, '#45a049');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 300);
+            
+            // Draw border
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(0, 0, 300, 300);
+            
+            // Draw text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(word.toUpperCase(), 150, 120);
+            
+            // Draw letter G
+            ctx.font = 'bold 72px Arial';
+            ctx.fillText('G', 150, 200);
+            
+            // Show preview
+            const dataURL = canvas.toDataURL();
+            showImagePreview(word, dataURL);
+        }
+
+        function playBuffer(buffer) {
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start();
+        }
+
+        function showAudioPreview(message) {
+            const preview = document.getElementById('sound-preview');
+            preview.innerHTML = `<div class="audio-preview">${message}</div>`;
+        }
+
+        function showVoicePreview(message) {
+            const preview = document.getElementById('voice-preview');
+            preview.innerHTML = `<div class="audio-preview">${message}</div>`;
+        }
+
+        function showImagePreview(word, dataURL) {
+            const preview = document.getElementById('image-preview');
+            preview.innerHTML = `
+                <div class="audio-preview">
+                    <h4>${word} image generated!</h4>
+                    <img src="${dataURL}" alt="${word}" style="max-width: 200px; border-radius: 10px;">
+                    <p><small>Right-click and save as ${word}.png</small></p>
+                </div>
+            `;
+        }
+
+        // Initialize audio context on user interaction
+        document.addEventListener('click', () => {
+            if (!audioContext) {
+                initAudioContext();
+            }
+        });
+    </script>
+</body>
+</html>

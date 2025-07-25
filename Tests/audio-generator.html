@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phonics Fun - Audio Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .generator-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #5a5a5a;
+            margin-top: 0;
+        }
+        .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #388E3C;
+        }
+        .control-row {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .control-row label {
+            min-width: 100px;
+            display: inline-block;
+        }
+        input[type="range"] {
+            flex: 1;
+        }
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+        }
+        .output-controls {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eaeaea;
+        }
+        .download-btn {
+            background: #2196F3;
+        }
+        .download-btn:hover {
+            background: #1976D2;
+        }
+        .clear-btn {
+            background: #F44336;
+        }
+        .clear-btn:hover {
+            background: #D32F2F;
+        }
+        .test-btn {
+            background: #9C27B0;
+        }
+        .test-btn:hover {
+            background: #7B1FA2;
+        }
+        .preview-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Phonics Fun - Audio Generator</h1>
+    <p>Use this tool to generate optimized audio files for the Phonics Fun game.</p>
+    
+    <div class="generator-section">
+        <h2>Explosion Sound Generator</h2>
+        <div class="control-row">
+            <label for="explosion-duration">Duration:</label>
+            <input type="range" id="explosion-duration" min="0.5" max="2" step="0.1" value="1.0">
+            <span class="value-display" id="explosion-duration-value">1.0s</span>
+        </div>
+        <div class="control-row">
+            <label for="explosion-decay">Decay:</label>
+            <input type="range" id="explosion-decay" min="2" max="10" step="0.5" value="4">
+            <span class="value-display" id="explosion-decay-value">4</span>
+        </div>
+        <div class="control-row">
+            <label for="explosion-volume">Volume:</label>
+            <input type="range" id="explosion-volume" min="0.1" max="1" step="0.05" value="0.5">
+            <span class="value-display" id="explosion-volume-value">0.5</span>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="generateExplosion()">Generate Explosion</button>
+            <button class="test-btn" onclick="testExplosion()">Test Sound</button>
+        </div>
+        
+        <div class="output-controls">
+            <button class="download-btn" onclick="downloadExplosion('mp3')">Download MP3</button>
+            <button class="download-btn" onclick="downloadExplosion('ogg')">Download OGG</button>
+            <button class="download-btn" onclick="downloadExplosion('wav')">Download WAV</button>
+        </div>
+    </div>
+    
+    <div class="generator-section">
+        <h2>Phoneme Sound Generator</h2>
+        <div class="control-row">
+            <label for="phoneme-letter">Letter:</label>
+            <input type="text" id="phoneme-letter" value="G" maxlength="1" style="width: 30px; text-align: center; padding: 5px;">
+        </div>
+        <div class="control-row">
+            <label for="phoneme-freq">Frequency:</label>
+            <input type="range" id="phoneme-freq" min="100" max="500" step="10" value="150">
+            <span class="value-display" id="phoneme-freq-value">150Hz</span>
+        </div>
+        <div class="control-row">
+            <label for="phoneme-duration">Duration:</label>
+            <input type="range" id="phoneme-duration" min="0.2" max="1" step="0.05" value="0.5">
+            <span class="value-display" id="phoneme-duration-value">0.5s</span>
+        </div>
+        <div class="control-row">
+            <label for="phoneme-volume">Volume:</label>
+            <input type="range" id="phoneme-volume" min="0.1" max="1" step="0.05" value="0.4">
+            <span class="value-display" id="phoneme-volume-value">0.4</span>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="generatePhoneme()">Generate Phoneme</button>
+            <button class="test-btn" onclick="testPhoneme()">Test Sound</button>
+        </div>
+        
+        <div class="output-controls">
+            <button class="download-btn" onclick="downloadPhoneme('mp3')">Download MP3</button>
+            <button class="download-btn" onclick="downloadPhoneme('ogg')">Download OGG</button>
+            <button class="download-btn" onclick="downloadPhoneme('wav')">Download WAV</button>
+        </div>
+    </div>
+    
+    <div class="generator-section">
+        <h2>Celebration Sound Generator</h2>
+        <div class="control-row">
+            <label for="celebration-duration">Duration:</label>
+            <input type="range" id="celebration-duration" min="1" max="5" step="0.5" value="2.5">
+            <span class="value-display" id="celebration-duration-value">2.5s</span>
+        </div>
+        <div class="control-row">
+            <label for="celebration-notes">Notes:</label>
+            <select id="celebration-notes">
+                <option value="major">Major Scale</option>
+                <option value="pentatonic" selected>Pentatonic (Happy)</option>
+                <option value="simple">Simple Chime</option>
+            </select>
+        </div>
+        <div class="control-row">
+            <label for="celebration-volume">Volume:</label>
+            <input type="range" id="celebration-volume" min="0.1" max="1" step="0.05" value="0.6">
+            <span class="value-display" id="celebration-volume-value">0.6</span>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="generateCelebration()">Generate Celebration</button>
+            <button class="test-btn" onclick="testCelebration()">Test Sound</button>
+        </div>
+        
+        <div class="output-controls">
+            <button class="download-btn" onclick="downloadCelebration('mp3')">Download MP3</button>
+            <button class="download-btn" onclick="downloadCelebration('ogg')">Download OGG</button>
+            <button class="download-btn" onclick="downloadCelebration('wav')">Download WAV</button>
+        </div>
+    </div>
+    
+    <div class="generator-section">
+        <h2>Voice Synthesis Generator</h2>
+        <div class="control-row">
+            <label for="voice-text">Text:</label>
+            <input type="text" id="voice-text" value="G is for grape!" style="width: 250px; padding: 5px;">
+        </div>
+        <div class="control-row">
+            <label for="voice-rate">Rate:</label>
+            <input type="range" id="voice-rate" min="0.5" max="1.5" step="0.05" value="0.85">
+            <span class="value-display" id="voice-rate-value">0.85</span>
+        </div>
+        <div class="control-row">
+            <label for="voice-pitch">Pitch:</label>
+            <input type="range" id="voice-pitch" min="0.5" max="2" step="0.1" value="1.2">
+            <span class="value-display" id="voice-pitch-value">1.2</span>
+        </div>
+        <div class="control-row">
+            <label for="voice-type">Voice:</label>
+            <select id="voice-type">
+                <!-- Will be populated with available voices -->
+                <option value="">Loading voices...</option>
+            </select>
+        </div>
+        
+        <div class="btn-group">
+            <button onclick="generateVoice()">Generate Voice</button>
+            <button class="test-btn" onclick="testVoice()">Test Voice</button>
+        </div>
+        
+        <div class="preview-container">
+            <p>Voice synthesis cannot be directly downloaded as audio files. Use a screen recording tool to capture the audio if needed.</p>
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let explosionBuffer = null;
+        let phonemeBuffer = null;
+        let celebrationBuffer = null;
+        let voiceSynthesisUtterance = null;
+        
+        // Initialize audio context
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioContext;
+        }
+        
+        // Helper function to connect value display to sliders
+        function setupRangeInput(inputId, valueId, suffix = '') {
+            const input = document.getElementById(inputId);
+            const valueDisplay = document.getElementById(valueId);
+            
+            input.addEventListener('input', () => {
+                valueDisplay.textContent = input.value + suffix;
+            });
+        }
+        
+        // Setup all range inputs
+        window.onload = function() {
+            setupRangeInput('explosion-duration', 'explosion-duration-value', 's');
+            setupRangeInput('explosion-decay', 'explosion-decay-value');
+            setupRangeInput('explosion-volume', 'explosion-volume-value');
+            
+            setupRangeInput('phoneme-freq', 'phoneme-freq-value', 'Hz');
+            setupRangeInput('phoneme-duration', 'phoneme-duration-value', 's');
+            setupRangeInput('phoneme-volume', 'phoneme-volume-value');
+            
+            setupRangeInput('celebration-duration', 'celebration-duration-value', 's');
+            setupRangeInput('celebration-volume', 'celebration-volume-value');
+            
+            setupRangeInput('voice-rate', 'voice-rate-value');
+            setupRangeInput('voice-pitch', 'voice-pitch-value');
+            
+            // Populate voice dropdown
+            if ('speechSynthesis' in window) {
+                // Voice list might not be loaded yet
+                speechSynthesis.addEventListener('voiceschanged', populateVoiceList);
+                populateVoiceList();
+            }
+        };
+        
+        function populateVoiceList() {
+            const voices = speechSynthesis.getVoices();
+            const select = document.getElementById('voice-type');
+            
+            // Clear existing options
+            select.innerHTML = '';
+            
+            if (voices.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = 'No voices available';
+                option.value = '';
+                select.appendChild(option);
+                return;
+            }
+            
+            // Add all available voices
+            voices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = index;
+                
+                // Prefer English voices
+                if (voice.lang.startsWith('en-')) {
+                    option.selected = true;
+                }
+                
+                select.appendChild(option);
+            });
+        }
+        
+        // ================ EXPLOSION SOUND ================
+        function generateExplosion() {
+            const context = initAudio();
+            const duration = parseFloat(document.getElementById('explosion-duration').value);
+            const decay = parseFloat(document.getElementById('explosion-decay').value);
+            const volume = parseFloat(document.getElementById('explosion-volume').value);
+            
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                // Enhanced envelope with faster initial attack and longer decay
+                const envelope = Math.exp(-t * decay) * (1 - Math.exp(-t * 30));
+                // More complex noise pattern with low frequency bias for richer sound
+                const noise = (Math.random() - 0.5) * 2;
+                const lowPassNoise = noise * (1 - t * 0.7); // Simple low-pass effect
+                data[i] = lowPassNoise * envelope * volume;
+            }
+            
+            explosionBuffer = buffer;
+            alert('Explosion sound generated! Use the Test or Download buttons to hear or save it.');
+        }
+        
+        function testExplosion() {
+            if (!explosionBuffer) {
+                alert('Please generate the explosion sound first.');
+                return;
+            }
+            
+            const context = initAudio();
+            const compressor = context.createDynamicsCompressor();
+            compressor.threshold.value = -24;
+            compressor.knee.value = 30;
+            compressor.ratio.value = 12;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.25;
+            compressor.connect(context.destination);
+            
+            const source = context.createBufferSource();
+            source.buffer = explosionBuffer;
+            source.connect(compressor);
+            source.start();
+        }
+        
+        function downloadExplosion(format) {
+            if (!explosionBuffer) {
+                alert('Please generate the explosion sound first.');
+                return;
+            }
+            
+            const offlineCtx = new OfflineAudioContext(1, explosionBuffer.length, audioContext.sampleRate);
+            const source = offlineCtx.createBufferSource();
+            source.buffer = explosionBuffer;
+            source.connect(offlineCtx.destination);
+            source.start();
+            
+            offlineCtx.startRendering().then(buffer => {
+                const blob = bufferToBlob(buffer, format);
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `explosion.${format}`;
+                a.click();
+                
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            });
+        }
+        
+        // ================ PHONEME SOUND ================
+        function generatePhoneme() {
+            const context = initAudio();
+            const letter = document.getElementById('phoneme-letter').value.toUpperCase() || 'G';
+            const frequency = parseFloat(document.getElementById('phoneme-freq').value);
+            const duration = parseFloat(document.getElementById('phoneme-duration').value);
+            const volume = parseFloat(document.getElementById('phoneme-volume').value);
+            
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(1, duration * sampleRate, sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            // Calculate formants based on letter
+            // For G, we'll use default values
+            const fundamental = frequency;
+            const formant1 = 700;
+            const formant2 = 1700;
+            
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                // Better envelope with attack and decay phases
+                const attack = Math.min(1, t * 10); // Fast 0.1s attack
+                const decay = Math.max(0, 1 - (t - 0.3) * 3); // Decay starting at 0.3s
+                const envelope = attack * decay;
+                
+                // Combine fundamental with formants for more natural vowel sound
+                const fundamental_wave = Math.sin(2 * Math.PI * fundamental * t);
+                const formant1_wave = Math.sin(2 * Math.PI * formant1 * t) * 0.3;
+                const formant2_wave = Math.sin(2 * Math.PI * formant2 * t) * 0.15;
+                
+                data[i] = (fundamental_wave + formant1_wave + formant2_wave) * envelope * volume;
+            }
+            
+            phonemeBuffer = buffer;
+            alert(`Phoneme sound for letter "${letter}" generated! Use the Test or Download buttons to hear or save it.`);
+        }
+        
+        function testPhoneme() {
+            if (!phonemeBuffer) {
+                alert('Please generate the phoneme sound first.');
+                return;
+            }
+            
+            const context = initAudio();
+            
+            // Add a slight reverb effect for more natural sound
+            const convolver = context.createConvolver();
+            const reverbBuffer = createReverbBuffer(context, 0.2, 0.1);
+            convolver.buffer = reverbBuffer;
+            
+            const gainNode = context.createGain();
+            gainNode.gain.value = 0.9;
+            
+            const source = context.createBufferSource();
+            source.buffer = phonemeBuffer;
+            source.connect(gainNode);
+            
+            // Split the signal - some direct, some with reverb
+            gainNode.connect(context.destination);
+            gainNode.connect(convolver);
+            convolver.connect(context.destination);
+            
+            source.start();
+        }
+        
+        function downloadPhoneme(format) {
+            if (!phonemeBuffer) {
+                alert('Please generate the phoneme sound first.');
+                return;
+            }
+            
+            const letter = document.getElementById('phoneme-letter').value.toUpperCase() || 'G';
+            
+            const offlineCtx = new OfflineAudioContext(1, phonemeBuffer.length, audioContext.sampleRate);
+            const source = offlineCtx.createBufferSource();
+            source.buffer = phonemeBuffer;
+            source.connect(offlineCtx.destination);
+            source.start();
+            
+            offlineCtx.startRendering().then(buffer => {
+                const blob = bufferToBlob(buffer, format);
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `phoneme-${letter.toLowerCase()}.${format}`;
+                a.click();
+                
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            });
+        }
+        
+        // ================ CELEBRATION SOUND ================
+        function generateCelebration() {
+            const context = initAudio();
+            const duration = parseFloat(document.getElementById('celebration-duration').value);
+            const noteType = document.getElementById('celebration-notes').value;
+            const volume = parseFloat(document.getElementById('celebration-volume').value);
+            
+            const sampleRate = context.sampleRate;
+            const buffer = context.createBuffer(2, duration * sampleRate, sampleRate);
+            const leftChannel = buffer.getChannelData(0);
+            const rightChannel = buffer.getChannelData(1);
+            
+            // Define notes based on selected type
+            let notes;
+            switch (noteType) {
+                case 'major':
+                    notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25]; // C Major scale
+                    break;
+                case 'pentatonic':
+                    notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // C Major pentatonic
+                    break;
+                case 'simple':
+                    notes = [523.25, 659.25, 783.99]; // C5, E5, G5 (simple chord)
+                    break;
+                default:
+                    notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25]; // Default to pentatonic
+            }
+            
+            // Calculate note durations and intervals
+            const totalNotes = noteType === 'simple' ? 3 : 8;
+            const noteDuration = duration / totalNotes;
+            
+            // Generate the notes sequentially
+            for (let i = 0; i < buffer.length; i++) {
+                const t = i / sampleRate;
+                let sample = 0;
+                
+                if (noteType === 'simple') {
+                    // Play all notes at once for simple chime
+                    for (let j = 0; j < notes.length; j++) {
+                        const freq = notes[j];
+                        const env = Math.exp(-t * 2); // Simple decay
+                        sample += Math.sin(2 * Math.PI * freq * t) * env * 0.2;
+                    }
+                } else {
+                    // Play ascending scale
+                    for (let j = 0; j < notes.length; j++) {
+                        const noteStart = j * noteDuration;
+                        const noteEnd = (j + 1) * noteDuration;
+                        
+                        if (t >= noteStart && t < noteEnd) {
+                            const freq = notes[j];
+                            const noteT = t - noteStart;
+                            const env = Math.sin(Math.PI * noteT / noteDuration); // Bell-shaped envelope
+                            sample = Math.sin(2 * Math.PI * freq * t) * env * 0.3;
+                            
+                            // Add a fifth for harmony
+                            const fifth = freq * 1.5;
+                            sample += Math.sin(2 * Math.PI * fifth * t) * env * 0.15;
+                        }
+                    }
+                }
+                
+                // Apply stereo and volume
+                leftChannel[i] = sample * volume * (1 - t/duration * 0.3); // Left fades slightly
+                rightChannel[i] = sample * volume * (0.7 + t/duration * 0.3); // Right gets louder
+            }
+            
+            celebrationBuffer = buffer;
+            alert('Celebration sound generated! Use the Test or Download buttons to hear or save it.');
+        }
+        
+        function testCelebration() {
+            if (!celebrationBuffer) {
+                alert('Please generate the celebration sound first.');
+                return;
+            }
+            
+            const context = initAudio();
+            
+            // Add reverb for spaciousness
+            const convolver = context.createConvolver();
+            const reverbBuffer = createReverbBuffer(context, 1.5, 1);
+            convolver.buffer = reverbBuffer;
+            
+            const gainNode = context.createGain();
+            gainNode.gain.value = 1.0;
+            
+            const source = context.createBufferSource();
+            source.buffer = celebrationBuffer;
+            source.connect(gainNode);
+            
+            // Mix dry and wet signals
+            gainNode.connect(context.destination);
+            gainNode.connect(convolver);
+            convolver.connect(context.destination);
+            
+            source.start();
+        }
+        
+        function downloadCelebration(format) {
+            if (!celebrationBuffer) {
+                alert('Please generate the celebration sound first.');
+                return;
+            }
+            
+            const offlineCtx = new OfflineAudioContext(
+                celebrationBuffer.numberOfChannels,
+                celebrationBuffer.length,
+                audioContext.sampleRate
+            );
+            
+            const source = offlineCtx.createBufferSource();
+            source.buffer = celebrationBuffer;
+            source.connect(offlineCtx.destination);
+            source.start();
+            
+            offlineCtx.startRendering().then(buffer => {
+                const blob = bufferToBlob(buffer, format);
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `celebration.${format}`;
+                a.click();
+                
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+            });
+        }
+        
+        // ================ VOICE SYNTHESIS ================
+        function generateVoice() {
+            if (!('speechSynthesis' in window)) {
+                alert('Speech synthesis not supported in this browser');
+                return;
+            }
+            
+            const text = document.getElementById('voice-text').value;
+            const rate = parseFloat(document.getElementById('voice-rate').value);
+            const pitch = parseFloat(document.getElementById('voice-pitch').value);
+            const voiceIndex = document.getElementById('voice-type').value;
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = rate;
+            utterance.pitch = pitch;
+            
+            // Set voice if selected
+            if (voiceIndex !== '') {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0 && voices[voiceIndex]) {
+                    utterance.voice = voices[voiceIndex];
+                }
+            }
+            
+            voiceSynthesisUtterance = utterance;
+            alert('Voice settings prepared! Click "Test Voice" to hear it.');
+        }
+        
+        function testVoice() {
+            if (!voiceSynthesisUtterance) {
+                alert('Please generate the voice first.');
+                return;
+            }
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            // Clone the utterance to avoid issues with reusing the same object
+            const utterance = new SpeechSynthesisUtterance(voiceSynthesisUtterance.text);
+            utterance.rate = voiceSynthesisUtterance.rate;
+            utterance.pitch = voiceSynthesisUtterance.pitch;
+            utterance.voice = voiceSynthesisUtterance.voice;
+            
+            speechSynthesis.speak(utterance);
+        }
+        
+        // ================ HELPER FUNCTIONS ================
+        // Create a simple reverb impulse response
+        function createReverbBuffer(context, duration, decay) {
+            const sampleRate = context.sampleRate;
+            const length = sampleRate * duration;
+            const impulse = context.createBuffer(2, length, sampleRate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+            
+            for (let i = 0; i < length; i++) {
+                const n = i / length;
+                // Exponential decay
+                left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+                right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n, decay);
+            }
+            
+            return impulse;
+        }
+        
+        // Convert AudioBuffer to Blob for download
+        function bufferToBlob(buffer, format) {
+            // We need to use an offline context to encode to mp3/ogg
+            // This is a simplified version - in reality, you would need a codec library
+            // for proper mp3/ogg encoding. Here we use wav as a fallback
+            
+            // Number of channels
+            const numChannels = buffer.numberOfChannels;
+            // Sample rate
+            const sampleRate = buffer.sampleRate;
+            // Create a wav header
+            const wavHeader = createWavHeader(buffer.length, numChannels, sampleRate);
+            
+            // Get buffer data
+            const channelData = [];
+            for (let i = 0; i < numChannels; i++) {
+                channelData.push(buffer.getChannelData(i));
+            }
+            
+            // Interleave the channels
+            const interleaved = interleaveChannels(channelData, buffer.length);
+            
+            // Convert to 16-bit PCM
+            const samples = new Int16Array(interleaved.length);
+            for (let i = 0; i < interleaved.length; i++) {
+                const s = Math.max(-1, Math.min(1, interleaved[i]));
+                samples[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            }
+            
+            // Create the WAV file
+            const wavBlob = new Blob([wavHeader, samples.buffer], { type: 'audio/wav' });
+            
+            // If the requested format is wav, return it directly
+            if (format === 'wav') {
+                return wavBlob;
+            }
+            
+            // For mp3 and ogg, we'd need proper encoding libraries
+            // This is a placeholder - in reality you would convert to the appropriate format
+            console.warn(`${format} encoding not implemented - returning WAV format instead`);
+            return wavBlob;
+        }
+        
+        // Create a WAV header
+        function createWavHeader(dataLength, numChannels, sampleRate) {
+            const header = new ArrayBuffer(44);
+            const view = new DataView(header);
+            
+            // RIFF chunk descriptor
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataLength * 2, true);
+            writeString(view, 8, 'WAVE');
+            
+            // FMT sub-chunk
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true); // Subchunk size
+            view.setUint16(20, 1, true); // Audio format (1 for PCM)
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * 2, true); // Byte rate
+            view.setUint16(32, numChannels * 2, true); // Block align
+            view.setUint16(34, 16, true); // Bits per sample
+            
+            // Data sub-chunk
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataLength * 2, true);
+            
+            return header;
+        }
+        
+        // Write a string to a DataView
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+        
+        // Interleave audio channels
+        function interleaveChannels(channelData, frameCount) {
+            const numChannels = channelData.length;
+            const result = new Float32Array(frameCount * numChannels);
+            let index = 0;
+            
+            for (let i = 0; i < frameCount; i++) {
+                for (let channel = 0; channel < numChannels; channel++) {
+                    result[index++] = channelData[channel][i];
+                }
+            }
+            
+            return result;
+        }
+        
+        // Initialize audio context on user interaction
+        document.addEventListener('click', () => {
+            if (!audioContext) {
+                initAudio();
+            }
+        });
+    </script>
+</body>
+</html>

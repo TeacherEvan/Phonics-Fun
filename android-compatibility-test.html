@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BenQ Android Board - Phonics Fun Compatibility Test</title>
+    <!-- MCP Tool Scripts -->
+    <script src="js/mcp-audio.js"></script>
+    <script src="js/mcp-touch.js"></script>
+    <script src="js/mcp-perf.js"></script>
+    <script src="js/mcp-controller.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4CAF50;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #ccc;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #4CAF50;
+            backdrop-filter: blur(10px);
+        }
+
+        .test-header {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        /* Touch Test Area */
+        .touch-test-area {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #333, #555);
+            border: 3px dashed #4CAF50;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            user-select: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .touch-test-area:hover {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            transform: scale(1.02);
+        }
+
+        .touch-test-area.active {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Buttons */
+        .test-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button:hover {
+            background: linear-gradient(45deg, #45a049, #3d8b3d);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .primary-button {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+            font-weight: bold;
+            padding: 16px 32px;
+        }
+
+        .primary-button:hover {
+            background: linear-gradient(45deg, #1976D2, #0D47A1);
+        }
+
+        /* MCP Results Styling */
+        .mcp-results-summary {
+            background: rgba(33, 33, 33, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #2196F3;
+        }
+
+        .score-meter {
+            height: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin: 10px 0 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .score-meter.small {
+            height: 15px;
+            margin: 5px 0;
+        }
+
+        .score-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF5252, #FFEB3B, #4CAF50);
+            border-radius: 15px;
+            transition: width 1s ease-in-out;
+        }
+
+        .category-scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .category {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .issues-found, .recommendations {
+            text-align: left;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .issues-found h4, .recommendations h4 {
+            margin-bottom: 10px;
+            color: #FFEB3B;
+        }
+
+        .issues-found ul, .recommendations ul {
+            padding-left: 20px;
+        }
+
+        .issues-found li, .recommendations li {
+            margin-bottom: 5px;
+        }
+
+        .issues-found li.critical {
+            color: #FF5252;
+        }
+
+        .issues-found li.warning {
+            color: #FFEB3B;
+        }
+
+        .issues-found li.info {
+            color: #2196F3;
+        }
+
+        .progress-indicator {
+            padding: 20px;
+            text-align: center;
+            font-style: italic;
+            color: #BBBBBB;
+        }
+
+        .results-container {
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-button:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .test-button:active {
+            transform: translateY(0);
+        }
+
+        /* Audio Test */
+        .audio-test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .audio-test-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #555;
+        }
+
+        /* Performance Test */
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .performance-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #555;
+        }
+
+        /* Log Display */
+        .log-container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #555;
+        }
+
+        .log-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .log-entry.success {
+            color: #4CAF50;
+        }
+
+        .log-entry.error {
+            color: #ff6b6b;
+        }
+
+        .log-entry.warning {
+            color: #ffeb3b;
+        }
+
+        .log-entry.info {
+            color: #2196F3;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .status-pass {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-fail {
+            background: #f44336;
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+
+        .status-unknown {
+            background: #ff9800;
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .test-section {
+                padding: 15px;
+            }
+        }
+
+        /* Animation for loading */
+        .loading {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 BenQ Android Board Compatibility Test</h1>
+        <p class="subtitle">Comprehensive testing for Phonics Fun game on BenQ Android displays</p>
+
+        <!-- Device Info Section -->
+        <div class="test-section">
+            <h2 class="test-header">📱 Device Information</h2>
+            <div id="device-info">
+                <div class="performance-grid">
+                    <div class="performance-item">
+                        <strong>User Agent:</strong>
+                        <div id="user-agent">Loading...</div>
+                    </div>
+                    <div class="performance-item">
+                        <strong>Screen Resolution:</strong>
+                        <div id="screen-resolution">Loading...</div>
+                    </div>
+                    <div class="performance-item">
+                        <strong>Viewport Size:</strong>
+                        <div id="viewport-size">Loading...</div>
+                    </div>
+                    <div class="performance-item">
+                        <strong>Touch Support:</strong>
+                        <div id="touch-support">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Touch Test Section -->
+        <div class="test-section">
+            <h2 class="test-header">👆 Touch & Click Test</h2>
+            <p>Test both touch and mouse interactions on your BenQ Android board:</p>
+            
+            <div class="touch-test-area" id="touch-area">
+                <div id="touch-message">Touch or Click Here</div>
+            </div>
+            
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <span class="status-indicator" id="touch-status"></span>
+                    <strong>Touch Events:</strong> <span id="touch-count">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="status-indicator" id="click-status"></span>
+                    <strong>Click Events:</strong> <span id="click-count">0</span>
+                </div>
+                <div class="performance-item">
+                    <span class="status-indicator" id="gesture-status"></span>
+                    <strong>Multi-Touch:</strong> <span id="gesture-support">Testing...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Test Section -->
+        <div class="test-section">
+            <h2 class="test-header">🔊 Audio Compatibility Test</h2>
+            <p>Testing different audio formats and playback methods:</p>
+            
+            <div class="audio-test-grid">
+                <div class="audio-test-item">
+                    <h3>WAV Format Test</h3>
+                    <button class="test-button" onclick="testAudio('wav')">Test WAV Audio</button>
+                    <div id="wav-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>MP3 Format Test</h3>
+                    <button class="test-button" onclick="testAudio('mp3')">Test MP3 Audio</button>
+                    <div id="mp3-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>Web Audio API</h3>
+                    <button class="test-button" onclick="testWebAudio()">Test Web Audio</button>
+                    <div id="webaudio-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>Voice Audio</h3>
+                    <button class="test-button" onclick="testVoiceAudio()">Test Voice</button>
+                    <div id="voice-status">Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Test Section -->
+        <div class="test-section">
+            <h2 class="test-header">⚡ Performance Test</h2>
+            <p>Testing system performance and capabilities:</p>
+            
+            <button class="test-button" onclick="runPerformanceTest()">Run Performance Test</button>
+            <div class="progress-bar">
+                <div class="progress-fill" id="performance-progress"></div>
+            </div>
+            
+            <div class="performance-grid">
+                <div class="performance-item">
+                    <strong>Frame Rate:</strong>
+                    <div id="fps-display">0 FPS</div>
+                </div>
+                <div class="performance-item">
+                    <strong>Memory Usage:</strong>
+                    <div id="memory-display">N/A</div>
+                </div>
+                <div class="performance-item">
+                    <strong>Animation Test:</strong>
+                    <div id="animation-test">Click to test</div>
+                </div>
+                <div class="performance-item">
+                    <strong>Orientation:</strong>
+                    <div id="orientation-display">Portrait</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game-Specific Tests -->
+        <div class="test-section">
+            <h2 class="test-header">🎮 Game-Specific Tests</h2>
+            <p>Testing specific features used in Phonics Fun:</p>
+            
+            <div class="audio-test-grid">
+                <div class="audio-test-item">
+                    <h3>Canvas Support</h3>
+                    <button class="test-button" onclick="testCanvas()">Test Canvas</button>
+                    <div id="canvas-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>CSS Animations</h3>
+                    <button class="test-button" onclick="testCSSAnimations()">Test Animations</button>
+                    <div id="css-animations-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>Local Storage</h3>
+                    <button class="test-button" onclick="testLocalStorage()">Test Storage</button>
+                    <div id="storage-status">Ready</div>
+                </div>
+                
+                <div class="audio-test-item">
+                    <h3>Asset Loading</h3>
+                    <button class="test-button" onclick="testAssetLoading()">Test Assets</button>
+                    <div id="assets-status">Ready</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- MCP Advanced Tests -->
+        <div class="test-section">
+            <h2 class="test-header">🔬 MCP Advanced Diagnostics</h2>
+            <p>Run comprehensive MCP diagnostic tests for detailed analysis:</p>
+            
+            <div class="action-buttons">
+                <button class="test-button" onclick="runMCPAudioTest()">Audio Diagnostics</button>
+                <button class="test-button" onclick="runMCPTouchTest()">Touch Diagnostics</button>
+                <button class="test-button" onclick="runMCPPerformanceTest()">Performance Diagnostics</button>
+                <button class="test-button primary-button" onclick="runFullMCPScan()">Run Full MCP Scan</button>
+            </div>
+            
+            <div id="mcp-results" class="results-container"></div>
+        </div>
+
+        <!-- Log Section -->
+        <div class="test-section">
+            <h2 class="test-header">📋 Test Log</h2>
+            <div class="log-container" id="log-container">
+                <div class="log-entry info">System initialized and ready for testing...</div>
+            </div>
+            <button class="test-button" onclick="clearLog()">Clear Log</button>
+            <button class="test-button" onclick="exportLog()">Export Log</button>
+        </div>
+    </div>
+
+    <!-- Hidden Audio Elements -->
+    <audio id="test-audio-wav" preload="auto">
+        <source src="assets/sounds/celebration.wav" type="audio/wav">
+    </audio>
+    
+    <audio id="test-audio-mp3" preload="auto">
+        <source src="assets/sounds/celebration.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="test-voice-audio" preload="auto">
+        <source src="assets/sounds/voices/american-female/voice-girl.wav" type="audio/wav">
+    </audio>
+
+    <!-- Hidden Canvas for Testing -->
+    <canvas id="test-canvas" width="100" height="100" style="display: none;"></canvas>
+
+    <script>
+        // Global variables
+        let touchCount = 0;
+        let clickCount = 0;
+        let testResults = {};
+        let audioContext = null;
+        let performanceTest = null;
+        let fps = 0;
+        let lastTime = 0;
+        let frameCount = 0;
+
+        // Initialize the test suite
+        function initTestSuite() {
+            logMessage('Initializing BenQ Android Board Compatibility Test...', 'info');
+            
+            // Get device information
+            updateDeviceInfo();
+            
+            // Setup touch event listeners
+            setupTouchEventListeners();
+            
+            // Setup orientation change listener
+            setupOrientationListener();
+            
+            // Test basic browser features
+            testBrowserFeatures();
+            
+            // Start FPS monitoring
+            startFPSMonitoring();
+            
+            logMessage('Test suite initialized successfully!', 'success');
+        }
+
+        // Device information gathering
+        function updateDeviceInfo() {
+            document.getElementById('user-agent').textContent = navigator.userAgent;
+            document.getElementById('screen-resolution').textContent = `${screen.width} x ${screen.height}`;
+            document.getElementById('viewport-size').textContent = `${window.innerWidth} x ${window.innerHeight}`;
+            
+            // Test touch support
+            const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            document.getElementById('touch-support').textContent = touchSupport ? 'Yes' : 'No';
+            
+            if (touchSupport) {
+                document.getElementById('touch-support').style.color = '#4CAF50';
+            } else {
+                document.getElementById('touch-support').style.color = '#ff6b6b';
+            }
+        }
+
+        // Touch event listeners
+        function setupTouchEventListeners() {
+            const touchArea = document.getElementById('touch-area');
+            let touchStartTime = 0;
+            let touches = [];
+
+            // Touch events
+            touchArea.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                touchStartTime = Date.now();
+                touches = Array.from(e.touches);
+                touchCount++;
+                
+                document.getElementById('touch-count').textContent = touchCount;
+                document.getElementById('touch-status').className = 'status-indicator status-pass';
+                
+                touchArea.classList.add('active');
+                
+                logMessage(`Touch started: ${touches.length} finger(s)`, 'success');
+                
+                // Test multi-touch
+                if (touches.length > 1) {
+                    document.getElementById('gesture-support').textContent = 'Multi-touch detected!';
+                    document.getElementById('gesture-status').className = 'status-indicator status-pass';
+                }
+            });
+
+            touchArea.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                const duration = Date.now() - touchStartTime;
+                
+                touchArea.classList.remove('active');
+                
+                logMessage(`Touch ended after ${duration}ms`, 'info');
+            });
+
+            touchArea.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                logMessage(`Touch moved: ${e.touches.length} finger(s)`, 'info');
+            });
+
+            // Mouse events (fallback)
+            touchArea.addEventListener('click', (e) => {
+                clickCount++;
+                document.getElementById('click-count').textContent = clickCount;
+                document.getElementById('click-status').className = 'status-indicator status-pass';
+                
+                touchArea.classList.add('active');
+                setTimeout(() => touchArea.classList.remove('active'), 500);
+                
+                logMessage('Click event detected', 'success');
+            });
+
+            touchArea.addEventListener('mousedown', (e) => {
+                logMessage('Mouse down event detected', 'info');
+            });
+
+            touchArea.addEventListener('mouseup', (e) => {
+                logMessage('Mouse up event detected', 'info');
+            });
+        }
+
+        // Orientation change listener
+        function setupOrientationListener() {
+            function updateOrientation() {
+                const orientation = window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait';
+                document.getElementById('orientation-display').textContent = orientation;
+                document.getElementById('viewport-size').textContent = `${window.innerWidth} x ${window.innerHeight}`;
+                
+                logMessage(`Orientation changed to: ${orientation}`, 'info');
+            }
+
+            window.addEventListener('resize', updateOrientation);
+            window.addEventListener('orientationchange', updateOrientation);
+            
+            updateOrientation();
+        }
+
+        // Audio testing functions
+        function testAudio(format) {
+            const audioElement = document.getElementById(`test-audio-${format}`);
+            const statusElement = document.getElementById(`${format}-status`);
+            
+            logMessage(`Testing ${format.toUpperCase()} audio...`, 'info');
+            statusElement.textContent = 'Testing...';
+            
+            audioElement.play()
+                .then(() => {
+                    statusElement.textContent = 'Success!';
+                    statusElement.style.color = '#4CAF50';
+                    logMessage(`${format.toUpperCase()} audio playback successful`, 'success');
+                })
+                .catch(error => {
+                    statusElement.textContent = 'Failed!';
+                    statusElement.style.color = '#ff6b6b';
+                    logMessage(`${format.toUpperCase()} audio playback failed: ${error.message}`, 'error');
+                });
+        }
+
+        function testWebAudio() {
+            const statusElement = document.getElementById('webaudio-status');
+            
+            logMessage('Testing Web Audio API...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                // Create a simple oscillator
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 440;
+                gainNode.gain.value = 0.1;
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                statusElement.textContent = 'Success!';
+                statusElement.style.color = '#4CAF50';
+                logMessage('Web Audio API test successful', 'success');
+                
+            } catch (error) {
+                statusElement.textContent = 'Failed!';
+                statusElement.style.color = '#ff6b6b';
+                logMessage(`Web Audio API test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testVoiceAudio() {
+            const audioElement = document.getElementById('test-voice-audio');
+            const statusElement = document.getElementById('voice-status');
+            
+            logMessage('Testing voice audio...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            audioElement.play()
+                .then(() => {
+                    statusElement.textContent = 'Success!';
+                    statusElement.style.color = '#4CAF50';
+                    logMessage('Voice audio playback successful', 'success');
+                })
+                .catch(error => {
+                    statusElement.textContent = 'Failed!';
+                    statusElement.style.color = '#ff6b6b';
+                    logMessage(`Voice audio playback failed: ${error.message}`, 'error');
+                });
+        }
+
+        // Performance testing
+        function runPerformanceTest() {
+            logMessage('Starting performance test...', 'info');
+            
+            const progressBar = document.getElementById('performance-progress');
+            let progress = 0;
+            
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    logMessage('Performance test completed', 'success');
+                }
+            }, 100);
+            
+            // Test memory usage
+            if (performance.memory) {
+                const memoryInfo = performance.memory;
+                const memoryUsage = `${Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024)}MB / ${Math.round(memoryInfo.totalJSHeapSize / 1024 / 1024)}MB`;
+                document.getElementById('memory-display').textContent = memoryUsage;
+                logMessage(`Memory usage: ${memoryUsage}`, 'info');
+            }
+        }
+
+        // FPS monitoring
+        function startFPSMonitoring() {
+            function updateFPS(currentTime) {
+                if (lastTime) {
+                    const deltaTime = currentTime - lastTime;
+                    fps = 1000 / deltaTime;
+                    frameCount++;
+                    
+                    if (frameCount % 60 === 0) {
+                        document.getElementById('fps-display').textContent = `${Math.round(fps)} FPS`;
+                    }
+                }
+                
+                lastTime = currentTime;
+                requestAnimationFrame(updateFPS);
+            }
+            
+            requestAnimationFrame(updateFPS);
+        }
+
+        // Game-specific tests
+        function testCanvas() {
+            const canvas = document.getElementById('test-canvas');
+            const statusElement = document.getElementById('canvas-status');
+            
+            logMessage('Testing Canvas support...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            try {
+                const ctx = canvas.getContext('2d');
+                
+                // Draw a simple test pattern
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(0, 0, 50, 50);
+                ctx.fillStyle = '#ff6b6b';
+                ctx.fillRect(50, 50, 50, 50);
+                
+                statusElement.textContent = 'Success!';
+                statusElement.style.color = '#4CAF50';
+                logMessage('Canvas test successful', 'success');
+                
+            } catch (error) {
+                statusElement.textContent = 'Failed!';
+                statusElement.style.color = '#ff6b6b';
+                logMessage(`Canvas test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testCSSAnimations() {
+            const statusElement = document.getElementById('css-animations-status');
+            
+            logMessage('Testing CSS animations...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            try {
+                // Create a test element with animation
+                const testElement = document.createElement('div');
+                testElement.style.position = 'absolute';
+                testElement.style.left = '-100px';
+                testElement.style.top = '-100px';
+                testElement.style.width = '10px';
+                testElement.style.height = '10px';
+                testElement.style.background = '#4CAF50';
+                testElement.style.animation = 'pulse 1s ease-in-out';
+                
+                document.body.appendChild(testElement);
+                
+                setTimeout(() => {
+                    document.body.removeChild(testElement);
+                    statusElement.textContent = 'Success!';
+                    statusElement.style.color = '#4CAF50';
+                    logMessage('CSS animations test successful', 'success');
+                }, 1000);
+                
+            } catch (error) {
+                statusElement.textContent = 'Failed!';
+                statusElement.style.color = '#ff6b6b';
+                logMessage(`CSS animations test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testLocalStorage() {
+            const statusElement = document.getElementById('storage-status');
+            
+            logMessage('Testing Local Storage...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            try {
+                const testKey = 'phonics-fun-test';
+                const testValue = 'test-value-' + Date.now();
+                
+                localStorage.setItem(testKey, testValue);
+                const retrievedValue = localStorage.getItem(testKey);
+                
+                if (retrievedValue === testValue) {
+                    localStorage.removeItem(testKey);
+                    statusElement.textContent = 'Success!';
+                    statusElement.style.color = '#4CAF50';
+                    logMessage('Local Storage test successful', 'success');
+                } else {
+                    throw new Error('Value mismatch');
+                }
+                
+            } catch (error) {
+                statusElement.textContent = 'Failed!';
+                statusElement.style.color = '#ff6b6b';
+                logMessage(`Local Storage test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testAssetLoading() {
+            const statusElement = document.getElementById('assets-status');
+            
+            logMessage('Testing asset loading...', 'info');
+            statusElement.textContent = 'Testing...';
+            
+            const testImage = new Image();
+            testImage.onload = () => {
+                statusElement.textContent = 'Success!';
+                statusElement.style.color = '#4CAF50';
+                logMessage('Asset loading test successful', 'success');
+            };
+            
+            testImage.onerror = () => {
+                statusElement.textContent = 'Failed!';
+                statusElement.style.color = '#ff6b6b';
+                logMessage('Asset loading test failed', 'error');
+            };
+            
+            // Test loading a small asset
+            testImage.src = 'assets/images/G-g/Images/girl-clipart-md.png';
+        }
+
+        // Browser feature testing
+        function testBrowserFeatures() {
+            logMessage('Testing browser features...', 'info');
+            
+            // Test for required features
+            const features = {
+                'localStorage': typeof Storage !== 'undefined',
+                'sessionStorage': typeof sessionStorage !== 'undefined',
+                'canvas': !!document.createElement('canvas').getContext,
+                'webAudio': !!(window.AudioContext || window.webkitAudioContext),
+                'requestAnimationFrame': !!window.requestAnimationFrame,
+                'touch': 'ontouchstart' in window,
+                'orientation': 'orientation' in window,
+                'devicePixelRatio': window.devicePixelRatio || 1
+            };
+            
+            Object.entries(features).forEach(([feature, supported]) => {
+                if (supported) {
+                    logMessage(`✓ ${feature}: Supported`, 'success');
+                } else {
+                    logMessage(`✗ ${feature}: Not supported`, 'warning');
+                }
+            });
+        }
+
+        // Logging functions
+        function logMessage(message, type = 'info') {
+            const logContainer = document.getElementById('log-container');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `<span style="color: #999;">[${timestamp}]</span> ${message}`;
+            
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            const logContainer = document.getElementById('log-container');
+            logContainer.innerHTML = '<div class="log-entry info">Log cleared.</div>';
+        }
+
+        function exportLog() {
+            const logEntries = document.querySelectorAll('.log-entry');
+            let logText = 'BenQ Android Board Compatibility Test Log\n';
+            logText += '='.repeat(50) + '\n\n';
+            
+            logEntries.forEach(entry => {
+                logText += entry.textContent + '\n';
+            });
+            
+            // Create and download the log file
+            const blob = new Blob([logText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `phonics-fun-compatibility-test-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            logMessage('Log exported successfully', 'success');
+        }
+
+        // Initialize when page loads
+        window.addEventListener('load', initTestSuite);
+        
+        // Handle visibility changes (important for Android)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                logMessage('Page hidden (backgrounded)', 'warning');
+            } else {
+                logMessage('Page visible (foregrounded)', 'info');
+            }
+        });
+
+        // Handle errors
+        window.addEventListener('error', (event) => {
+            logMessage(`JavaScript Error: ${event.error.message}`, 'error');
+        });
+
+        // MCP Test Functions
+        let mcpController;
+
+        function initMCPTests() {
+            // Initialize MCP controller when the page loads
+            mcpController = new MCPController({
+                logCallback: logMessage,
+                displayElementId: 'mcp-results'
+            });
+            logMessage('MCP Diagnostic Tools initialized', 'info');
+        }
+
+        function runMCPAudioTest() {
+            logMessage('Starting MCP Audio Diagnostics...', 'info');
+            mcpController.runAudioDiagnostics()
+                .then(results => {
+                    logMessage(`MCP Audio Diagnostics Complete: ${results.score}/10`, 
+                               results.score >= 7 ? 'success' : 'warning');
+                    displayMCPResults(results);
+                })
+                .catch(error => {
+                    logMessage(`MCP Audio Diagnostics Failed: ${error.message}`, 'error');
+                });
+        }
+
+        function runMCPTouchTest() {
+            logMessage('Starting MCP Touch Diagnostics...', 'info');
+            mcpController.runTouchDiagnostics()
+                .then(results => {
+                    logMessage(`MCP Touch Diagnostics Complete: ${results.score}/10`, 
+                               results.score >= 7 ? 'success' : 'warning');
+                    displayMCPResults(results);
+                })
+                .catch(error => {
+                    logMessage(`MCP Touch Diagnostics Failed: ${error.message}`, 'error');
+                });
+        }
+
+        function runMCPPerformanceTest() {
+            logMessage('Starting MCP Performance Diagnostics...', 'info');
+            mcpController.runPerformanceDiagnostics()
+                .then(results => {
+                    logMessage(`MCP Performance Diagnostics Complete: ${results.score}/10`, 
+                               results.score >= 7 ? 'success' : 'warning');
+                    displayMCPResults(results);
+                })
+                .catch(error => {
+                    logMessage(`MCP Performance Diagnostics Failed: ${error.message}`, 'error');
+                });
+        }
+
+        function runFullMCPScan() {
+            logMessage('Starting Full MCP Diagnostic Scan...', 'info');
+            
+            // Clear previous results
+            document.getElementById('mcp-results').innerHTML = 
+                '<div class="progress-indicator">Running comprehensive scan...</div>';
+            
+            mcpController.runFullDiagnostics()
+                .then(results => {
+                    const overallScore = results.overallScore;
+                    logMessage(`MCP Full Scan Complete: Overall Score ${overallScore}/10`, 
+                               overallScore >= 7 ? 'success' : 'warning');
+                    
+                    // Display detailed results
+                    displayMCPResults(results);
+                    
+                    // Apply recommended fixes automatically if score is low
+                    if (overallScore < 7 && results.recommendedFixes.length > 0) {
+                        logMessage('Applying recommended compatibility fixes...', 'info');
+                        mcpController.applyRecommendedFixes();
+                    }
+                })
+                .catch(error => {
+                    logMessage(`MCP Full Scan Failed: ${error.message}`, 'error');
+                });
+        }
+
+        function displayMCPResults(results) {
+            const resultsContainer = document.getElementById('mcp-results');
+            let html = '<div class="mcp-results-summary">';
+            
+            if (results.overallScore !== undefined) {
+                // Full scan results
+                html += `<h3>Overall Compatibility Score: ${results.overallScore}/10</h3>
+                        <div class="score-meter">
+                            <div class="score-fill" style="width: ${results.overallScore * 10}%"></div>
+                        </div>
+                        <div class="category-scores">
+                            <div class="category">
+                                <span>Audio: ${results.audioResults.score}/10</span>
+                                <div class="score-meter small">
+                                    <div class="score-fill" style="width: ${results.audioResults.score * 10}%"></div>
+                                </div>
+                            </div>
+                            <div class="category">
+                                <span>Touch: ${results.touchResults.score}/10</span>
+                                <div class="score-meter small">
+                                    <div class="score-fill" style="width: ${results.touchResults.score * 10}%"></div>
+                                </div>
+                            </div>
+                            <div class="category">
+                                <span>Performance: ${results.performanceResults.score}/10</span>
+                                <div class="score-meter small">
+                                    <div class="score-fill" style="width: ${results.performanceResults.score * 10}%"></div>
+                                </div>
+                            </div>
+                        </div>`;
+            } else {
+                // Single category test results
+                html += `<h3>Diagnostic Results: ${results.score}/10</h3>
+                        <div class="score-meter">
+                            <div class="score-fill" style="width: ${results.score * 10}%"></div>
+                        </div>`;
+            }
+            
+            // Display issues found
+            if (results.issues && results.issues.length > 0) {
+                html += '<div class="issues-found"><h4>Issues Found:</h4><ul>';
+                results.issues.forEach(issue => {
+                    html += `<li class="${issue.severity}">${issue.description}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            // Display recommendations
+            if (results.recommendations && results.recommendations.length > 0) {
+                html += '<div class="recommendations"><h4>Recommendations:</h4><ul>';
+                results.recommendations.forEach(rec => {
+                    html += `<li>${rec}</li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            resultsContainer.innerHTML = html;
+        }
+
+        // Add MCP initialization to the page load
+        window.addEventListener('load', function() {
+            initTestSuite();
+            initMCPTests();
+        });
+        
+    </script>
+</body>
+</html>

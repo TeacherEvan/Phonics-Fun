@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/level_select_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/space_background">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- Back Button -->
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            style="@style/SecondaryButton" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/level_select_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/select_level"
+            style="@style/ScreenTitle"
+            android:gravity="center" />
+
+        <!-- Settings Button -->
+        <Button
+            android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings"
+            style="@style/SettingsButton" />
+
+    </LinearLayout>
+
+    <!-- Level Selection Grid -->
+    <GridLayout
+        android:id="@+id/level_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/header_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:columnCount="3"
+        android:rowCount="3"
+        android:padding="32dp"
+        android:useDefaultMargins="true">
+
+        <!-- Letter G Button -->
+        <Button
+            android:id="@+id/letter_g_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="G"
+            style="@style/LetterButton"
+            android:layout_margin="8dp" />
+
+        <!-- Letter A Button -->
+        <Button
+            android:id="@+id/letter_a_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="A"
+            style="@style/LetterButton"
+            android:layout_margin="8dp" />
+
+        <!-- Letter B Button -->
+        <Button
+            android:id="@+id/letter_b_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="B"
+            style="@style/LetterButton"
+            android:layout_margin="8dp" />
+
+        <!-- Placeholder for future letters -->
+        <Button
+            android:id="@+id/letter_c_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="C"
+            style="@style/LetterButton"
+            android:layout_margin="8dp"
+            android:alpha="0.5"
+            android:enabled="false" />
+
+        <Button
+            android:id="@+id/letter_d_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="D"
+            style="@style/LetterButton"
+            android:layout_margin="8dp"
+            android:alpha="0.5"
+            android:enabled="false" />
+
+        <Button
+            android:id="@+id/letter_e_button"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:text="E"
+            style="@style/LetterButton"
+            android:layout_margin="8dp"
+            android:alpha="0.5"
+            android:enabled="false" />
+
+    </GridLayout>
+
+    <!-- Progress Indicator -->
+    <LinearLayout
+        android:id="@+id/progress_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/level_grid"
+        android:layout_marginTop="32dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/progress_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/progress_message"
+            style="@style/ProgressText" />
+
+    </LinearLayout>
+
+</RelativeLayout>
