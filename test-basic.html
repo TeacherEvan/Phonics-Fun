@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+</head>
+<body>
+    <div id="result">Testing...</div>
+    <script>
+        try {
+            console.log('Basic script loading test...');
+            document.getElementById('result').textContent = 'Basic script loaded successfully!';
+        } catch (e) {
+            console.error('Error:', e);
+            document.getElementById('result').textContent = 'Error: ' + e.message;
+        }
+    </script>
+</body>
+</html>

@@ -179,10 +179,6 @@ class EventManager {
     }
 }
 
-// Export for use in main game
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EventManager;
-}
-
-// Global instance for easy access
+// Export for use in main game (ES6 modules temporarily disabled)
+// export default EventManager;
 window.EventManager = EventManager;

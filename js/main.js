@@ -4,7 +4,12 @@
  * Author: AI Assistant
  */
 
-import EventBus from "./event-bus.js";
+// Note: ES6 imports commented out for compatibility - using global classes instead
+// import EventBus from "./event-bus.js";
+// import AudioManager from "./audio-manager.js";
+// import EventManager from "./event-manager.js";
+// import CollisionManager from "./collision-manager.js";
+// import ParticleSystem from "./particles.js";
 
 // Game state management
 class GameState {
@@ -861,17 +866,17 @@ window.addEventListener('resize', () => {
 // Utility functions
 function debounce(func, wait) {
     let timeout;
-    return function executedFunction(...args) {
+    return function executedFunction() {
+        const args = arguments; // Use arguments object instead of spread operator
         const later = () => {
             clearTimeout(timeout);
-            func(...args);
+            func.apply(this, args);
         };
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
 }
 
-// Export for testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { GameState };
-}
+// Export for testing (ES6 modules temporarily disabled)
+// export { GameState };
+window.GameState = GameState;
