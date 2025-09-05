@@ -803,7 +803,7 @@ class GameState {
         this.collisionManager.clear();
         
         // Cleanup particle system
-        if this.particleSystem) {
+        if (this.particleSystem) {
             this.particleSystem.destroy();
             this.particleSystem = null;
         }
