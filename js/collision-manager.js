@@ -345,4 +345,3 @@ class CollisionManager {
 // Export for use in main game (ES6 modules temporarily disabled)
 // export default CollisionManager;
 window.CollisionManager = CollisionManager;
-window.CollisionManager = CollisionManager;
