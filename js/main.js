@@ -501,7 +501,7 @@ class GameState {
             const x = Math.random() * (window.innerWidth - 100);
             const y = Math.random() * (window.innerHeight - 100);
             planet.style.left = x + "px";
-            planet.style.top = `${y}px`;
+            planet.style.top = y + "px";
             
             // Random animation delay
             planet.style.animationDelay = (Math.random() * 8) + 's';
