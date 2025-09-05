@@ -507,7 +507,7 @@ class GameState {
             planet.style.animationDelay = (Math.random() * 8) + 's';
             
             planet.addEventListener('click', () => {
-                console.log(`G planet ${i} clicked`);
+                console.log('G planet ' + i + ' clicked');
                 this.handlePlanetClick(planet, 'G');
             });
             
