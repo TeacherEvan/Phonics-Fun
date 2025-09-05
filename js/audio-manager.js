@@ -698,4 +698,3 @@ class AudioManager {
 window.AudioManager = AudioManager;
 
 // Global instance for easy access
-window.AudioManager = AudioManager;
