@@ -12,7 +12,7 @@ Phonics Fun is a multi-platform educational game teaching children phonics throu
 
 ### Web Application (Primary Platform)
 Bootstrap and run the web application:
-- `cd /path/to/project`
+- `cd .`
 - **Python HTTP Server**: `python3 -m http.server 8000` -- starts instantly. NEVER CANCEL.
 - **Node.js HTTP Server**: `npm install http-server --no-save` (takes 7 seconds), then `npx http-server -p 8000`
 - **Direct Browser**: Open `index.html` directly in browser (works but limited functionality)
