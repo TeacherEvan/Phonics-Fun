@@ -161,6 +161,6 @@ If anything breaks during development:
 docker stop $(docker ps -q) 2>/dev/null || true
 docker rm $(docker ps -aq) 2>/dev/null || true
 pkill -f "python.*http.server" || true
-cd /path/to/project
+cd .
 python3 -m http.server 8000
 ```
