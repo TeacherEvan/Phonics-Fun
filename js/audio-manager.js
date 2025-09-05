@@ -693,10 +693,8 @@ class AudioManager {
     }
 }
 
-// Export for use in main game
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AudioManager;
-}
+// Export for use in main game (ES6 modules temporarily disabled)
+// export default AudioManager;
+window.AudioManager = AudioManager;
 
 // Global instance for easy access
-window.AudioManager = AudioManager;

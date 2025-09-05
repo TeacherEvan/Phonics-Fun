@@ -500,14 +500,14 @@ class GameState {
             // Random position
             const x = Math.random() * (window.innerWidth - 100);
             const y = Math.random() * (window.innerHeight - 100);
-            planet.style.left = x + "px";
-            planet.style.top = y + "px";
+            planet.style.left = `${x}px`;
+            planet.style.top = `${y}px`;
             
             // Random animation delay
             planet.style.animationDelay = (Math.random() * 8) + 's';
             
             planet.addEventListener('click', () => {
-                console.log('G planet ' + i + ' clicked');
+                console.log(`G planet ${i} clicked`);
                 this.handlePlanetClick(planet, 'G');
             });
             
@@ -532,7 +532,7 @@ class GameState {
             // Random position
             const x = Math.random() * (window.innerWidth - 100);
             const y = Math.random() * (window.innerHeight - 100);
-            planet.style.left = x + "px";
+            planet.style.left = `${x}px`;
             planet.style.top = `${y}px`;
             
             // Random animation delay
@@ -629,8 +629,8 @@ class GameState {
                 break;
         }
         
-        asteroid.style.left = startX + "px";
-        asteroid.style.top = startY + "px";
+        asteroid.style.left = `${startX}px`;
+        asteroid.style.top = `${startY}px`;
         
         // Calculate trajectory
         const deltaX = targetX - startX;
@@ -659,8 +659,8 @@ class GameState {
         
         // Animate
         setTimeout(() => {
-            asteroid.style.left = targetX + "px";
-            asteroid.style.top = targetY + "px";
+            asteroid.style.left = `${targetX}px`;
+            asteroid.style.top = `${targetY}px`;
         }, 50);
         
         return asteroid;
@@ -803,7 +803,7 @@ class GameState {
         this.collisionManager.clear();
         
         // Cleanup particle system
-        if this.particleSystem) {
+        if (this.particleSystem) {
             this.particleSystem.destroy();
             this.particleSystem = null;
         }

@@ -342,10 +342,6 @@ class CollisionManager {
     }
 }
 
-// Export for use in main game
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CollisionManager;
-}
-
-// Global instance for easy access
+// Export for use in main game (ES6 modules temporarily disabled)
+// export default CollisionManager;
 window.CollisionManager = CollisionManager;
