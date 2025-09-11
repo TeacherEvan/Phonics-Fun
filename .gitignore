@@ -1,0 +1,86 @@
+# Build directories
+build/
+.gradle/
+gradle-app.setting
+
+# IDE files
+.idea/
+*.iml
+*.iws
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Node.js (if any npm tools are added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Android specific
+*.apk
+*.aab
+*.dex
+*.class
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+proguard/
+
+# Generated audio files (keep templates only)
+Assets/sounds/voices/generated/
+*-generated.wav
+*-generated.mp3
+
+# Test outputs
+test-results/
+coverage/
+
+# Environment specific
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Memory files
+memory.json
+
+# Generated documentation
+docs/generated/
