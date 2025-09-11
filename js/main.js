@@ -235,18 +235,20 @@ class GameState {
                 });
             }
         });
+        
+        // Centralized reaction to collisions - runs once at start-up
+        if (window.EventBus) {
+            EventBus.addEventListener("planet-hit", async ({ detail }) => {
+                // Waiting for both animations/SFX to finish keeps everything in sync
+                await Promise.all([
+                    detail.planet.triggerExplosion(),
+                    detail.asteroid.triggerExplosion()
+                ]);
+            });
+        }
     }
 
-    // centralised reaction to collisions ─ runs once at start-up
-    EventBus.addEventListener("planet-hit", async ({ detail }) => {
-    // Waiting for both animations/SFX to finish keeps everything in sync
-    await Promise.all([
-        detail.planet.triggerExplosion(),
-        detail.asteroid.triggerExplosion()
-    ]);
-});
-
-handleAsteroidPlanetCollision(asteroid, planet) {
+    handleAsteroidPlanetCollision(asteroid, planet) {
     console.log('Asteroid collided with planet:', asteroid.id, planet.id);
 
     // Get the actual DOM elements
@@ -862,7 +864,7 @@ resetGame() {
     this.collisionManager.clear();
 
     // Cleanup particle system
-    if this.particleSystem) {
+    if (this.particleSystem) {
         this.particleSystem.destroy();
         this.particleSystem = null;
     }
