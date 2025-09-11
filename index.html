@@ -1,185 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Phonics Fun - Learn with Teacher Evan</title>
-    <meta name="description" content="Educational phonics game for learning letters">
-    <link rel="stylesheet" href="css/styles.css">
-</head>
-<body>
-    <!-- Welcome Screen -->
-    <main id="welcome-screen" class="screen active">
-        <div class="welcome-background">
-            <div class="welcome-stars"></div>
-            <div class="welcome-planets"></div>
-            <div class="welcome-asteroids"></div>
-        </div>
-        <div class="welcome-container">
-            <h1 id="welcome-title" class="pulsating-text">
-                <span class="welcome-to">Welcome To</span>
-                <span id="teacher-evan" class="teacher-name">Teacher Evan's</span>
-                <span class="fun-with">Fun with phonics!</span>
-            </h1>
-            <button id="start-game-btn" class="primary-button">Start Game</button>
-            <div class="settings-container">
-                <button id="settings-btn" class="settings-button">⚙️</button>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+            content="width=device-width, initial-scale=1.0">
+        <title>Phonics Fun - Learn with Teacher Evan</title>
+        <meta name="description"
+            content="Educational phonics game for learning letters">
+        <link rel="stylesheet" href="css/styles.css">
+    </head>
+    <body>
+        <!-- Welcome Screen -->
+        <main id="welcome-screen" class="screen active">
+            <div class="welcome-background">
+                <div class="welcome-stars"></div>
+                <div class="welcome-planets"></div>
+                <div class="welcome-asteroids"></div>
             </div>
-        </div>
-    </main>
+            <div class="welcome-container">
+                <h1 id="welcome-title" class="pulsating-text">
+                    <span class="welcome-to">Welcome To</span>
+                    <span id="teacher-evan" class="teacher-name">Teacher
+                        Evan's</span>
+                    <span class="fun-with">Fun with phonics!</span>
+                </h1>
+                <button id="start-game-btn" class="primary-button">Start
+                    Game</button>
+                <div class="settings-container">
+                    <button id="settings-btn"
+                        class="settings-button">⚙️</button>
+                </div>
+            </div>
+        </main>
 
-    <!-- Level Select Screen -->
-    <main id="level-select-screen" class="screen">
-        <div class="level-select-container">
-            <h2 class="level-select-heading">Select a letter to play with!</h2>
-            <div class="letter-grid" id="letter-grid">
-                <!-- Letters A-Z will be generated dynamically -->
-                <button class="letter" data-letter="A">A</button>
-                <button class="letter" data-letter="B">B</button>
+        <!-- Level Select Screen -->
+        <main id="level-select-screen" class="screen">
+            <div class="level-select-container">
+                <h2 class="level-select-heading">Select a letter to play
+                    with!</h2>
+                <div class="letter-grid" id="letter-grid">
+                    <!-- Letters A-Z will be generated dynamically -->
+                    <button class="letter" data-letter="A">A</button>
+                    <button class="letter" data-letter="B">B</button>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
 
-    <!-- Gameplay Screen -->
-    <main id="gameplay-screen" class="screen">
-        <div class="gameplay-container">
-            <div class="galaxy-background"></div>
-            <div class="game-area">
-                <div class="planets-container">
-                    <!-- Planets will be generated dynamically -->
-                </div>
-                <div class="asteroids-container">
-                    <!-- Asteroids will be generated dynamically -->
-                </div>
-                <div class="explosions-container">
-                    <!-- Explosions will be generated dynamically -->
-                </div>
-                <div class="word-background">
-                    <!-- Word images will be shown here -->
-                </div>
-            </div>
-            <div class="game-ui">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="score-display">
-                    <span id="hits-counter">0</span> / 5 hits
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Ready Overlay -->
-    <div id="ready-overlay" class="overlay hidden">
-        <div class="overlay-content">
-            <h2 class="ready-text">READY??!!</h2>
-            <div class="loading-spinner"></div>
-        </div>
-    </div>
-
-    <!-- Settings Panel -->
-    <div id="settings-panel" class="settings-panel hidden">
-        <div class="settings-content">
-            <h3>Settings</h3>
-            <div class="setting-row">
-                <label>Music Volume:</label>
-                <input type="range" id="music-volume" min="0" max="100" value="50">
-                <span id="music-volume-display">50%</span>
-            </div>
-            <div class="setting-row">
-                <label>Sound Effects:</label>
-                <input type="range" id="effects-volume" min="0" max="100" value="70">
-                <span id="effects-volume-display">70%</span>
-            </div>
-            <div class="setting-row">
-                <label>Audio Priority:</label>
-                <div class="audio-priority-controls">
-                    <div>
-                        <input type="checkbox" id="high-priority-audio" checked>
-                        <label for="high-priority-audio">Learning Sounds (Voice & Phoneme)</label>
+        <!-- Gameplay Screen -->
+        <main id="gameplay-screen" class="screen">
+            <div class="gameplay-container">
+                <div class="galaxy-background"></div>
+                <div class="game-area">
+                    <div class="planets-container">
+                        <!-- Planets will be generated dynamically -->
                     </div>
-                    <div>
-                        <input type="checkbox" id="medium-priority-audio" checked>
-                        <label for="medium-priority-audio">Game Sounds (Explosion & Celebration)</label>
+                    <div class="asteroids-container">
+                        <!-- Asteroids will be generated dynamically -->
                     </div>
-                    <div>
-                        <input type="checkbox" id="low-priority-audio">
-                        <label for="low-priority-audio">Background Music (2.5MB)</label>
+                    <div class="explosions-container">
+                        <!-- Explosions will be generated dynamically -->
+                    </div>
+                    <div class="word-background">
+                        <!-- Word images will be shown here -->
+                    </div>
+                </div>
+                <div class="game-ui">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="score-display">
+                        <span id="hits-counter">0</span> / 5 hits
                     </div>
                 </div>
             </div>
-            <div class="setting-row">
-                <label>Voice Template:</label>
-                <select id="voice-template-select">
-                    <option value="american-female">American Female</option>
-                </select>
-                <button id="preview-voice" class="preview-button">🔊 Preview</button>
-            </div>
-            <div class="setting-row">
-                <label>Mute All:</label>
-                <button id="mute-toggle" class="toggle-button">🔊</button>
-            </div>
-            <button id="close-settings" class="close-button">×</button>
-        </div>
-    </div>
+        </main>
 
-    <!-- Coming Soon Popup -->
-    <div id="coming-soon-popup" class="popup hidden">
-        <div class="popup-content wood-style">
-            <h3>COMING SOON!</h3>
-            <button id="close-popup" class="close-button">×</button>
-        </div>
-    </div>
-
-    <!-- Level Complete Popup -->
-    <div id="level-complete-popup" class="popup hidden">
-        <div class="popup-content celebration">
-            <h2>Level Complete!</h2>
-            <div class="popup-buttons">
-                <button id="next-level-btn" class="primary-button">Next Level</button>
-                <button id="exit-btn" class="secondary-button">Exit</button>
+        <!-- Ready Overlay -->
+        <div id="ready-overlay" class="overlay hidden">
+            <div class="overlay-content">
+                <h2 class="ready-text">READY??!!</h2>
+                <div class="loading-spinner"></div>
             </div>
         </div>
-    </div>
 
-    <!-- Audio Elements -->
-    <audio id="background-music" loop preload="auto">
-        <source src="Assets/sounds/background-music.wav" type="audio/wav">
-        <source src="Assets/sounds/background-music.mp3" type="audio/mpeg">
-    </audio>
-    
-    <audio id="explosion-sound" preload="auto">
-        <source src="Assets/sounds/explosion.wav" type="audio/wav">
-        <source src="Assets/sounds/explosion.mp3" type="audio/mpeg">
-    </audio>
-    
-    <audio id="phoneme-sound" preload="auto">
-        <source src="Assets/sounds/phoneme-g.wav" type="audio/wav">
-        <source src="Assets/sounds/phoneme-g.mp3" type="audio/mpeg">
-    </audio>
-    
-    <audio id="celebration-sound" preload="auto">
-        <source src="Assets/sounds/celebration.wav" type="audio/wav">
-        <source src="Assets/sounds/celebration.mp3" type="audio/mpeg">
-    </audio>
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <div class="settings-content">
+                <h3>Settings</h3>
+                <div class="setting-row">
+                    <label for="music-volume">Music Volume:</label>
+                    <input type="range" id="music-volume" min="0" max="100"
+                        value="50" aria-label="Music volume slider">
+                    <span id="music-volume-display">50%</span>
+                </div>
+                <div class="setting-row">
+                    <label for="effects-volume">Sound Effects:</label>
+                    <input type="range" id="effects-volume" min="0" max="100"
+                        value="70" aria-label="Sound effects volume slider">
+                    <span id="effects-volume-display">70%</span>
+                </div>
+                <div class="setting-row">
+                    <label>Audio Priority:</label>
+                    <div class="audio-priority-controls">
+                        <div>
+                            <input type="checkbox" id="high-priority-audio"
+                                checked>
+                            <label for="high-priority-audio">Learning Sounds
+                                (Voice & Phoneme)</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="medium-priority-audio"
+                                checked>
+                            <label for="medium-priority-audio">Game Sounds
+                                (Explosion & Celebration)</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" id="low-priority-audio">
+                            <label for="low-priority-audio">Background Music
+                                (2.5MB)</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-row">
+                    <label for="voice-template-select">Voice Template:</label>
+                    <select id="voice-template-select"
+                        aria-label="Select voice template">
+                        <option value="american-female">American Female</option>
+                    </select>
+                    <button id="preview-voice" class="preview-button">🔊
+                        Preview</button>
+                </div>
+                <div class="setting-row">
+                    <label>Mute All:</label>
+                    <button id="mute-toggle" class="toggle-button">🔊</button>
+                </div>
+                <button id="close-settings" class="close-button">×</button>
+            </div>
+        </div>
 
-    <!-- Voice Messages -->
-    <audio id="voice-girl" preload="auto">
-        <source src="Assets/sounds/voices/american-female/voice-girl.wav" type="audio/wav">
-        <source src="Assets/sounds/voice-girl.mp3" type="audio/mpeg">
-    </audio>
-    <audio id="voice-grandpa" preload="auto">
-        <source src="Assets/sounds/voices/american-female/voice-grandpa.wav" type="audio/wav">
-        <source src="Assets/sounds/voice-grandpa.mp3" type="audio/mpeg">
-    </audio>
+        <!-- Coming Soon Popup -->
+        <div id="coming-soon-popup" class="popup hidden">
+            <div class="popup-content wood-style">
+                <h3>COMING SOON!</h3>
+                <button id="close-popup" class="close-button">×</button>
+            </div>
+        </div>
 
-    <!-- Game scripts -->
-    <script src="js/android-benq-init.js"></script>
-    <script src="js/event-bus.js"></script>
-    <script src="js/audio-manager.js"></script>
-    <script src="js/event-manager.js"></script>
-    <script src="js/collision-manager.js"></script>
-    <script src="js/particles.js"></script>
-    <script src="js/main.js"></script>
-</body>
+        <!-- Level Complete Popup -->
+        <div id="level-complete-popup" class="popup hidden">
+            <div class="popup-content celebration">
+                <h2>Level Complete!</h2>
+                <div class="popup-buttons">
+                    <button id="next-level-btn" class="primary-button">Next
+                        Level</button>
+                    <button id="exit-btn" class="secondary-button">Exit</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="background-music" loop preload="auto">
+            <source src="Assets/sounds/background-music.wav" type="audio/wav">
+            <source src="Assets/sounds/background-music.mp3" type="audio/mpeg">
+        </audio>
+
+        <audio id="explosion-sound" preload="auto">
+            <source src="Assets/sounds/explosion.wav" type="audio/wav">
+            <source src="Assets/sounds/explosion.mp3" type="audio/mpeg">
+        </audio>
+
+        <audio id="phoneme-sound" preload="auto">
+            <source src="Assets/sounds/phoneme-g.wav" type="audio/wav">
+            <source src="Assets/sounds/phoneme-g.mp3" type="audio/mpeg">
+        </audio>
+
+        <audio id="celebration-sound" preload="auto">
+            <source src="Assets/sounds/celebration.wav" type="audio/wav">
+            <source src="Assets/sounds/celebration.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- Voice Messages -->
+        <audio id="voice-girl" preload="auto">
+            <source src="Assets/sounds/voices/american-female/voice-girl.wav"
+                type="audio/wav">
+            <source src="Assets/sounds/voice-girl.mp3" type="audio/mpeg">
+        </audio>
+        <audio id="voice-grandpa" preload="auto">
+            <source src="Assets/sounds/voices/american-female/voice-grandpa.wav"
+                type="audio/wav">
+            <source src="Assets/sounds/voice-grandpa.mp3" type="audio/mpeg">
+        </audio>
+
+        <!-- Game scripts -->
+        <script src="js/android-benq-init.js"></script>
+        <script src="js/event-bus.js"></script>
+        <script src="js/audio-manager.js"></script>
+        <script src="js/event-manager.js"></script>
+        <script src="js/collision-manager.js"></script>
+        <script src="js/particles.js"></script>
+        <script src="js/main.js"></script>
+    </body>
 </html>
