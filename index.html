@@ -3,11 +3,21 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport"
-            content="width=device-width, initial-scale=1.0">
+            content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
         <title>Phonics Fun - Learn with Teacher Evan</title>
         <meta name="description"
-            content="Educational phonics game for learning letters">
+            content="Educational phonics game for learning letters through interactive space-themed gameplay">
+        <meta name="theme-color" content="#1a1a2e">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+        
+        <!-- Performance: Preload critical CSS -->
+        <link rel="preload" href="css/styles.css" as="style">
         <link rel="stylesheet" href="css/styles.css">
+        
+        <!-- Performance: DNS prefetch for potential CDN resources -->
+        <link rel="dns-prefetch" href="//fonts.googleapis.com">
     </head>
     <body>
         <!-- Welcome Screen -->
@@ -194,6 +204,8 @@
         <!-- Game scripts -->
         <script src="js/android-benq-init.js"></script>
         <script src="js/event-bus.js"></script>
+        <script src="js/performance-utils.js"></script>
+        <script src="js/ui-utils.js"></script>
         <script src="js/audio-manager.js"></script>
         <script src="js/event-manager.js"></script>
         <script src="js/collision-manager.js"></script>
