@@ -1,7 +1,7 @@
 /**
  * Performance Utilities for Phonics Fun
  * Implements lazy loading, resource optimization, and performance monitoring
- * Author: GitHub Copilot
+ * Author: Phonics Fun Development Team
  */
 
 class PerformanceUtils {

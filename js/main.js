@@ -15,7 +15,7 @@
 // import ParticleSystem from "./particles.js";
 
 /**
- * PhonicsGameController - Main game state management class
+ * GameState - Main game state management class
  * Handles screen navigation, gameplay logic, and subsystem coordination
  */
 class GameState {
@@ -232,13 +232,18 @@ class GameState {
         });
         
         // Debounced resize handler for performance
-        const debouncedResize = PerformanceUtils.debounce(() => {
+        const resizeHandler = () => {
             console.log('📐 Window resized');
             if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
                 this.resetGameplayState();
                 this.renderGameplayPlanets();
             }
-        }, 250);
+        };
+        
+        // Use PerformanceUtils debounce if available, otherwise use local debounce
+        const debouncedResize = (window.PerformanceUtils && PerformanceUtils.debounce) 
+            ? PerformanceUtils.debounce(resizeHandler, 250)
+            : debounce(resizeHandler, 250);
         
         window.addEventListener('resize', debouncedResize);
     }
@@ -266,8 +271,13 @@ class GameState {
             }
         }, { passive: false });
 
-        // Disable context menu for better touch experience
-        document.addEventListener('contextmenu', (e) => e.preventDefault());
+        // Disable context menu only in game area for better touch experience
+        // This preserves accessibility for users who rely on context menus elsewhere
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.game-area') || e.target.closest('.planet')) {
+                e.preventDefault();
+            }
+        });
     }
 
     /**

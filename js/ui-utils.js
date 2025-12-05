@@ -1,7 +1,7 @@
 /**
  * UI Utilities for Phonics Fun
  * Enhanced micro-interactions, loading states, and visual feedback
- * Author: GitHub Copilot
+ * Author: Phonics Fun Development Team
  */
 
 class UIUtils {
