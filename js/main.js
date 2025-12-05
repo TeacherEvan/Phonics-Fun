@@ -1,7 +1,10 @@
 /**
- * Phonics Fun - Letter G Game
- * Educational game for learning phonics
+ * Phonics Fun - Educational Phonics Game
+ * Interactive space-themed game for learning letter sounds
  * Author: AI Assistant
+ * 
+ * @fileoverview Main game controller managing state, screens, and gameplay
+ * @version 2.0.0
  */
 
 // Note: ES6 imports commented out for compatibility - using global classes instead
@@ -11,101 +14,162 @@
 // import CollisionManager from "./collision-manager.js";
 // import ParticleSystem from "./particles.js";
 
-// Game state management
+/**
+ * GameState - Main game state management class
+ * Handles screen navigation, gameplay logic, and subsystem coordination
+ */
 class GameState {
     constructor() {
+        // Screen management
         this.currentScreen = 'welcome';
-        this.correctHits = 0;
-        this.totalHits = 5;
-        this.gameActive = false;
-        this.planetsCreated = false;
-        this.allowedLetters = ["G", "A", "B"]; // <- now supports three letters
-        this.currentLetter = 'G'; // Track which letter level is active
+        
+        // Gameplay state
+        this.correctHitsCount = 0;
+        this.requiredHitsToComplete = 5;
+        this.isGameplayActive = false;
+        this.arePlanetsRendered = false;
+        
+        // Letter configuration
+        this.enabledLetters = ["G", "A", "B"];
+        this.activeLetterLevel = 'G';
 
-        // Organized word lists by letter
-        this.letterWords = {
+        // Organized vocabulary by letter
+        // TODO: [OPTIMIZATION] Consider moving vocabulary data to external JSON for easier content updates
+        this.letterVocabulary = {
             'G': [
-                { letter: "G", word: "grape", soundKey: "voiceGrape" },
-                { letter: "G", word: "goat", soundKey: "voiceGoat" },
-                { letter: "G", word: "gold", soundKey: "voiceGold" },
-                { letter: "G", word: "girl", soundKey: "voiceGirl" },
-                { letter: "G", word: "grandpa", soundKey: "voiceGrandpa" }
+                { letter: "G", word: "grape", audioKey: "voiceGrape" },
+                { letter: "G", word: "goat", audioKey: "voiceGoat" },
+                { letter: "G", word: "gold", audioKey: "voiceGold" },
+                { letter: "G", word: "girl", audioKey: "voiceGirl" },
+                { letter: "G", word: "grandpa", audioKey: "voiceGrandpa" }
             ],
             'A': [
-                { letter: "A", word: "apple", soundKey: "voiceApple" },
-                { letter: "A", word: "ant", soundKey: "voiceAnt" },
-                { letter: "A", word: "airplane", soundKey: "voiceAirplane" },
-                { letter: "A", word: "alligator", soundKey: "voiceAlligator" },
-                { letter: "A", word: "arrow", soundKey: "voiceArrow" }
+                { letter: "A", word: "apple", audioKey: "voiceApple" },
+                { letter: "A", word: "ant", audioKey: "voiceAnt" },
+                { letter: "A", word: "airplane", audioKey: "voiceAirplane" },
+                { letter: "A", word: "alligator", audioKey: "voiceAlligator" },
+                { letter: "A", word: "arrow", audioKey: "voiceArrow" }
             ],
             'B': [
-                { letter: "B", word: "ball", soundKey: "voiceBall" },
-                { letter: "B", word: "bat", soundKey: "voiceBat" },
-                { letter: "B", word: "bear", soundKey: "voiceBear" },
-                { letter: "B", word: "boat", soundKey: "voiceBoat" },
-                { letter: "B", word: "butterfly", soundKey: "voiceButterfly" }
+                { letter: "B", word: "ball", audioKey: "voiceBall" },
+                { letter: "B", word: "bat", audioKey: "voiceBat" },
+                { letter: "B", word: "bear", audioKey: "voiceBear" },
+                { letter: "B", word: "boat", audioKey: "voiceBoat" },
+                { letter: "B", word: "butterfly", audioKey: "voiceButterfly" }
             ]
         };
 
-        // Legacy support - will be updated dynamically
-        this.wordMessages = this.letterWords['G'];
-        this.currentWordIndex = 0;
-        this.isMuted = false;
-        this.musicVolume = 0.5;
-        this.effectsVolume = 0.7;
+        // Active vocabulary for current level
+        this.activeVocabulary = this.letterVocabulary['G'];
+        this.vocabularyIndex = 0;
+        
+        // Audio settings
+        this.isAudioMuted = false;
+        this.backgroundMusicVolume = 0.5;
+        this.soundEffectsVolume = 0.7;
 
         // Initialize subsystems
         this.audioManager = new AudioManager();
         this.eventManager = new EventManager();
         this.collisionManager = new CollisionManager();
         this.particleSystem = null;
+        
+        // Performance and UI utilities
+        this.performanceUtils = window.PerformanceUtils ? new PerformanceUtils() : null;
+        this.uiUtils = window.UIUtils ? new UIUtils() : null;
 
-        this.init();
+        this.initializeGame();
     }
 
-    init() {
-        console.log('Initializing Phonics Fun game...');
+    // Legacy getters for backward compatibility
+    get correctHits() { return this.correctHitsCount; }
+    set correctHits(value) { this.correctHitsCount = value; }
+    get totalHits() { return this.requiredHitsToComplete; }
+    get gameActive() { return this.isGameplayActive; }
+    set gameActive(value) { this.isGameplayActive = value; }
+    get planetsCreated() { return this.arePlanetsRendered; }
+    set planetsCreated(value) { this.arePlanetsRendered = value; }
+    get allowedLetters() { return this.enabledLetters; }
+    get currentLetter() { return this.activeLetterLevel; }
+    set currentLetter(value) { this.activeLetterLevel = value; }
+    get wordMessages() { return this.activeVocabulary; }
+    set wordMessages(value) { this.activeVocabulary = value; }
+    get currentWordIndex() { return this.vocabularyIndex; }
+    set currentWordIndex(value) { this.vocabularyIndex = value; }
+    get isMuted() { return this.isAudioMuted; }
+    set isMuted(value) { this.isAudioMuted = value; }
+    get musicVolume() { return this.backgroundMusicVolume; }
+    set musicVolume(value) { this.backgroundMusicVolume = value; }
+    get effectsVolume() { return this.soundEffectsVolume; }
+    set effectsVolume(value) { this.soundEffectsVolume = value; }
+
+    /**
+     * Initialize the game and all subsystems
+     */
+    initializeGame() {
+        console.log('🎮 Initializing Phonics Fun game...');
         this.setupEventListeners();
-        this.setupAudio();
+        this.setupAudioConfiguration();
         this.setupEventSubscriptions();
-        this.createLetterGrid();
-        this.createWelcomeAnimations();
-        this.showScreen('welcome');
+        this.renderLetterSelectionGrid();
+        this.createWelcomeScreenAnimations();
+        this.navigateToScreen('welcome');
+        
+        // Preload images for enabled letters
+        if (this.performanceUtils) {
+            this.enabledLetters.forEach(letter => {
+                this.performanceUtils.preloadLetterImages(letter);
+            });
+        }
+        
+        // Make interactive elements enhanced
+        if (this.uiUtils) {
+            this.uiUtils.makeInteractive('.primary-button');
+            this.uiUtils.makeInteractive('.secondary-button');
+        }
     }
+    
+    // Legacy method alias for backward compatibility
+    init() { this.initializeGame(); }
 
+    /**
+     * Setup all DOM event listeners for user interactions
+     */
     setupEventListeners() {
-        // Welcome screen
+        // Welcome screen - Start game button
         document.getElementById('start-game-btn').addEventListener('click', () => {
-            console.log('Start game clicked');
-            this.showScreen('level-select');
+            console.log('▶️ Start game clicked');
+            this.navigateToScreen('level-select');
         });
 
-        // Settings
+        // Settings panel toggle
         document.getElementById('settings-btn').addEventListener('click', () => {
-            this.toggleSettings();
+            this.toggleSettingsPanel();
         });
 
         document.getElementById('close-settings').addEventListener('click', () => {
-            this.toggleSettings();
+            this.toggleSettingsPanel();
         });
 
+        // Volume controls with real-time feedback
         document.getElementById('music-volume').addEventListener('input', (e) => {
-            this.musicVolume = e.target.value / 100;
-            this.audioManager.setVolume('music', this.musicVolume);
+            this.backgroundMusicVolume = e.target.value / 100;
+            this.audioManager.setVolume('music', this.backgroundMusicVolume);
             document.getElementById('music-volume-display').textContent = e.target.value + '%';
         });
 
         document.getElementById('effects-volume').addEventListener('input', (e) => {
-            this.effectsVolume = e.target.value / 100;
-            this.audioManager.setVolume('effects', this.effectsVolume);
+            this.soundEffectsVolume = e.target.value / 100;
+            this.audioManager.setVolume('effects', this.soundEffectsVolume);
             document.getElementById('effects-volume-display').textContent = e.target.value + '%';
         });
 
+        // Mute toggle
         document.getElementById('mute-toggle').addEventListener('click', () => {
-            this.toggleMute();
+            this.toggleAudioMute();
         });
 
-        // Audio priority controls
+        // Audio priority controls for bandwidth optimization
         document.getElementById('high-priority-audio').addEventListener('change', (e) => {
             this.audioManager.setAudioPriority('high', e.target.checked);
         });
@@ -116,7 +180,7 @@ class GameState {
 
         document.getElementById('low-priority-audio').addEventListener('change', (e) => {
             this.audioManager.setAudioPriority('low', e.target.checked);
-            // If enabling background music, play it if we're on the welcome screen
+            // Enable background music if checkbox is checked and on welcome screen
             if (e.target.checked && this.currentScreen === 'welcome') {
                 this.audioManager.play('background-music');
             }
@@ -131,90 +195,120 @@ class GameState {
             this.previewVoiceTemplate();
         });
 
-        // Level complete popup
+        // Level complete popup actions
         document.getElementById('next-level-btn').addEventListener('click', () => {
-            console.log('Next level clicked');
-            this.hidePopup('level-complete-popup');
-            this.showScreen('level-select');
+            console.log('⏭️ Next level clicked');
+            this.dismissPopup('level-complete-popup');
+            this.navigateToScreen('level-select');
         });
 
         document.getElementById('exit-btn').addEventListener('click', () => {
-            console.log('Exit clicked');
-            this.hidePopup('level-complete-popup');
-            this.showScreen('welcome');
+            console.log('🚪 Exit clicked');
+            this.dismissPopup('level-complete-popup');
+            this.navigateToScreen('welcome');
         });
 
-        // Coming soon popup
+        // Coming soon popup close
         document.getElementById('close-popup').addEventListener('click', () => {
             console.log('Close popup clicked');
-            this.hidePopup('coming-soon-popup');
+            this.dismissPopup('coming-soon-popup');
         });
 
-        // Touch and mouse event optimization for Android
+        // Touch event optimization for mobile and tablet devices
+        this.setupTouchEventHandlers();
+
+        // Handle device orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => this.handleDeviceOrientationChange(), 100);
+        });
+
+        // Handle page visibility changes (critical for mobile browsers)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.audioManager.pauseAll();
+            } else {
+                this.audioManager.resumeAll();
+            }
+        });
+        
+        // Debounced resize handler for performance
+        const resizeHandler = () => {
+            console.log('📐 Window resized');
+            if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
+                this.resetGameplayState();
+                this.renderGameplayPlanets();
+            }
+        };
+        
+        // Use PerformanceUtils debounce if available, otherwise use local debounce
+        const debouncedResize = (window.PerformanceUtils && PerformanceUtils.debounce) 
+            ? PerformanceUtils.debounce(resizeHandler, 250)
+            : debounce(resizeHandler, 250);
+        
+        window.addEventListener('resize', debouncedResize);
+    }
+    
+    /**
+     * Setup touch event handlers for mobile optimization
+     */
+    setupTouchEventHandlers() {
+        // Prevent default touch behaviors in game area
         document.addEventListener('touchstart', (e) => {
-            // Only prevent default for game area touches
             if (e.target.closest('.game-area') || e.target.closest('.planet')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
         document.addEventListener('touchmove', (e) => {
-            // Prevent scrolling during touch moves
             if (e.target.closest('.game-area') || e.target.closest('.planet')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
         document.addEventListener('touchend', (e) => {
-            // Handle touch end events
             if (e.target.closest('.game-area') || e.target.closest('.planet')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // Prevent context menu on long touch
+        // Disable context menu only in game area for better touch experience
+        // This preserves accessibility for users who rely on context menus elsewhere
         document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
-
-        // Handle orientation changes
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                this.handleOrientationChange();
-            }, 100);
-        });
-
-        // Handle page visibility changes (important for Android)
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // Pause game when page is hidden
-                this.audioManager.pauseAll();
-            } else {
-                // Resume game when page becomes visible
-                this.audioManager.resumeAll();
+            if (e.target.closest('.game-area') || e.target.closest('.planet')) {
+                e.preventDefault();
             }
         });
     }
 
-    handleOrientationChange() {
-        // Handle orientation changes for better mobile support
+    /**
+     * Handle device orientation changes for responsive layout
+     */
+    handleDeviceOrientationChange() {
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
-            // Force a repaint
+            // Force layout recalculation
             gameArea.style.display = 'none';
             gameArea.offsetHeight; // Trigger reflow
             gameArea.style.display = '';
         }
     }
+    
+    // Legacy alias
+    handleOrientationChange() { this.handleDeviceOrientationChange(); }
 
-    setupAudio() {
-        // Load settings into audio manager
+    /**
+     * Configure audio manager with current settings
+     */
+    setupAudioConfiguration() {
         this.audioManager.loadSettings({
-            musicVolume: this.musicVolume,
-            effectsVolume: this.effectsVolume,
-            isMuted: this.isMuted
+            musicVolume: this.backgroundMusicVolume,
+            effectsVolume: this.soundEffectsVolume,
+            isMuted: this.isAudioMuted
         });
     }
+    
+    // Legacy alias
+    setupAudio() { this.setupAudioConfiguration(); }
 
     setupEventSubscriptions() {
         // Subscribe to collision events
@@ -319,24 +413,42 @@ class GameState {
         }
     }
 
-    toggleMute() {
-        this.isMuted = !this.isMuted;
+    /**
+     * Toggle audio mute state
+     */
+    toggleAudioMute() {
+        this.isAudioMuted = !this.isAudioMuted;
         const muteButton = document.getElementById('mute-toggle');
-        muteButton.textContent = this.isMuted ? '🔇' : '🔊';
-
-        // Update audio manager
+        muteButton.textContent = this.isAudioMuted ? '🔇' : '🔊';
         this.audioManager.toggleMute();
+        
+        // Show toast notification for feedback
+        if (this.uiUtils) {
+            this.uiUtils.showToast(
+                this.isAudioMuted ? 'Audio muted' : 'Audio enabled',
+                'info',
+                2000
+            );
+        }
     }
+    
+    // Legacy alias
+    toggleMute() { this.toggleAudioMute(); }
 
-    toggleSettings() {
+    /**
+     * Toggle settings panel visibility
+     */
+    toggleSettingsPanel() {
         const panel = document.getElementById('settings-panel');
         panel.classList.toggle('active');
 
-        // Update voice template selector to show current selection
         if (panel.classList.contains('active')) {
             this.updateVoiceTemplateSelector();
         }
     }
+    
+    // Legacy alias
+    toggleSettings() { this.toggleSettingsPanel(); }
 
     handleVoiceTemplateChange(templateId) {
         console.log('Voice template changed to:', templateId);
@@ -364,16 +476,19 @@ class GameState {
         selector.value = currentTemplate;
     }
 
-    createWelcomeAnimations() {
+    /**
+     * Create animated elements for the welcome screen
+     */
+    createWelcomeScreenAnimations() {
         const planetsContainer = document.querySelector('.welcome-planets');
         const asteroidsContainer = document.querySelector('.welcome-asteroids');
 
-        // Create planets with interactive effects
+        // Create floating planets with interactive hover effects
         for (let i = 1; i <= 4; i++) {
             const planet = document.createElement('div');
-            planet.className = 'welcome-planet welcome-planet-' + i;
+            planet.className = `welcome-planet welcome-planet-${i}`;
 
-            // Add hover effects
+            // Enhanced hover effects
             planet.addEventListener('mouseenter', () => {
                 planet.style.filter = 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)) brightness(1.2)';
                 planet.style.transform = 'scale(1.1)';
@@ -384,20 +499,19 @@ class GameState {
                 planet.style.transform = 'scale(1)';
             });
 
-            // Add click effect
+            // Interactive click sparkle effect
             planet.addEventListener('click', () => {
-                this.createWelcomeSparkles(planet);
+                this.createSparkleEffect(planet);
             });
 
             planetsContainer.appendChild(planet);
         }
 
-        // Create asteroids with interactive effects
+        // Create floating asteroids with hover effects
         for (let i = 1; i <= 6; i++) {
             const asteroid = document.createElement('div');
-            asteroid.className = 'welcome-asteroid welcome-asteroid-' + i;
+            asteroid.className = `welcome-asteroid welcome-asteroid-${i}`;
 
-            // Add hover effects
             asteroid.addEventListener('mouseenter', () => {
                 asteroid.style.filter = 'drop-shadow(0 0 15px rgba(255, 255, 255, 0.6)) brightness(1.3)';
                 asteroid.style.transform = 'scale(1.2)';
@@ -408,220 +522,302 @@ class GameState {
                 asteroid.style.transform = 'scale(1)';
             });
 
-            // Add click effect
             asteroid.addEventListener('click', () => {
-                this.createWelcomeSparkles(asteroid);
+                this.createSparkleEffect(asteroid);
             });
 
             asteroidsContainer.appendChild(asteroid);
         }
     }
+    
+    // Legacy alias
+    createWelcomeAnimations() { this.createWelcomeScreenAnimations(); }
 
-    createWelcomeSparkles(element) {
+    /**
+     * Create sparkle particle effect at element position
+     * @param {HTMLElement} element - Element to create sparkles around
+     */
+    createSparkleEffect(element) {
         const rect = element.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-        // Create sparkle particles
+        // Create 8 sparkle particles in a radial pattern
         for (let i = 0; i < 8; i++) {
             const sparkle = document.createElement('div');
             sparkle.className = 'welcome-sparkle';
-            sparkle.style.cssText = 'position: fixed; ' +
-                'width: 4px; ' +
-                'height: 4px; ' +
-                'background: radial-gradient(circle, #fff, #ffd700); ' +
-                'border-radius: 50%; ' +
-                'left: ' + x + 'px; ' +
-                'top: ' + y + 'px; ' +
-                'pointer-events: none; ' +
-                'z-index: 100; ' +
-                'animation: sparkleOut 0.6s ease-out forwards;';
+            sparkle.style.cssText = `
+                position: fixed;
+                width: 4px;
+                height: 4px;
+                background: radial-gradient(circle, #fff, #ffd700);
+                border-radius: 50%;
+                left: ${centerX}px;
+                top: ${centerY}px;
+                pointer-events: none;
+                z-index: 100;
+                animation: sparkleOut 0.6s ease-out forwards;
+            `;
 
             const angle = (i / 8) * Math.PI * 2;
             const distance = 50;
-            sparkle.style.setProperty('--dx', (Math.cos(angle) * distance) + 'px');
-            sparkle.style.setProperty('--dy', (Math.sin(angle) * distance) + 'px');
+            sparkle.style.setProperty('--dx', `${Math.cos(angle) * distance}px`);
+            sparkle.style.setProperty('--dy', `${Math.sin(angle) * distance}px`);
 
             document.body.appendChild(sparkle);
 
-            setTimeout(() => {
-                sparkle.remove();
-            }, 600);
+            // Cleanup after animation
+            setTimeout(() => sparkle.remove(), 600);
         }
     }
+    
+    // Legacy alias
+    createWelcomeSparkles(element) { this.createSparkleEffect(element); }
 
-    createLetterGrid() {
-        const grid = document.querySelector('.letter-grid');
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    /**
+     * Render the A-Z letter selection grid
+     * Creates buttons for all letters with enabled/disabled states
+     */
+    renderLetterSelectionGrid() {
+        const gridContainer = document.querySelector('.letter-grid');
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        letters.split('').forEach(letter => {
-            const button = document.createElement('button');
-            const isPlayable = this.allowedLetters.includes(letter);
-            button.className = isPlayable ? 'letter-button playable' : 'letter-button disabled';
-            button.textContent = letter;
-            button.setAttribute('data-letter', letter);
+        // Clear existing buttons
+        gridContainer.innerHTML = '';
 
-            button.addEventListener('click', () => {
-                console.log('Letter ' + letter + ' clicked');
-                this.handleLetterClick(letter);
+        alphabet.split('').forEach(letter => {
+            const letterButton = document.createElement('button');
+            const isLetterEnabled = this.enabledLetters.includes(letter);
+            
+            letterButton.className = isLetterEnabled 
+                ? 'letter-button playable' 
+                : 'letter-button disabled';
+            letterButton.textContent = letter;
+            letterButton.setAttribute('data-letter', letter);
+            letterButton.setAttribute('aria-label', `Letter ${letter}${isLetterEnabled ? ' - available' : ' - coming soon'}`);
+
+            letterButton.addEventListener('click', () => {
+                console.log(`📝 Letter ${letter} clicked`);
+                this.handleLetterSelection(letter);
             });
 
-            grid.appendChild(button);
+            gridContainer.appendChild(letterButton);
         });
     }
+    
+    // Legacy alias
+    createLetterGrid() { this.renderLetterSelectionGrid(); }
 
-    handleLetterClick(letter) {
-        if (this.isCorrectLetter(letter)) {
-            this.startLetterLevel(letter);
+    /**
+     * Handle letter button click in level selection
+     * @param {string} letter - The selected letter
+     */
+    handleLetterSelection(letter) {
+        if (this.isLetterEnabled(letter)) {
+            this.initializeLetterLevel(letter);
         } else {
-            this.showPopup('coming-soon-popup');
+            this.displayPopup('coming-soon-popup');
         }
     }
+    
+    // Legacy alias
+    handleLetterClick(letter) { this.handleLetterSelection(letter); }
 
-    startLetterLevel(letter) {
-        console.log(`Starting ${letter} level...`);
-        this.currentLetter = letter;
-        this.wordMessages = this.letterWords[letter];
-        this.showOverlay('ready-overlay');
+    /**
+     * Initialize and start a letter level
+     * @param {string} letter - The letter to start level for
+     */
+    initializeLetterLevel(letter) {
+        console.log(`🚀 Starting ${letter} level...`);
+        this.activeLetterLevel = letter;
+        this.activeVocabulary = this.letterVocabulary[letter];
+        this.displayOverlay('ready-overlay');
 
-        // Simulate asset preloading
+        // Show loading state with skeleton
+        if (this.uiUtils) {
+            this.uiUtils.showToast(`Loading letter ${letter} level...`, 'info', 2000);
+        }
+
+        // Preload assets for this letter during loading screen
+        if (this.performanceUtils) {
+            this.performanceUtils.preloadLetterImages(letter);
+        }
+
+        // Transition to gameplay after loading
+        // TODO: [OPTIMIZATION] Replace setTimeout with actual asset preloading Promise
         setTimeout(() => {
-            this.hideOverlay('ready-overlay');
-            this.showScreen('gameplay');
-            this.initializeGameplay();
+            this.dismissOverlay('ready-overlay');
+            this.navigateToScreen('gameplay');
+            this.startGameplaySession();
         }, 5000);
     }
+    
+    // Legacy alias
+    startLetterLevel(letter) { this.initializeLetterLevel(letter); }
 
     // Legacy method for G level compatibility
     startGLevel() {
-        this.startLetterLevel('G');
+        this.initializeLetterLevel('G');
     }
 
-    initializeGameplay() {
-        console.log('Initializing gameplay...');
-        this.gameActive = true;
-        this.correctHits = 0;
-        this.currentWordIndex = 0;
-        this.updateProgress();
+    /**
+     * Start a new gameplay session
+     * Initializes particles, planets, and game state
+     */
+    startGameplaySession() {
+        console.log('🎯 Initializing gameplay session...');
+        this.isGameplayActive = true;
+        this.correctHitsCount = 0;
+        this.vocabularyIndex = 0;
+        this.updateProgressDisplay();
 
-        // Initialize particle system
+        // Initialize particle system for visual effects
         if (window.ParticleSystem) {
             this.particleSystem = new ParticleSystem();
             this.particleSystem.createStarfield();
         }
 
-        if (!this.planetsCreated) {
-            this.createPlanets();
-            this.planetsCreated = true;
+        // Create planets if not already rendered
+        if (!this.arePlanetsRendered) {
+            this.renderGameplayPlanets();
+            this.arePlanetsRendered = true;
         }
     }
+    
+    // Legacy alias
+    initializeGameplay() { this.startGameplaySession(); }
 
-    createPlanets() {
-        console.log('Creating planets...');
-        const container = document.querySelector('.planets-container');
-        container.innerHTML = ''; // Clear existing planets
+    /**
+     * Render target and distractor planets in the gameplay area
+     * Creates interactive letter planets for the current level
+     */
+    renderGameplayPlanets() {
+        console.log('🪐 Creating planets...');
+        const planetsContainer = document.querySelector('.planets-container');
+        planetsContainer.innerHTML = '';
 
-        // Create 5 target letter planets
+        const letterLower = this.activeLetterLevel.toLowerCase();
+
+        // Create target letter planets (5 planets to hit)
         for (let i = 0; i < 5; i++) {
-            const planet = document.createElement('div');
-            planet.className = `planet ${this.currentLetter.toLowerCase()}-planet`;
-            planet.textContent = this.currentLetter;
-            planet.setAttribute('data-letter', this.currentLetter);
-            planet.setAttribute('data-index', i);
+            const targetPlanet = document.createElement('div');
+            targetPlanet.className = `planet ${letterLower}-planet`;
+            targetPlanet.textContent = this.activeLetterLevel;
+            targetPlanet.setAttribute('data-letter', this.activeLetterLevel);
+            targetPlanet.setAttribute('data-index', i);
+            targetPlanet.setAttribute('aria-label', `Target planet with letter ${this.activeLetterLevel}`);
 
-            // Random position
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-            planet.style.left = x + "px";
-            planet.style.top = y + "px";
+            // Random position within game area
+            const posX = Math.random() * (window.innerWidth - 100);
+            const posY = Math.random() * (window.innerHeight - 100);
+            targetPlanet.style.left = `${posX}px`;
+            targetPlanet.style.top = `${posY}px`;
 
-            // Random animation delay
-            planet.style.animationDelay = (Math.random() * 8) + 's';
+            // Staggered animation for visual interest
+            targetPlanet.style.animationDelay = `${Math.random() * 8}s`;
 
-            planet.addEventListener('click', () => {
-                console.log(`${this.currentLetter} planet ${i} clicked`);
-                this.handlePlanetClick(planet, this.currentLetter);
+            targetPlanet.addEventListener('click', () => {
+                console.log(`🎯 ${this.activeLetterLevel} planet ${i} clicked`);
+                this.handlePlanetInteraction(targetPlanet, this.activeLetterLevel);
             });
 
-            container.appendChild(planet);
+            planetsContainer.appendChild(targetPlanet);
 
-            // Register with collision manager
-            this.collisionManager.registerObject(`planet-${this.currentLetter.toLowerCase()}-${i}`, planet, 'planet', {
-                isStatic: false,
-                data: { letter: this.currentLetter, index: i }
-            });
+            // Register with collision detection system
+            this.collisionManager.registerObject(
+                `planet-${letterLower}-${i}`,
+                targetPlanet,
+                'planet',
+                { isStatic: false, data: { letter: this.activeLetterLevel, index: i } }
+            );
         }
 
-        // Create 3 non-target planets (avoid current letter and other allowed letters)
+        // Create distractor planets (3 random non-target letters)
         for (let i = 0; i < 3; i++) {
-            const planet = document.createElement('div');
-            planet.className = 'planet other-planet';
+            const distractorPlanet = document.createElement('div');
+            distractorPlanet.className = 'planet other-planet';
 
-            let letter;
+            // Select random letter that is not enabled
+            let distractorLetter;
             do {
-                const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-                letter = randomLetter;
-            } while (this.allowedLetters.includes(letter));
+                distractorLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            } while (this.enabledLetters.includes(distractorLetter));
 
-            planet.textContent = letter;
-            planet.setAttribute('data-letter', letter);
+            distractorPlanet.textContent = distractorLetter;
+            distractorPlanet.setAttribute('data-letter', distractorLetter);
+            distractorPlanet.setAttribute('aria-label', `Distractor planet with letter ${distractorLetter}`);
 
             // Random position
-            const x = Math.random() * (window.innerWidth - 100);
-            const y = Math.random() * (window.innerHeight - 100);
-            planet.style.left = x + "px";
-            planet.style.top = `${y}px`;
+            const posX = Math.random() * (window.innerWidth - 100);
+            const posY = Math.random() * (window.innerHeight - 100);
+            distractorPlanet.style.left = `${posX}px`;
+            distractorPlanet.style.top = `${posY}px`;
 
-            // Random animation delay
-            planet.style.animationDelay = `${Math.random() * 12}s`;
+            // Slower animation for distractors
+            distractorPlanet.style.animationDelay = `${Math.random() * 12}s`;
 
-            planet.addEventListener('click', () => {
-                console.log(`Non-G planet ${letter} clicked`);
-                this.handlePlanetClick(planet, letter);
+            distractorPlanet.addEventListener('click', () => {
+                console.log(`❌ Non-target planet ${distractorLetter} clicked`);
+                this.handlePlanetInteraction(distractorPlanet, distractorLetter);
             });
 
-            container.appendChild(planet);
+            planetsContainer.appendChild(distractorPlanet);
 
-            // Register with collision manager
-            this.collisionManager.registerObject(`planet-other-${i}`, planet, 'planet', {
-                isStatic: false,
-                data: { letter: letter, index: i }
-            });
+            // Register with collision detection
+            this.collisionManager.registerObject(
+                `planet-other-${i}`,
+                distractorPlanet,
+                'planet',
+                { isStatic: false, data: { letter: distractorLetter, index: i } }
+            );
         }
     }
+    
+    // Legacy alias
+    createPlanets() { this.renderGameplayPlanets(); }
 
-    handlePlanetClick(planet, letter) {
-        if (!this.gameActive) return;
+    /**
+     * Handle planet click interaction
+     * @param {HTMLElement} planetElement - The clicked planet element
+     * @param {string} letter - The letter on the planet
+     */
+    handlePlanetInteraction(planetElement, letter) {
+        if (!this.isGameplayActive) return;
 
-        const rect = planet.getBoundingClientRect();
-        const planetX = rect.left + rect.width / 2;
-        const planetY = rect.top + rect.height / 2;
+        const rect = planetElement.getBoundingClientRect();
+        const planetCenterX = rect.left + rect.width / 2;
+        const planetCenterY = rect.top + rect.height / 2;
 
-        if (this.isCorrectLetter(letter)) {
-            this.handleCorrectHit(planet, planetX, planetY);
+        if (this.isLetterEnabled(letter)) {
+            this.processCorrectPlanetHit(planetElement, planetCenterX, planetCenterY);
         } else {
-            this.handleIncorrectHit(planet, planetX, planetY);
+            this.processIncorrectPlanetHit(planetElement, planetCenterX, planetCenterY);
         }
     }
+    
+    // Legacy alias
+    handlePlanetClick(planet, letter) { this.handlePlanetInteraction(planet, letter); }
 
-    handleCorrectHit(planet, x, y) {
-        console.log('Correct hit!');
+    /**
+     * Process a correct planet hit (target letter)
+     * @param {HTMLElement} planetElement - The hit planet
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     */
+    processCorrectPlanetHit(planetElement, x, y) {
+        console.log('✅ Correct hit!');
 
-        // Get planet ID
-        const index = planet.getAttribute('data-index');
-        const planetId = `planet-g-${index}`;
-
-        // Create fiery asteroid with particle trail
+        const planetIndex = planetElement.getAttribute('data-index');
         const asteroidId = `asteroid-fiery-${Date.now()}`;
-        const asteroidElement = this.createAsteroid(x, y, 'fiery', asteroidId);
+        const asteroidElement = this.spawnAsteroid(x, y, 'fiery', asteroidId);
 
-        // Add particle trail to asteroid
+        // Create particle trail following asteroid
         if (this.particleSystem) {
             const trailInterval = setInterval(() => {
                 if (asteroidElement && asteroidElement.parentNode) {
-                    const rect = asteroidElement.getBoundingClientRect();
-                    const asteroidX = rect.left + rect.width / 2;
-                    const asteroidY = rect.top + rect.height / 2;
+                    const asteroidRect = asteroidElement.getBoundingClientRect();
+                    const asteroidX = asteroidRect.left + asteroidRect.width / 2;
+                    const asteroidY = asteroidRect.top + asteroidRect.height / 2;
                     this.particleSystem.asteroidTrail(asteroidX, asteroidY, asteroidElement.velocity || { x: 2, y: 2 });
                 } else {
                     clearInterval(trailInterval);
@@ -629,105 +825,138 @@ class GameState {
             }, 50);
         }
     }
+    
+    // Legacy alias
+    handleCorrectHit(planet, x, y) { this.processCorrectPlanetHit(planet, x, y); }
 
-    handleIncorrectHit(planet, x, y) {
-        console.log('Incorrect hit');
+    /**
+     * Process an incorrect planet hit (distractor letter)
+     * @param {HTMLElement} planetElement - The hit planet
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     */
+    processIncorrectPlanetHit(planetElement, x, y) {
+        console.log('❌ Incorrect hit');
 
-        // Create dull asteroid
         const asteroidId = `asteroid-dull-${Date.now()}`;
-        this.createAsteroid(x, y, 'dull', asteroidId);
+        this.spawnAsteroid(x, y, 'dull', asteroidId);
     }
+    
+    // Legacy alias
+    handleIncorrectHit(planet, x, y) { this.processIncorrectPlanetHit(planet, x, y); }
 
-    createAsteroid(targetX, targetY, type, id) {
-        const asteroid = document.createElement('div');
-        asteroid.className = `asteroid ${type}`;
-        asteroid.id = id;
+    /**
+     * Spawn an asteroid that flies toward a target position
+     * @param {number} targetX - Target X coordinate
+     * @param {number} targetY - Target Y coordinate
+     * @param {string} asteroidType - Type of asteroid ('fiery' or 'dull')
+     * @param {string} asteroidId - Unique identifier for the asteroid
+     * @returns {HTMLElement} The created asteroid element
+     */
+    spawnAsteroid(targetX, targetY, asteroidType, asteroidId) {
+        const asteroidElement = document.createElement('div');
+        asteroidElement.className = `asteroid ${asteroidType}`;
+        asteroidElement.id = asteroidId;
 
-        // Random starting position from screen edge
-        const side = Math.floor(Math.random() * 4);
+        // Calculate random starting position from screen edge
+        const screenEdge = Math.floor(Math.random() * 4);
         let startX, startY;
 
-        switch (side) {
-            case 0: // Top
+        switch (screenEdge) {
+            case 0: // Top edge
                 startX = Math.random() * window.innerWidth;
                 startY = -20;
                 break;
-            case 1: // Right
+            case 1: // Right edge
                 startX = window.innerWidth + 20;
                 startY = Math.random() * window.innerHeight;
                 break;
-            case 2: // Bottom
+            case 2: // Bottom edge
                 startX = Math.random() * window.innerWidth;
                 startY = window.innerHeight + 20;
                 break;
-            case 3: // Left
+            case 3: // Left edge
                 startX = -20;
                 startY = Math.random() * window.innerHeight;
                 break;
         }
 
-        asteroid.style.left = startX + "px";
-        asteroid.style.top = startY + "px";
+        asteroidElement.style.left = `${startX}px`;
+        asteroidElement.style.top = `${startY}px`;
 
-        // Calculate trajectory
+        // Calculate trajectory vector
         const deltaX = targetX - startX;
         const deltaY = targetY - startY;
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-        // Store velocity for particle system
+        // Store velocity for particle trail calculations
         const velocity = {
-            x: deltaX / distance * 10,
-            y: deltaY / distance * 10
+            x: (deltaX / distance) * 10,
+            y: (deltaY / distance) * 10
         };
-        asteroid.velocity = velocity;
+        asteroidElement.velocity = velocity;
 
-        // Animate to target
-        const duration = type === 'fiery' ? 1000 : 1500;
-        asteroid.style.transition = `all ${duration}ms linear`;
+        // Set animation duration based on type
+        const animationDuration = asteroidType === 'fiery' ? 1000 : 1500;
+        asteroidElement.style.transition = `all ${animationDuration}ms linear`;
 
-        document.querySelector('.asteroids-container').appendChild(asteroid);
+        document.querySelector('.asteroids-container').appendChild(asteroidElement);
 
-        // Register with collision manager
-        this.collisionManager.registerObject(id, asteroid, 'asteroid', {
+        // Register with collision detection system
+        this.collisionManager.registerObject(asteroidId, asteroidElement, 'asteroid', {
             velocity: velocity,
             isStatic: false,
-            data: { type: type }
+            data: { type: asteroidType }
         });
 
-        // Animate
+        // Animate movement to target
         setTimeout(() => {
-            asteroid.style.left = targetX + "px";
-            asteroid.style.top = targetY + "px";
+            asteroidElement.style.left = `${targetX}px`;
+            asteroidElement.style.top = `${targetY}px`;
         }, 50);
 
-        return asteroid;
+        return asteroidElement;
     }
+    
+    // Legacy alias
+    createAsteroid(targetX, targetY, type, id) { return this.spawnAsteroid(targetX, targetY, type, id); }
 
-    createExplosion(x, y) {
-        // Create the main explosion visual
-        const explosion = document.createElement('div');
-        explosion.className = 'explosion';
-        explosion.style.left = `${x - 75}px`;
-        explosion.style.top = `${y - 75}px`;
+    /**
+     * Create visual explosion effect at coordinates
+     * @param {number} x - X coordinate for explosion center
+     * @param {number} y - Y coordinate for explosion center
+     */
+    createExplosionEffect(x, y) {
+        const explosionElement = document.createElement('div');
+        explosionElement.className = 'explosion';
+        explosionElement.style.left = `${x - 75}px`;
+        explosionElement.style.top = `${y - 75}px`;
 
-        document.querySelector('.explosions-container').appendChild(explosion);
+        document.querySelector('.explosions-container').appendChild(explosionElement);
 
         // Create enhanced particle explosion
         if (this.particleSystem) {
             this.particleSystem.createEnhancedExplosion(x, y, 1.5);
         }
 
-        // Add screen shake effect
-        this.createScreenShake();
+        // Trigger screen shake for impact feedback
+        this.triggerScreenShake();
 
+        // Cleanup explosion element after animation
         setTimeout(() => {
-            if (explosion.parentNode) {
-                explosion.remove();
+            if (explosionElement.parentNode) {
+                explosionElement.remove();
             }
         }, 800);
     }
+    
+    // Legacy alias
+    createExplosion(x, y) { this.createExplosionEffect(x, y); }
 
-    createScreenShake() {
+    /**
+     * Trigger screen shake effect for impact feedback
+     */
+    triggerScreenShake() {
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
             gameArea.style.animation = 'screenShake 0.3s ease-in-out';
@@ -736,131 +965,230 @@ class GameState {
             }, 300);
         }
     }
+    
+    // Legacy alias
+    createScreenShake() { this.triggerScreenShake(); }
 
-    playVoiceMessage() {
-        const wordData = this.wordMessages[this.currentWordIndex];
+    /**
+     * Play voice message for current vocabulary word
+     */
+    playVocabularyAudio() {
+        const vocabularyItem = this.activeVocabulary[this.vocabularyIndex];
 
-        // Handle both old string format and new object format
-        let word, letter, soundKey;
-        if (typeof wordData === 'string') {
-            word = wordData;
-            letter = 'G'; // Default for old format
-            soundKey = `voice-${word}`;
+        // Handle both legacy string format and new object format
+        let word, letter, audioKey;
+        if (typeof vocabularyItem === 'string') {
+            word = vocabularyItem;
+            letter = 'G';
+            audioKey = `voice-${word}`;
         } else {
-            word = wordData.word;
-            letter = wordData.letter;
-            soundKey = wordData.soundKey;
+            word = vocabularyItem.word;
+            letter = vocabularyItem.letter;
+            audioKey = vocabularyItem.audioKey;
         }
 
-        this.audioManager.play(soundKey);
+        this.audioManager.play(audioKey);
 
         // Fallback to speech synthesis if audio file fails
         setTimeout(() => {
-            // Check if the user has interacted with the page
             if (document.visibilityState === 'visible' && this.audioManager.canUseSpeechSynthesis) {
                 this.audioManager.speak(`${letter} is for ${word}!`, { pitch: 1.2, rate: 0.9 });
             }
         }, 500);
 
-        this.currentWordIndex = (this.currentWordIndex + 1) % this.wordMessages.length;
+        // Advance to next vocabulary item
+        this.vocabularyIndex = (this.vocabularyIndex + 1) % this.activeVocabulary.length;
     }
+    
+    // Legacy alias
+    playVoiceMessage() { this.playVocabularyAudio(); }
 
-    showWordImage() {
-        const wordData = this.wordMessages[this.currentWordIndex - 1] || this.wordMessages[0];
-        const wordBg = document.querySelector('.word-background');
+    /**
+     * Display word image in the background
+     */
+    displayWordImage() {
+        const vocabularyItem = this.activeVocabulary[this.vocabularyIndex - 1] || this.activeVocabulary[0];
+        const wordBackground = document.querySelector('.word-background');
 
-        // Handle both old string format and new object format
+        // Handle both legacy string format and new object format
         let word, letter;
-        if (typeof wordData === 'string') {
-            word = wordData;
-            letter = 'G'; // Default for old format
+        if (typeof vocabularyItem === 'string') {
+            word = vocabularyItem;
+            letter = 'G';
         } else {
-            word = wordData.word;
-            letter = wordData.letter;
+            word = vocabularyItem.word;
+            letter = vocabularyItem.letter;
         }
 
-        // Set background image with letter-specific path
-        const imagePath = `assets/images/${letter}-${letter.toLowerCase()}/Images/${word}.png`;
-        wordBg.style.backgroundImage = `url('${imagePath}')`;
-        wordBg.classList.add('visible');
+        // Set background image with lazy loading path
+        const imagePath = `Assets/images/${letter}-${letter.toLowerCase()}/Images/${word}.png`;
+        wordBackground.style.backgroundImage = `url('${imagePath}')`;
+        wordBackground.classList.add('visible');
 
-        // Hide after 3 seconds or until next hit
+        // Hide after display duration
+        // TODO: [OPTIMIZATION] Consider using CSS animation instead of JavaScript timeout
         setTimeout(() => {
-            wordBg.classList.remove('visible');
+            wordBackground.classList.remove('visible');
         }, 3000);
     }
+    
+    // Legacy alias
+    showWordImage() { this.displayWordImage(); }
 
-    updateProgress() {
-        const progressFill = document.getElementById('progress-fill');
-        const hitsCounter = document.getElementById('hits-counter');
+    /**
+     * Update progress bar and counter display
+     */
+    updateProgressDisplay() {
+        const progressFillElement = document.getElementById('progress-fill');
+        const hitsCounterElement = document.getElementById('hits-counter');
 
-        const percentage = (this.correctHits / this.totalHits) * 100;
-        progressFill.style.width = `${percentage}%`;
-        hitsCounter.textContent = this.correctHits;
+        const progressPercentage = (this.correctHitsCount / this.requiredHitsToComplete) * 100;
+        progressFillElement.style.width = `${progressPercentage}%`;
+        hitsCounterElement.textContent = this.correctHitsCount;
     }
+    
+    // Legacy alias
+    updateProgress() { this.updateProgressDisplay(); }
 
-    completeLevel() {
-        console.log('Level complete!');
-        this.gameActive = false;
+    /**
+     * Handle level completion
+     */
+    completeLevelSuccessfully() {
+        console.log('🎉 Level complete!');
+        this.isGameplayActive = false;
         this.audioManager.play('celebration');
 
-        // Create celebration particles
+        // Create celebration particle effects
         if (this.particleSystem) {
             this.particleSystem.levelComplete();
         }
 
-        this.showPopup('level-complete-popup');
+        // Show success toast
+        if (this.uiUtils) {
+            this.uiUtils.showToast('Level Complete! Great job!', 'success', 3000);
+        }
+
+        this.displayPopup('level-complete-popup');
+    }
+    
+    // Legacy alias
+    completeLevel() { this.completeLevelSuccessfully(); }
+
+    /**
+     * Navigate to a specific game screen
+     * @param {string} screenId - The screen identifier (welcome, level-select, gameplay)
+     */
+    navigateToScreen(screenId) {
+        console.log(`🔄 Navigating to screen: ${screenId}`);
+
+        // Get current and target screens
+        const currentScreenElement = document.querySelector('.screen.active');
+        const targetScreenElement = document.getElementById(`${screenId}-screen`);
+
+        // Use smooth transition if UI utilities available
+        if (this.uiUtils && currentScreenElement && targetScreenElement) {
+            this.uiUtils.transitionScreens(currentScreenElement, targetScreenElement, () => {
+                this.onScreenTransitionComplete(screenId);
+            });
+        } else {
+            // Fallback to immediate transition
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            targetScreenElement.classList.add('active');
+            this.onScreenTransitionComplete(screenId);
+        }
+
+        this.currentScreen = screenId;
     }
 
-    showScreen(screenId) {
-        console.log(`Showing screen: ${screenId}`);
-
-        // Hide all screens
-        document.querySelectorAll('.screen').forEach(screen => {
-            screen.classList.remove('active');
-        });
-
-        // Show target screen
-        document.getElementById(`${screenId}-screen`).classList.add('active');
-        this.currentScreen = screenId;
-
-        // Handle background music
+    /**
+     * Handle post-transition actions for each screen
+     * @param {string} screenId - The screen that was transitioned to
+     */
+    onScreenTransitionComplete(screenId) {
         if (screenId === 'welcome') {
             this.audioManager.play('background-music');
-            this.resetGame();
+            this.resetGameplayState();
         } else {
             this.audioManager.stop('background-music');
         }
     }
+    
+    // Legacy alias
+    showScreen(screenId) { this.navigateToScreen(screenId); }
 
-    showOverlay(overlayId) {
-        console.log(`Showing overlay: ${overlayId}`);
-        document.getElementById(overlayId).classList.remove('hidden');
+    /**
+     * Display an overlay
+     * @param {string} overlayId - The overlay element ID
+     */
+    displayOverlay(overlayId) {
+        console.log(`📋 Showing overlay: ${overlayId}`);
+        const overlay = document.getElementById(overlayId);
+        overlay.classList.remove('hidden');
+        
+        // Animate entrance
+        if (this.uiUtils) {
+            this.uiUtils.animateEntrance(overlay.querySelector('.overlay-content'), 'scaleIn');
+        }
     }
+    
+    // Legacy alias
+    showOverlay(overlayId) { this.displayOverlay(overlayId); }
 
-    hideOverlay(overlayId) {
-        console.log(`Hiding overlay: ${overlayId}`);
+    /**
+     * Dismiss an overlay
+     * @param {string} overlayId - The overlay element ID
+     */
+    dismissOverlay(overlayId) {
+        console.log(`📋 Hiding overlay: ${overlayId}`);
         document.getElementById(overlayId).classList.add('hidden');
     }
+    
+    // Legacy alias
+    hideOverlay(overlayId) { this.dismissOverlay(overlayId); }
 
-    showPopup(popupId) {
-        console.log(`Showing popup: ${popupId}`);
-        document.getElementById(popupId).classList.remove('hidden');
+    /**
+     * Display a popup modal
+     * @param {string} popupId - The popup element ID
+     */
+    displayPopup(popupId) {
+        console.log(`💬 Showing popup: ${popupId}`);
+        const popup = document.getElementById(popupId);
+        popup.classList.remove('hidden');
+        
+        // Animate popup content entrance
+        if (this.uiUtils) {
+            this.uiUtils.animateEntrance(popup.querySelector('.popup-content'), 'scaleIn');
+        }
     }
+    
+    // Legacy alias
+    showPopup(popupId) { this.displayPopup(popupId); }
 
-    hidePopup(popupId) {
-        console.log(`Hiding popup: ${popupId}`);
+    /**
+     * Dismiss a popup modal
+     * @param {string} popupId - The popup element ID
+     */
+    dismissPopup(popupId) {
+        console.log(`💬 Hiding popup: ${popupId}`);
         document.getElementById(popupId).classList.add('hidden');
     }
+    
+    // Legacy alias
+    hidePopup(popupId) { this.dismissPopup(popupId); }
 
-    resetGame() {
-        console.log('Resetting game...');
-        this.correctHits = 0;
-        this.currentWordIndex = 0;
-        this.gameActive = false;
-        this.planetsCreated = false;
+    /**
+     * Reset gameplay state for new game
+     */
+    resetGameplayState() {
+        console.log('🔄 Resetting game state...');
+        this.correctHitsCount = 0;
+        this.vocabularyIndex = 0;
+        this.isGameplayActive = false;
+        this.arePlanetsRendered = false;
 
-        // Cleanup collision manager
+        // Clear collision detection registry
         this.collisionManager.clear();
 
         // Cleanup particle system
@@ -869,64 +1197,72 @@ class GameState {
             this.particleSystem = null;
         }
 
-        // Clear containers
-        document.querySelector('.planets-container').innerHTML = '';
-        document.querySelector('.asteroids-container').innerHTML = '';
-        document.querySelector('.explosions-container').innerHTML = '';
+        // Clear game containers
+        const containers = ['.planets-container', '.asteroids-container', '.explosions-container'];
+        containers.forEach(selector => {
+            const container = document.querySelector(selector);
+            if (container) container.innerHTML = '';
+        });
 
-        // Reset UI
-        this.updateProgress();
+        // Reset UI elements
+        this.updateProgressDisplay();
         document.querySelector('.word-background').classList.remove('visible');
     }
+    
+    // Legacy alias
+    resetGame() { this.resetGameplayState(); }
 
-    isCorrectLetter(letter) {
-        return this.allowedLetters.includes(letter);
+    /**
+     * Check if a letter is enabled for play
+     * @param {string} letter - The letter to check
+     * @returns {boolean} Whether the letter is enabled
+     */
+    isLetterEnabled(letter) {
+        return this.enabledLetters.includes(letter);
     }
+    
+    // Legacy alias
+    isCorrectLetter(letter) { return this.isLetterEnabled(letter); }
+    
+    // Expose letterWords for backward compatibility
+    get letterWords() { return this.letterVocabulary; }
 }
 
-// Error handling
+// Global error handling with enhanced logging
 window.addEventListener('error', (e) => {
-    console.error('Game error:', e.error);
+    console.error('🚨 Game error:', e.error);
 });
 
-// Initialize game when DOM is loaded
+// Handle unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('🚨 Unhandled promise rejection:', event.reason);
+});
+
+// Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, starting game...');
+    console.log('📄 DOM loaded, initializing Phonics Fun...');
     window.game = new GameState();
 });
 
-// Handle visibility changes (for mobile)
+// Handle visibility changes (for mobile/tablet devices)
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        console.log('Game paused (tab hidden)');
-        // Pause any ongoing animations or sounds
+        console.log('⏸️ Game paused (tab hidden)');
         if (window.game && window.game.audioManager) {
             window.game.audioManager.stopAll();
         }
     } else {
-        console.log('Game resumed (tab visible)');
-        // Resume if needed
+        console.log('▶️ Game resumed (tab visible)');
         if (window.game && window.game.currentScreen === 'welcome') {
             window.game.audioManager.play('background-music');
         }
     }
 });
 
-// Handle window resize
-window.addEventListener('resize', () => {
-    console.log('Window resized');
-    // Recreate planets if in gameplay
-    if (window.game && window.game.currentScreen === 'gameplay' && window.game.planetsCreated) {
-        window.game.resetGame();
-        window.game.createPlanets();
-    }
-});
-
-// Utility functions
+// Optimized debounce utility function
 function debounce(func, wait) {
     let timeout;
-    return function executedFunction() {
-        const args = arguments; // Use arguments object instead of spread operator
+    return function executedFunction(...args) {
         const later = () => {
             clearTimeout(timeout);
             func.apply(this, args);
@@ -936,6 +1272,5 @@ function debounce(func, wait) {
     };
 }
 
-// Export for testing (ES6 modules temporarily disabled)
-// export { GameState };
+// Export for testing and external access
 window.GameState = GameState;

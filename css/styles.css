@@ -5,6 +5,11 @@
     box-sizing: border-box;
 }
 
+/* Performance: Enable GPU acceleration for smoother animations */
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -14,9 +19,11 @@ body {
     touch-action: none;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
-    -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    /* Performance: Use will-change sparingly on stable elements */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Screen Management */
@@ -31,7 +38,11 @@ body {
     align-items: center;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Performance: GPU layer for smooth transitions */
+    will-change: opacity, visibility;
 }
 
 .screen.active {
@@ -174,18 +185,32 @@ body {
     font-size: 1.5rem;
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.2s ease,
+                filter 0.2s ease;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
     font-weight: bold;
+    position: relative;
+    overflow: hidden;
+    /* Performance: GPU layer for smooth hover */
+    will-change: transform;
 }
 
 .primary-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.5);
+    filter: brightness(1.1);
 }
 
 .primary-button:active {
-    transform: translateY(0);
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+}
+
+/* Focus state for accessibility */
+.primary-button:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 3px;
 }
 
 .settings-container {
