@@ -315,8 +315,8 @@ class GameState {
         
         planets.forEach((planet, index) => {
             // Recalculate position to keep planets visible
-            const currentLeft = parseInt(planet.style.left) || 0;
-            const currentTop = parseInt(planet.style.top) || 0;
+            const currentLeft = parseInt(planet.style.left, 10) || 0;
+            const currentTop = parseInt(planet.style.top, 10) || 0;
             
             // Ensure planet stays within new viewport bounds
             const newLeft = Math.min(currentLeft, width - 120);

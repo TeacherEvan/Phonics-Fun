@@ -216,7 +216,7 @@ class DisplayManager {
         styles.textContent = `
             /* Dynamic viewport-based scaling */
             .planet {
-                transform: scale(var(--planet-scale, 1)) !important;
+                transform: scale(var(--planet-scale, 1));
                 transform-origin: center center;
             }
             
@@ -346,8 +346,8 @@ class DisplayManager {
             // Disable expensive animations
             document.body.classList.add('low-memory');
             
-            // Reduce particle effects
-            if (window.game && window.game.particleSystem) {
+            // Reduce particle effects if particle system exists
+            if (window.game && window.game.particleSystem && window.game.particleSystem.maxParticles) {
                 window.game.particleSystem.maxParticles = 20;
             }
         } else if (this.performanceProfile === 'high') {

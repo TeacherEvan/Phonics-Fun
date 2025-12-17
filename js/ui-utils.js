@@ -305,7 +305,7 @@ class UIUtils {
         const borderRadius = options.borderRadius || '8px';
 
         const skeleton = document.createElement('div');
-        skeleton.className = 'skeleton-loading';
+        skeleton.className = 'skeleton';
         skeleton.style.cssText = `
             width: ${width};
             height: ${height};

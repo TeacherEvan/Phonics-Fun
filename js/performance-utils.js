@@ -284,6 +284,7 @@ class PerformanceUtils {
         };
 
         const images = letterImages[letter] || [];
+        const self = this;
         
         // Use requestIdleCallback for non-blocking preloading
         PerformanceUtils.requestIdleCallback(() => {
@@ -298,7 +299,7 @@ class PerformanceUtils {
                         console.log(`⚠️ Failed to preload: ${letter}-${word}`);
                     };
                     img.src = `${imagePath}${word}.png`;
-                    this.resourceCache.set(`${letter}-${word}`, img);
+                    self.resourceCache.set(`${letter}-${word}`, img);
                 }, index * 100); // Stagger by 100ms
             });
         });
