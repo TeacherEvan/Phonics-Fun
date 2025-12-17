@@ -1254,6 +1254,23 @@ body {
     .score-display {
         font-size: 1rem;
     }
+    
+    /* Optimize touch targets */
+    .settings-button {
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
+    }
+    
+    /* Better spacing for mobile */
+    .welcome-container {
+        padding: 1.5rem;
+    }
+    
+    .primary-button {
+        padding: 1.2rem 2.5rem;
+        font-size: 1.3rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1275,6 +1292,90 @@ body {
     
     .popup-content {
         padding: 1rem;
+    }
+    
+    /* Extra small screens need even better touch targets */
+    .letter-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 0.4rem;
+    }
+    
+    /* Reduce animation complexity on small devices */
+    .welcome-planet,
+    .welcome-asteroid {
+        animation-duration: 30s !important;
+    }
+}
+
+/* Medium tablet and small desktop */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .letter-grid {
+        grid-template-columns: repeat(7, 1fr);
+        gap: 1rem;
+    }
+    
+    .letter-button {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+    }
+    
+    .planet {
+        width: 90px;
+        height: 90px;
+        font-size: 2.2rem;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    .letter-grid {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 1.2rem;
+    }
+    
+    .letter-button {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .planet {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+}
+
+/* Large desktop and ultra-wide */
+@media (min-width: 1440px) {
+    .letter-grid {
+        grid-template-columns: repeat(9, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .letter-button {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+    
+    .planet {
+        width: 120px;
+        height: 120px;
+        font-size: 3rem;
+    }
+    
+    .welcome-container h1 {
+        font-size: clamp(3rem, 6vw, 5rem);
+    }
+    
+    .game-ui {
+        font-size: 1.4rem;
+    }
+    
+    .progress-bar {
+        height: 24px;
     }
 }
 
@@ -1440,11 +1541,69 @@ body {
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .planet {
         border-width: 2px;
+        box-shadow: 0 0 25px rgba(255,255,255,0.5);
     }
     
     .progress-bar {
         border-width: 2px;
     }
+    
+    .asteroid {
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
+    }
+}
+
+/* Loading skeleton for lazy-loaded content */
+.skeleton {
+    background: linear-gradient(90deg, #2a2a3e 25%, #3a3a4e 50%, #2a2a3e 75%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeletonPulse {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Smooth image load animation */
+img {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+img.loaded {
+    opacity: 1;
+}
+
+/* Progressive image loading */
+.word-background {
+    transition: opacity 0.3s ease, background-image 0.3s ease;
+}
+
+.word-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(42, 42, 62, 0.3) 25%, rgba(58, 58, 78, 0.3) 50%, rgba(42, 42, 62, 0.3) 75%);
+    background-size: 200% 100%;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.word-background.loading::before {
+    opacity: 1;
+}
+
+/* Enhanced focus indicators for accessibility */
+*:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 3px;
+    border-radius: 4px;
 }
 
 /* Accessibility improvements for touch */

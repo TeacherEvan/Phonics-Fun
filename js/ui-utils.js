@@ -305,7 +305,7 @@ class UIUtils {
         const borderRadius = options.borderRadius || '8px';
 
         const skeleton = document.createElement('div');
-        skeleton.className = 'skeleton-loading';
+        skeleton.className = 'skeleton';
         skeleton.style.cssText = `
             width: ${width};
             height: ${height};
@@ -313,6 +313,7 @@ class UIUtils {
             position: absolute;
             top: 0;
             left: 0;
+            z-index: 1;
         `;
 
         element.style.position = 'relative';
@@ -332,10 +333,44 @@ class UIUtils {
             skeleton.style.opacity = '0';
             skeleton.style.transition = 'opacity 0.3s ease';
             setTimeout(() => {
-                skeleton.remove();
+                if (skeleton.parentNode) {
+                    skeleton.remove();
+                }
                 this.loadingStates.delete(element);
             }, 300);
         }
+    }
+    
+    /**
+     * Show loading state for image with progressive enhancement
+     * @param {string} src - Image source URL
+     * @param {HTMLElement} container - Container element
+     * @returns {Promise<HTMLImageElement>} Promise resolving to loaded image
+     */
+    loadImageProgressive(src, container) {
+        return new Promise((resolve, reject) => {
+            // Show skeleton while loading
+            const skeleton = this.showSkeleton(container, {
+                width: '100%',
+                height: '100%',
+                borderRadius: '8px'
+            });
+            
+            const img = new Image();
+            
+            img.onload = () => {
+                this.hideSkeleton(container);
+                img.classList.add('loaded');
+                resolve(img);
+            };
+            
+            img.onerror = () => {
+                this.hideSkeleton(container);
+                reject(new Error(`Failed to load image: ${src}`));
+            };
+            
+            img.src = src;
+        });
     }
 
     /**

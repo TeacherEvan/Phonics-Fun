@@ -284,13 +284,37 @@ class PerformanceUtils {
         };
 
         const images = letterImages[letter] || [];
-        images.forEach(word => {
-            const img = new Image();
-            img.src = `${imagePath}${word}.png`;
-            this.resourceCache.set(`${letter}-${word}`, img);
+        const self = this;
+        
+        // Use requestIdleCallback for non-blocking preloading
+        PerformanceUtils.requestIdleCallback(() => {
+            images.forEach((word, index) => {
+                // Stagger image loading to avoid blocking
+                setTimeout(() => {
+                    const img = new Image();
+                    img.onload = () => {
+                        console.log(`✅ Preloaded: ${letter}-${word}`);
+                    };
+                    img.onerror = () => {
+                        console.log(`⚠️ Failed to preload: ${letter}-${word}`);
+                    };
+                    img.src = `${imagePath}${word}.png`;
+                    self.resourceCache.set(`${letter}-${word}`, img);
+                }, index * 100); // Stagger by 100ms
+            });
         });
 
-        console.log(`📦 Preloaded images for letter: ${letter}`);
+        console.log(`📦 Preloading images for letter: ${letter}`);
+    }
+    
+    /**
+     * Get cached image for a letter-word combination
+     * @param {string} letter - The letter
+     * @param {string} word - The word
+     * @returns {HTMLImageElement|null} Cached image or null
+     */
+    getCachedImage(letter, word) {
+        return this.resourceCache.get(`${letter}-${word}`) || null;
     }
 
     /**
