@@ -77,6 +77,9 @@ class GameState {
         // Performance and UI utilities
         this.performanceUtils = window.PerformanceUtils ? new PerformanceUtils() : null;
         this.uiUtils = window.UIUtils ? new UIUtils() : null;
+        
+        // Display management for responsive design
+        this.displayManager = window.DisplayManager ? new DisplayManager() : null;
 
         this.initializeGame();
     }
@@ -221,6 +224,11 @@ class GameState {
         window.addEventListener('orientationchange', () => {
             setTimeout(() => this.handleDeviceOrientationChange(), 100);
         });
+        
+        // Handle display changes from DisplayManager
+        window.addEventListener('displaychange', (e) => {
+            this.handleDisplayChange(e.detail);
+        });
 
         // Handle page visibility changes (critical for mobile browsers)
         document.addEventListener('visibilitychange', () => {
@@ -278,6 +286,54 @@ class GameState {
                 e.preventDefault();
             }
         });
+    }
+
+    /**
+     * Handle display changes from DisplayManager
+     * @param {Object} displayInfo - Display information from DisplayManager
+     */
+    handleDisplayChange(displayInfo) {
+        console.log('📱 Display configuration changed:', displayInfo);
+        
+        // Adjust game elements based on new display configuration
+        if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
+            // Reposition planets for new viewport
+            this.adjustPlanetPositions(displayInfo);
+        }
+        
+        // Update UI scaling
+        this.updateUIScaling(displayInfo);
+    }
+    
+    /**
+     * Adjust planet positions for current viewport
+     * @param {Object} displayInfo - Display information
+     */
+    adjustPlanetPositions(displayInfo) {
+        const planets = document.querySelectorAll('.planet');
+        const { width, height } = displayInfo.viewport;
+        
+        planets.forEach((planet, index) => {
+            // Recalculate position to keep planets visible
+            const currentLeft = parseInt(planet.style.left) || 0;
+            const currentTop = parseInt(planet.style.top) || 0;
+            
+            // Ensure planet stays within new viewport bounds
+            const newLeft = Math.min(currentLeft, width - 120);
+            const newTop = Math.min(currentTop, height - 120);
+            
+            planet.style.left = `${Math.max(10, newLeft)}px`;
+            planet.style.top = `${Math.max(10, newTop)}px`;
+        });
+    }
+    
+    /**
+     * Update UI scaling based on display info
+     * @param {Object} displayInfo - Display information
+     */
+    updateUIScaling(displayInfo) {
+        // UI scaling is handled by DisplayManager CSS variables
+        console.log(`🎨 UI scaled for ${displayInfo.deviceType} in ${displayInfo.orientation} orientation`);
     }
 
     /**
@@ -1020,15 +1076,54 @@ class GameState {
             letter = vocabularyItem.letter;
         }
 
+        // Show loading state
+        wordBackground.classList.add('loading');
+        
         // Set background image with lazy loading path
         const imagePath = `Assets/images/${letter}-${letter.toLowerCase()}/Images/${word}.png`;
-        wordBackground.style.backgroundImage = `url('${imagePath}')`;
-        wordBackground.classList.add('visible');
-
+        
+        // Check if image is cached
+        if (this.performanceUtils && this.performanceUtils.getCachedImage) {
+            const cachedImage = this.performanceUtils.getCachedImage(letter, word);
+            if (cachedImage && cachedImage.complete) {
+                wordBackground.style.backgroundImage = `url('${imagePath}')`;
+                wordBackground.classList.remove('loading');
+                wordBackground.classList.add('visible');
+                this.scheduleImageHide(wordBackground);
+                return;
+            }
+        }
+        
+        // Load image progressively with loading indicator
+        const img = new Image();
+        img.onload = () => {
+            wordBackground.style.backgroundImage = `url('${imagePath}')`;
+            wordBackground.classList.remove('loading');
+            wordBackground.classList.add('visible');
+            this.scheduleImageHide(wordBackground);
+        };
+        
+        img.onerror = () => {
+            console.warn(`Failed to load image: ${imagePath}`);
+            wordBackground.classList.remove('loading');
+            // Still show the word area even if image failed
+            wordBackground.classList.add('visible');
+            this.scheduleImageHide(wordBackground);
+        };
+        
+        img.src = imagePath;
+    }
+    
+    /**
+     * Schedule hiding of word image after delay
+     * @param {HTMLElement} wordBackground - Word background element
+     */
+    scheduleImageHide(wordBackground) {
         // Hide after display duration
-        // TODO: [OPTIMIZATION] Consider using CSS animation instead of JavaScript timeout
         setTimeout(() => {
             wordBackground.classList.remove('visible');
+            // Remove loading class if still present
+            wordBackground.classList.remove('loading');
         }, 3000);
     }
     
