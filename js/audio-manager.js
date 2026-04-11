@@ -9,6 +9,7 @@ class AudioManager {
         this.sounds = new Map();
         this.voices = new Map();
         this.backgroundMusic = null;
+        this.loadingSounds = new Map();
         this.audioContext = null;
         this.masterGain = null;
         this.musicGain = null;
@@ -75,85 +76,23 @@ class AudioManager {
     }
 
     loadAllSounds() {
-        const sounds = {
-            // Background music (using generated WAV file)
-            backgroundMusic: "assets/sounds/background-music.wav",
-
-            // Sound effects (using generated WAV files)
-            explosion: "assets/sounds/explosion.wav",
-            celebration: "assets/sounds/celebration.wav",
-
-            // Phoneme sounds
-            phonemeG: "assets/sounds/phoneme-g.wav",
-            phonemeA: "assets/sounds/phoneme-a.wav",
-            phonemeB: "assets/sounds/phoneme-b.wav",
-
-            // Voice sounds for letters A, B, and G
-            voiceGrape: "assets/sounds/voices/american-female/voice-grape.wav",
-            voiceGoat: "assets/sounds/voices/american-female/voice-goat.wav",
-            voiceGold: "assets/sounds/voices/american-female/voice-gold.wav",
-            voiceGirl: "assets/sounds/voices/american-female/voice-girl.wav",
-            voiceGrandpa: "assets/sounds/voices/american-female/voice-grandpa.wav",
-
-            // A letter words
-            voiceApple: "assets/sounds/voices/american-female/voice-apple.wav",
-            voiceAnt: "assets/sounds/voices/american-female/voice-ant.wav",
-            voiceAirplane: "assets/sounds/voices/american-female/voice-airplane.wav",
-            voiceAlligator: "assets/sounds/voices/american-female/voice-alligator.wav",
-            voiceArrow: "assets/sounds/voices/american-female/voice-arrow.wav",
-
-            // B letter words
-            voiceBall: "assets/sounds/voices/american-female/voice-ball.wav",
-            voiceBat: "assets/sounds/voices/american-female/voice-bat.wav",
-            voiceBear: "assets/sounds/voices/american-female/voice-bear.wav",
-            voiceBoat: "assets/sounds/voices/american-female/voice-boat.wav",
-            voiceButterfly: "assets/sounds/voices/american-female/voice-butterfly.wav"
-        };
-
-        // Background music (using generated WAV file)
         if (this.audioPriority.lowPriority) {
-            this.loadSound('background-music', sounds.backgroundMusic, 'music');
+            this.ensureSoundLoaded('background-music');
         }
 
-        // Sound effects (using generated WAV files)
         if (this.audioPriority.mediumPriority) {
-            this.loadSound('explosion', sounds.explosion, 'effect');
-            this.loadSound('celebration', sounds.celebration, 'effect');
-        }
-
-        // Load voice messages using current template
-        if (this.audioPriority.highPriority) {
-            this.loadVoiceTemplate(this.currentVoiceTemplate);
-        }
-
-        // Load additional phoneme and voice sounds
-        for (const [id, url] of Object.entries(sounds)) {
-            if (!this.sounds.has(id)) {
-                this.loadSound(id, url, 'effect');
-            }
+            this.ensureSoundLoaded('explosion');
+            this.ensureSoundLoaded('celebration');
         }
     }
 
     loadVoiceTemplate(templateId) {
         console.log(`Loading voice template: ${templateId}`);
 
-        // Clear existing voice files
-        this.voices.clear();
-
-        // Load new voice files from template directory
-        const words = ['grape', 'goat', 'gold', 'girl', 'grandpa'];
-        words.forEach(word => {
-            const soundId = `voice-${word}`;
-            const soundPath = `assets/sounds/voices/${templateId}/voice-${word}.wav`;
-            this.loadSound(soundId, soundPath, 'voice');
-        });
-
-        // Update current template
+        this.clearVoiceCache();
         this.currentVoiceTemplate = templateId;
-
-        // Save to localStorage
         localStorage.setItem('voiceTemplate', templateId);
-
+        this.ensureLetterAudio('G');
         console.log(`Voice template loaded: ${templateId}`);
     }
 
@@ -174,9 +113,20 @@ class AudioManager {
     }
 
     loadSound(id, url, type = 'effect') {
-        // For Web Audio API
+        if (this.hasLoadedSound(id)) {
+            return Promise.resolve();
+        }
+
+        if (this.loadingSounds.has(id)) {
+            return this.loadingSounds.get(id);
+        }
+
+        const finalizeLoad = () => {
+            this.loadingSounds.delete(id);
+        };
+
         if (this.audioContext) {
-            fetch(url)
+            const loadPromise = fetch(url)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`Failed to load sound: ${url}`);
@@ -185,68 +135,78 @@ class AudioManager {
                 })
                 .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
                 .then(audioBuffer => {
-                    if (type === 'music') {
-                        this.sounds.set(id, {
-                            buffer: audioBuffer,
-                            type: type,
-                            source: null,
-                            loop: true
-                        });
-                    } else {
-                        this.sounds.set(id, {
-                            buffer: audioBuffer,
-                            type: type,
-                            source: null,
-                            loop: false
-                        });
-                    }
+                    this.sounds.set(id, {
+                        buffer: audioBuffer,
+                        type: type,
+                        source: null,
+                        loop: type === 'music'
+                    });
                     console.log(`Sound loaded successfully: ${id}`);
                 })
                 .catch(error => {
                     console.error(`Error loading sound ${id}:`, error);
 
-                    // Fallback to HTML Audio
-                    this.loadFallbackSound(id, url, type);
-                });
-        } else {
-            // Fallback to HTML Audio
-            this.loadFallbackSound(id, url, type);
+                    if (error.message && error.message.startsWith('Failed to load sound:')) {
+                        return Promise.resolve();
+                    }
+
+                    return this.loadFallbackSound(id, url, type);
+                })
+                .finally(finalizeLoad);
+
+            this.loadingSounds.set(id, loadPromise);
+            return loadPromise;
         }
+
+        const loadPromise = this.loadFallbackSound(id, url, type)
+            .finally(finalizeLoad);
+        this.loadingSounds.set(id, loadPromise);
+        return loadPromise;
     }
 
     loadFallbackSound(id, url, type) {
+        if (this.hasLoadedSound(id)) {
+            return Promise.resolve();
+        }
+
         const audio = new Audio();
-        audio.preload = 'auto';
+        audio.preload = 'metadata';
 
         if (type === 'music') {
             audio.loop = true;
         }
 
-        // Handle successful loading
-        audio.addEventListener('canplaythrough', () => {
-            console.log(`Fallback sound loaded successfully: ${id}`);
+        const loadPromise = new Promise((resolve, reject) => {
+            audio.addEventListener('canplaythrough', () => {
+                console.log(`Fallback sound loaded successfully: ${id}`);
+                resolve();
+            }, { once: true });
+
+            audio.addEventListener('error', (e) => {
+                console.error(`Error loading fallback sound ${id}:`, e);
+                reject(e);
+            }, { once: true });
+
+            audio.src = url;
+
+            if (type === 'music') {
+                this.backgroundMusic = audio;
+            } else if (type === 'voice') {
+                this.voices.set(id, audio);
+            } else {
+                this.sounds.set(id, {
+                    audio: audio,
+                    type: type
+                });
+            }
         });
 
-        // Handle error
-        audio.addEventListener('error', (e) => {
-            console.error(`Error loading fallback sound ${id}:`, e);
-        });
-
-        audio.src = url;
-
-        if (type === 'music') {
-            this.backgroundMusic = audio;
-        } else if (type === 'voice') {
-            this.voices.set(id, audio);
-        } else {
-            this.sounds.set(id, {
-                audio: audio,
-                type: type
-            });
-        }
+        return loadPromise;
     }
 
     play(id) {
+        id = this.normalizeSoundId(id);
+
         // Skip if muted or if trying to play a disabled sound
         if (this.isMuted) return;
 
@@ -257,12 +217,17 @@ class AudioManager {
         }
 
         const soundType = id.startsWith('voice-') ? 'high' :
-            (id === 'phoneme-g' ? 'high' :
+            (id.startsWith('phoneme-') ? 'high' :
                 (id === 'background-music' ? 'low' : 'medium'));
 
         if ((soundType === 'medium' && !this.audioPriority.mediumPriority) ||
             (soundType === 'high' && !this.audioPriority.highPriority)) {
             console.log(`Skipping ${id} (${soundType} priority sound disabled)`);
+            return;
+        }
+
+        if (!this.hasLoadedSound(id)) {
+            this.ensureSoundLoaded(id);
             return;
         }
 
@@ -687,7 +652,7 @@ class AudioManager {
 
             // If enabling low priority sounds that weren't loaded yet
             if (enabled && !this.sounds.has('background-music')) {
-                this.loadSound('background-music', 'assets/sounds/background-music.wav', 'music');
+                this.ensureSoundLoaded('background-music');
             }
         }
 
@@ -700,6 +665,116 @@ class AudioManager {
      */
     getAudioPriority() {
         return this.audioPriority;
+    }
+
+    hasLoadedSound(id) {
+        return this.sounds.has(id) || this.voices.has(id) || (id === 'background-music' && this.backgroundMusic !== null);
+    }
+
+    normalizeSoundId(id) {
+        const aliasMap = {
+            backgroundMusic: 'background-music',
+            phonemeG: 'phoneme-g',
+            phonemeA: 'phoneme-a',
+            phonemeB: 'phoneme-b',
+            voiceGrape: 'voice-grape',
+            voiceGoat: 'voice-goat',
+            voiceGold: 'voice-gold',
+            voiceGirl: 'voice-girl',
+            voiceGrandpa: 'voice-grandpa',
+            voiceApple: 'voice-apple',
+            voiceAnt: 'voice-ant',
+            voiceAirplane: 'voice-airplane',
+            voiceAlligator: 'voice-alligator',
+            voiceArrow: 'voice-arrow',
+            voiceBall: 'voice-ball',
+            voiceBat: 'voice-bat',
+            voiceBear: 'voice-bear',
+            voiceBoat: 'voice-boat',
+            voiceButterfly: 'voice-butterfly'
+        };
+
+        return aliasMap[id] || id;
+    }
+
+    getSoundPath(id) {
+        if (id === 'background-music') {
+            return 'Assets/sounds/background-music.wav';
+        }
+
+        if (id === 'explosion') {
+            return 'Assets/sounds/explosion.wav';
+        }
+
+        if (id === 'celebration') {
+            return 'Assets/sounds/celebration.wav';
+        }
+
+        if (id.startsWith('phoneme-')) {
+            return `Assets/sounds/${id}.wav`;
+        }
+
+        if (id.startsWith('voice-')) {
+            return `Assets/sounds/voices/${this.currentVoiceTemplate}/${id}.wav`;
+        }
+
+        return null;
+    }
+
+    getSoundType(id) {
+        if (id === 'background-music') {
+            return 'music';
+        }
+
+        if (id.startsWith('voice-')) {
+            return 'voice';
+        }
+
+        return 'effect';
+    }
+
+    ensureSoundLoaded(id) {
+        const normalizedId = this.normalizeSoundId(id);
+
+        if (this.hasLoadedSound(normalizedId)) {
+            return Promise.resolve();
+        }
+
+        const soundPath = this.getSoundPath(normalizedId);
+        if (!soundPath) {
+            return Promise.resolve();
+        }
+
+        return this.loadSound(normalizedId, soundPath, this.getSoundType(normalizedId));
+    }
+
+    ensureLetterAudio(letter) {
+        const upperLetter = letter.toUpperCase();
+        const letterWords = {
+            G: ['grape', 'goat', 'gold', 'girl', 'grandpa'],
+            A: ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
+            B: ['ball', 'bat', 'bear', 'boat', 'butterfly']
+        };
+
+        const requests = [
+            this.ensureSoundLoaded(`phoneme-${upperLetter.toLowerCase()}`)
+        ];
+
+        (letterWords[upperLetter] || []).forEach(word => {
+            requests.push(this.ensureSoundLoaded(`voice-${word}`));
+        });
+
+        return Promise.allSettled(requests);
+    }
+
+    clearVoiceCache() {
+        Array.from(this.sounds.keys())
+            .filter(id => id.startsWith('voice-'))
+            .forEach(id => {
+                this.sounds.delete(id);
+            });
+
+        this.voices.clear();
     }
 }
 

@@ -28,14 +28,22 @@
                 <div class="welcome-asteroids"></div>
             </div>
             <div class="welcome-container">
+                <p class="welcome-kicker">Space mission for sound explorers</p>
                 <h1 id="welcome-title" class="pulsating-text">
                     <span class="welcome-to">Welcome To</span>
                     <span id="teacher-evan" class="teacher-name">Teacher
                         Evan's</span>
                     <span class="fun-with">Fun with phonics!</span>
                 </h1>
-                <button id="start-game-btn" class="primary-button">Start
-                    Game</button>
+                <p class="welcome-subtitle">Tap glowing planets, hear exciting
+                    new words, and launch into phonics practice with Teacher
+                    Evan.</p>
+                <div class="welcome-actions">
+                    <button id="start-game-btn" class="primary-button">Start
+                        Game</button>
+                    <p class="welcome-helper">Best with sound on for full space
+                        adventure mode.</p>
+                </div>
                 <div class="settings-container">
                     <button id="settings-btn"
                         class="settings-button">⚙️</button>
@@ -46,12 +54,17 @@
         <!-- Level Select Screen -->
         <main id="level-select-screen" class="screen">
             <div class="level-select-container">
-                <h2 class="level-select-heading">Select a letter to play
-                    with!</h2>
-                <div class="letter-grid" id="letter-grid">
-                    <!-- Letters A-Z will be generated dynamically -->
-                    <button class="letter" data-letter="A">A</button>
-                    <button class="letter" data-letter="B">B</button>
+                <p class="level-select-kicker">Choose your next sound mission</p>
+                <h2 class="level-select-heading">Pick a letter and launch!</h2>
+                <p class="level-select-subtitle">Glowing letters are ready to
+                    play. The rest are still being built in the star
+                    workshop.</p>
+                <div class="letter-grid-frame">
+                    <div class="letter-grid" id="letter-grid">
+                        <!-- Letters A-Z will be generated dynamically -->
+                        <button class="letter" data-letter="A">A</button>
+                        <button class="letter" data-letter="B">B</button>
+                    </div>
                 </div>
             </div>
         </main>
@@ -75,11 +88,24 @@
                     </div>
                 </div>
                 <div class="game-ui">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
+                    <div class="hud-cluster">
+                        <div class="active-letter-panel">
+                            <span class="hud-label">Mission Letter</span>
+                            <span id="active-letter-display"
+                                class="active-letter-display">G</span>
+                        </div>
+                        <div class="progress-panel">
+                            <span class="hud-label">Mission Progress</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill"
+                                    id="progress-fill"></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="score-display">
-                        <span id="hits-counter">0</span> / 5 hits
+                        <span class="score-label">Hits</span>
+                        <span class="score-value"><span id="hits-counter">0</span>
+                            / 5</span>
                     </div>
                 </div>
             </div>
@@ -88,7 +114,11 @@
         <!-- Ready Overlay -->
         <div id="ready-overlay" class="overlay hidden">
             <div class="overlay-content">
-                <h2 class="ready-text">READY??!!</h2>
+                <p class="overlay-kicker">Engines warming up</p>
+                <h2 class="ready-text">Ready for <span
+                        id="ready-letter-display">G</span>?</h2>
+                <p class="overlay-subtitle">Loading your next phonics
+                    adventure.</p>
                 <div class="loading-spinner"></div>
             </div>
         </div>
@@ -97,6 +127,8 @@
         <div id="settings-panel" class="settings-panel hidden">
             <div class="settings-content">
                 <h3>Settings</h3>
+                <p class="settings-intro">Tune your space mission for a comfy,
+                    happy learning session.</p>
                 <div class="setting-row">
                     <label for="music-volume">Music Volume:</label>
                     <input type="range" id="music-volume" min="0" max="100"
@@ -110,7 +142,7 @@
                     <span id="effects-volume-display">70%</span>
                 </div>
                 <div class="setting-row">
-                    <label>Audio Priority:</label>
+                    <span class="setting-label">Audio Priority:</span>
                     <div class="audio-priority-controls">
                         <div>
                             <input type="checkbox" id="high-priority-audio"
@@ -141,7 +173,7 @@
                         Preview</button>
                 </div>
                 <div class="setting-row">
-                    <label>Mute All:</label>
+                    <span class="setting-label">Mute All:</span>
                     <button id="mute-toggle" class="toggle-button">🔊</button>
                 </div>
                 <button id="close-settings" class="close-button">×</button>
@@ -151,7 +183,11 @@
         <!-- Coming Soon Popup -->
         <div id="coming-soon-popup" class="popup hidden">
             <div class="popup-content wood-style">
+                <p class="popup-kicker">Star workshop</p>
                 <h3>COMING SOON!</h3>
+                <p class="popup-message">That letter is still under
+                    construction. Try one of the glowing mission letters for
+                    now.</p>
                 <button id="close-popup" class="close-button">×</button>
             </div>
         </div>
@@ -159,7 +195,11 @@
         <!-- Level Complete Popup -->
         <div id="level-complete-popup" class="popup hidden">
             <div class="popup-content celebration">
+                <p class="popup-kicker">Mission complete</p>
                 <h2>Level Complete!</h2>
+                <p class="popup-message">You blasted through letter <span
+                        id="level-complete-letter">G</span>. Choose your next
+                    adventure.</p>
                 <div class="popup-buttons">
                     <button id="next-level-btn" class="primary-button">Next
                         Level</button>
@@ -169,33 +209,33 @@
         </div>
 
         <!-- Audio Elements -->
-        <audio id="background-music" loop preload="auto">
+        <audio id="background-music" loop preload="none">
             <source src="Assets/sounds/background-music.wav" type="audio/wav">
             <source src="Assets/sounds/background-music.mp3" type="audio/mpeg">
         </audio>
 
-        <audio id="explosion-sound" preload="auto">
+        <audio id="explosion-sound" preload="none">
             <source src="Assets/sounds/explosion.wav" type="audio/wav">
             <source src="Assets/sounds/explosion.mp3" type="audio/mpeg">
         </audio>
 
-        <audio id="phoneme-sound" preload="auto">
+        <audio id="phoneme-sound" preload="none">
             <source src="Assets/sounds/phoneme-g.wav" type="audio/wav">
             <source src="Assets/sounds/phoneme-g.mp3" type="audio/mpeg">
         </audio>
 
-        <audio id="celebration-sound" preload="auto">
+        <audio id="celebration-sound" preload="none">
             <source src="Assets/sounds/celebration.wav" type="audio/wav">
             <source src="Assets/sounds/celebration.mp3" type="audio/mpeg">
         </audio>
 
         <!-- Voice Messages -->
-        <audio id="voice-girl" preload="auto">
+        <audio id="voice-girl" preload="none">
             <source src="Assets/sounds/voices/american-female/voice-girl.wav"
                 type="audio/wav">
             <source src="Assets/sounds/voice-girl.mp3" type="audio/mpeg">
         </audio>
-        <audio id="voice-grandpa" preload="auto">
+        <audio id="voice-grandpa" preload="none">
             <source src="Assets/sounds/voices/american-female/voice-grandpa.wav"
                 type="audio/wav">
             <source src="Assets/sounds/voice-grandpa.mp3" type="audio/mpeg">

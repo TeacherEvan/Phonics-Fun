@@ -122,21 +122,9 @@ class PerformanceUtils {
      * Preloads essential resources before they're needed
      */
     setupResourceHints() {
-        // Preload critical CSS
-        this.preloadResource('css/styles.css', 'style');
-
-        // Preload critical fonts (if any custom fonts are added)
-        // this.preloadResource('fonts/game-font.woff2', 'font');
-
-        // Prefetch audio files that will be needed soon
-        const criticalAudio = [
-            'assets/sounds/explosion.wav',
-            'assets/sounds/celebration.wav'
-        ];
-
-        criticalAudio.forEach(url => {
-            this.prefetchResource(url);
-        });
+        // Critical stylesheet preload already exists in index.html.
+        // Avoid speculative media requests here so the welcome screen can
+        // render without immediately competing with non-visible assets.
     }
 
     /**
@@ -283,8 +271,14 @@ class PerformanceUtils {
             'B': ['ball', 'bat', 'bear', 'boat', 'butterfly']
         };
 
-        const images = letterImages[letter] || [];
+        const images = (letterImages[letter] || []).filter(word => {
+            return !this.resourceCache.has(`${letter}-${word}`);
+        });
         const self = this;
+
+        if (images.length === 0) {
+            return;
+        }
         
         // Use requestIdleCallback for non-blocking preloading
         PerformanceUtils.requestIdleCallback(() => {

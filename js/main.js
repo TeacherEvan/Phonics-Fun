@@ -37,25 +37,25 @@ class GameState {
         // TODO: [OPTIMIZATION] Consider moving vocabulary data to external JSON for easier content updates
         this.letterVocabulary = {
             'G': [
-                { letter: "G", word: "grape", audioKey: "voiceGrape" },
-                { letter: "G", word: "goat", audioKey: "voiceGoat" },
-                { letter: "G", word: "gold", audioKey: "voiceGold" },
-                { letter: "G", word: "girl", audioKey: "voiceGirl" },
-                { letter: "G", word: "grandpa", audioKey: "voiceGrandpa" }
+                { letter: "G", word: "grape", audioKey: "voice-grape" },
+                { letter: "G", word: "goat", audioKey: "voice-goat" },
+                { letter: "G", word: "gold", audioKey: "voice-gold" },
+                { letter: "G", word: "girl", audioKey: "voice-girl" },
+                { letter: "G", word: "grandpa", audioKey: "voice-grandpa" }
             ],
             'A': [
-                { letter: "A", word: "apple", audioKey: "voiceApple" },
-                { letter: "A", word: "ant", audioKey: "voiceAnt" },
-                { letter: "A", word: "airplane", audioKey: "voiceAirplane" },
-                { letter: "A", word: "alligator", audioKey: "voiceAlligator" },
-                { letter: "A", word: "arrow", audioKey: "voiceArrow" }
+                { letter: "A", word: "apple", audioKey: "voice-apple" },
+                { letter: "A", word: "ant", audioKey: "voice-ant" },
+                { letter: "A", word: "airplane", audioKey: "voice-airplane" },
+                { letter: "A", word: "alligator", audioKey: "voice-alligator" },
+                { letter: "A", word: "arrow", audioKey: "voice-arrow" }
             ],
             'B': [
-                { letter: "B", word: "ball", audioKey: "voiceBall" },
-                { letter: "B", word: "bat", audioKey: "voiceBat" },
-                { letter: "B", word: "bear", audioKey: "voiceBear" },
-                { letter: "B", word: "boat", audioKey: "voiceBoat" },
-                { letter: "B", word: "butterfly", audioKey: "voiceButterfly" }
+                { letter: "B", word: "ball", audioKey: "voice-ball" },
+                { letter: "B", word: "bat", audioKey: "voice-bat" },
+                { letter: "B", word: "bear", audioKey: "voice-bear" },
+                { letter: "B", word: "boat", audioKey: "voice-boat" },
+                { letter: "B", word: "butterfly", audioKey: "voice-butterfly" }
             ]
         };
 
@@ -115,15 +115,9 @@ class GameState {
         this.setupAudioConfiguration();
         this.setupEventSubscriptions();
         this.renderLetterSelectionGrid();
+        this.syncLetterDisplays();
         this.createWelcomeScreenAnimations();
         this.navigateToScreen('welcome');
-        
-        // Preload images for enabled letters
-        if (this.performanceUtils) {
-            this.enabledLetters.forEach(letter => {
-                this.performanceUtils.preloadLetterImages(letter);
-            });
-        }
         
         // Make interactive elements enhanced
         if (this.uiUtils) {
@@ -425,7 +419,7 @@ class GameState {
 
         // Play sound effects
         this.audioManager.play('explosion');
-        this.audioManager.play('phoneme-g');
+        this.audioManager.play(`phoneme-${this.activeLetterLevel.toLowerCase()}`);
 
         // Remove planet and asteroid from collision manager
         this.collisionManager.unregisterObject(asteroidId);
@@ -496,11 +490,23 @@ class GameState {
      */
     toggleSettingsPanel() {
         const panel = document.getElementById('settings-panel');
-        panel.classList.toggle('active');
+        const isOpening = !panel.classList.contains('active');
 
-        if (panel.classList.contains('active')) {
+        if (isOpening) {
+            panel.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                panel.classList.add('active');
+            });
             this.updateVoiceTemplateSelector();
+            return;
         }
+
+        panel.classList.remove('active');
+        setTimeout(() => {
+            if (!panel.classList.contains('active')) {
+                panel.classList.add('hidden');
+            }
+        }, 300);
     }
     
     // Legacy alias
@@ -523,7 +529,10 @@ class GameState {
         const randomWord = sampleWords[Math.floor(Math.random() * sampleWords.length)];
 
         console.log('Previewing voice template with word:', randomWord);
-        this.audioManager.play('voice-' + randomWord);
+        this.audioManager.ensureLetterAudio('G')
+            .finally(() => {
+                this.audioManager.play('voice-' + randomWord);
+            });
     }
 
     updateVoiceTemplateSelector() {
@@ -687,6 +696,8 @@ class GameState {
         console.log(`🚀 Starting ${letter} level...`);
         this.activeLetterLevel = letter;
         this.activeVocabulary = this.letterVocabulary[letter];
+        this.syncLetterDisplays();
+        this.audioManager.ensureLetterAudio(letter);
         this.displayOverlay('ready-overlay');
 
         // Show loading state with skeleton
@@ -1140,6 +1151,23 @@ class GameState {
         const progressPercentage = (this.correctHitsCount / this.requiredHitsToComplete) * 100;
         progressFillElement.style.width = `${progressPercentage}%`;
         hitsCounterElement.textContent = this.correctHitsCount;
+        this.syncLetterDisplays();
+    }
+
+    /**
+     * Sync active letter labels across gameplay HUD and popups
+     */
+    syncLetterDisplays() {
+        [
+            'active-letter-display',
+            'ready-letter-display',
+            'level-complete-letter'
+        ].forEach(elementId => {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = this.activeLetterLevel;
+            }
+        });
     }
     
     // Legacy alias
