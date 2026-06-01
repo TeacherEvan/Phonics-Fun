@@ -987,9 +987,6 @@
             logMessage('Log exported successfully', 'success');
         }
 
-        // Initialize when page loads
-        window.addEventListener('load', initTestSuite);
-        
         // Handle visibility changes (important for Android)
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
@@ -1001,144 +998,115 @@
 
         // Handle errors
         window.addEventListener('error', (event) => {
-            logMessage(`JavaScript Error: ${event.error.message}`, 'error');
+            const message = event?.error?.message || 'Unknown JavaScript error';
+            logMessage(`JavaScript Error: ${message}`, 'error');
         });
 
         // MCP Test Functions
-        let mcpController;
+        let mcpController = null;
 
         function initMCPTests() {
-            // Initialize MCP controller when the page loads
-            mcpController = new MCPController({
-                logCallback: logMessage,
-                displayElementId: 'mcp-results'
-            });
-            logMessage('MCP Diagnostic Tools initialized', 'info');
+            if (typeof MCPDiagnosticController === 'undefined') {
+                logMessage('MCP Diagnostic Controller script failed to load', 'error');
+                return false;
+            }
+
+            mcpController = new MCPDiagnosticController();
+            const initialized = mcpController.initialize();
+            if (initialized) {
+                logMessage('MCP Diagnostic Tools initialized', 'success');
+                return true;
+            }
+
+            logMessage('MCP Diagnostic Tools failed to initialize', 'error');
+            return false;
         }
 
-        function runMCPAudioTest() {
+        function ensureMCPController() {
+            if (!mcpController && !initMCPTests()) {
+                return false;
+            }
+            return !!mcpController;
+        }
+
+        async function runMCPAudioTest() {
+            if (!ensureMCPController()) return;
             logMessage('Starting MCP Audio Diagnostics...', 'info');
-            mcpController.runAudioDiagnostics()
-                .then(results => {
-                    logMessage(`MCP Audio Diagnostics Complete: ${results.score}/10`, 
-                               results.score >= 7 ? 'success' : 'warning');
-                    displayMCPResults(results);
-                })
-                .catch(error => {
-                    logMessage(`MCP Audio Diagnostics Failed: ${error.message}`, 'error');
-                });
+            const results = await mcpController.startScan({ audio: true, performance: false, touch: false });
+            const report = mcpController.generateReport();
+            logMessage(`MCP Audio Diagnostics Complete: ${report.summary.scores.audio}/100`, 'success');
+            displayMCPResults(report);
         }
 
-        function runMCPTouchTest() {
+        async function runMCPTouchTest() {
+            if (!ensureMCPController()) return;
             logMessage('Starting MCP Touch Diagnostics...', 'info');
-            mcpController.runTouchDiagnostics()
-                .then(results => {
-                    logMessage(`MCP Touch Diagnostics Complete: ${results.score}/10`, 
-                               results.score >= 7 ? 'success' : 'warning');
-                    displayMCPResults(results);
-                })
-                .catch(error => {
-                    logMessage(`MCP Touch Diagnostics Failed: ${error.message}`, 'error');
-                });
+            const results = await mcpController.startScan({ audio: false, performance: false, touch: true });
+            const report = mcpController.generateReport();
+            logMessage(`MCP Touch Diagnostics Complete: ${report.summary.scores.touch}/100`, 'success');
+            displayMCPResults(report);
         }
 
-        function runMCPPerformanceTest() {
+        async function runMCPPerformanceTest() {
+            if (!ensureMCPController()) return;
             logMessage('Starting MCP Performance Diagnostics...', 'info');
-            mcpController.runPerformanceDiagnostics()
-                .then(results => {
-                    logMessage(`MCP Performance Diagnostics Complete: ${results.score}/10`, 
-                               results.score >= 7 ? 'success' : 'warning');
-                    displayMCPResults(results);
-                })
-                .catch(error => {
-                    logMessage(`MCP Performance Diagnostics Failed: ${error.message}`, 'error');
-                });
+            const results = await mcpController.startScan({ audio: false, performance: true, touch: false });
+            const report = mcpController.generateReport();
+            logMessage(`MCP Performance Diagnostics Complete: ${report.summary.scores.performance}/100`, 'success');
+            displayMCPResults(report);
         }
 
-        function runFullMCPScan() {
+        async function runFullMCPScan() {
+            if (!ensureMCPController()) return;
             logMessage('Starting Full MCP Diagnostic Scan...', 'info');
-            
-            // Clear previous results
-            document.getElementById('mcp-results').innerHTML = 
-                '<div class="progress-indicator">Running comprehensive scan...</div>';
-            
-            mcpController.runFullDiagnostics()
-                .then(results => {
-                    const overallScore = results.overallScore;
-                    logMessage(`MCP Full Scan Complete: Overall Score ${overallScore}/10`, 
-                               overallScore >= 7 ? 'success' : 'warning');
-                    
-                    // Display detailed results
-                    displayMCPResults(results);
-                    
-                    // Apply recommended fixes automatically if score is low
-                    if (overallScore < 7 && results.recommendedFixes.length > 0) {
-                        logMessage('Applying recommended compatibility fixes...', 'info');
-                        mcpController.applyRecommendedFixes();
-                    }
-                })
-                .catch(error => {
-                    logMessage(`MCP Full Scan Failed: ${error.message}`, 'error');
-                });
+
+            const resultsContainer = document.getElementById('mcp-results');
+            resultsContainer.innerHTML = '<div class="progress-indicator">Running comprehensive scan...</div>';
+
+            await mcpController.startScan({ audio: true, performance: true, touch: true });
+            const report = mcpController.generateReport();
+            logMessage(`MCP Full Scan Complete: Overall Score ${report.summary.compatibilityScore}/100`, 'success');
+            displayMCPResults(report);
         }
 
-        function displayMCPResults(results) {
+        function displayMCPResults(report) {
             const resultsContainer = document.getElementById('mcp-results');
+            const summary = report.summary || {};
+            const scores = summary.scores || {};
+            const details = report.details || {};
+            const recommendations = report.recommendations || [];
+
             let html = '<div class="mcp-results-summary">';
-            
-            if (results.overallScore !== undefined) {
-                // Full scan results
-                html += `<h3>Overall Compatibility Score: ${results.overallScore}/10</h3>
-                        <div class="score-meter">
-                            <div class="score-fill" style="width: ${results.overallScore * 10}%"></div>
-                        </div>
-                        <div class="category-scores">
-                            <div class="category">
-                                <span>Audio: ${results.audioResults.score}/10</span>
-                                <div class="score-meter small">
-                                    <div class="score-fill" style="width: ${results.audioResults.score * 10}%"></div>
-                                </div>
-                            </div>
-                            <div class="category">
-                                <span>Touch: ${results.touchResults.score}/10</span>
-                                <div class="score-meter small">
-                                    <div class="score-fill" style="width: ${results.touchResults.score * 10}%"></div>
-                                </div>
-                            </div>
-                            <div class="category">
-                                <span>Performance: ${results.performanceResults.score}/10</span>
-                                <div class="score-meter small">
-                                    <div class="score-fill" style="width: ${results.performanceResults.score * 10}%"></div>
-                                </div>
-                            </div>
-                        </div>`;
-            } else {
-                // Single category test results
-                html += `<h3>Diagnostic Results: ${results.score}/10</h3>
-                        <div class="score-meter">
-                            <div class="score-fill" style="width: ${results.score * 10}%"></div>
-                        </div>`;
+            html += `<h3>Overall Compatibility Score: ${summary.compatibilityScore ?? 0}/100</h3>
+                     <div class="score-meter">
+                         <div class="score-fill" style="width: ${(summary.compatibilityScore ?? 0)}%"></div>
+                     </div>`;
+
+            html += '<div class="category-scores">';
+            if (scores.audio !== undefined) {
+                html += `<div class="category"><span>Audio: ${scores.audio}/100</span><div class="score-meter small"><div class="score-fill" style="width: ${scores.audio}%"></div></div></div>`;
             }
-            
-            // Display issues found
-            if (results.issues && results.issues.length > 0) {
-                html += '<div class="issues-found"><h4>Issues Found:</h4><ul>';
-                results.issues.forEach(issue => {
-                    html += `<li class="${issue.severity}">${issue.description}</li>`;
-                });
-                html += '</ul></div>';
+            if (scores.touch !== undefined) {
+                html += `<div class="category"><span>Touch: ${scores.touch}/100</span><div class="score-meter small"><div class="score-fill" style="width: ${scores.touch}%"></div></div></div>`;
             }
-            
-            // Display recommendations
-            if (results.recommendations && results.recommendations.length > 0) {
-                html += '<div class="recommendations"><h4>Recommendations:</h4><ul>';
-                results.recommendations.forEach(rec => {
-                    html += `<li>${rec}</li>`;
-                });
-                html += '</ul></div>';
+            if (scores.performance !== undefined) {
+                html += `<div class="category"><span>Performance: ${scores.performance}/100</span><div class="score-meter small"><div class="score-fill" style="width: ${scores.performance}%"></div></div></div>`;
             }
-            
             html += '</div>';
+
+            if (recommendations.length > 0) {
+                html += '<div class="recommendations"><h4>Recommendations:</h4><ul>';
+                recommendations.forEach(rec => {
+                    html += `<li><strong>${rec.severity?.toUpperCase?.() || 'INFO'}</strong>: ${rec.message} — ${rec.solution}</li>`;
+                });
+                html += '</ul></div>';
+            }
+
+            html += '<div class="details"><h4>Details</h4><pre style="white-space: pre-wrap; text-align: left;">';
+            html += JSON.stringify({ audio: details.audio, performance: details.performance, touch: details.touch }, null, 2);
+            html += '</pre></div>';
+            html += '</div>';
+
             resultsContainer.innerHTML = html;
         }
 

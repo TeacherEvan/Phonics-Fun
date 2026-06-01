@@ -107,6 +107,10 @@ class MCPDiagnosticController {
         
         console.log('[MCP Controller] Starting MCP diagnostic scan...');
         this.results.timestamp = new Date().toISOString();
+        this.results.audio = null;
+        this.results.performance = null;
+        this.results.touch = null;
+        this.results.overall = null;
         
         try {
             // Run audio diagnostic

@@ -281,27 +281,25 @@ class MCPAudioDiagnostic {
             audio.src = 'data:audio/mpeg;base64,/+MYxAAAAANIAAAAAExBTUUzLjk4LjIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
             audio.volume = 0.01; // Very low volume
             
-            // Try to play without user interaction
+            // Try to play without user interaction and wait for the outcome
             const playPromise = audio.play();
             
-            if (playPromise) {
-                playPromise.then(() => {
+            if (playPromise && typeof playPromise.then === 'function') {
+                try {
+                    await playPromise;
                     this.testResults.autoplaySupport = true;
                     console.log('[MCP Audio] Autoplay supported');
                     audio.pause();
-                }).catch(error => {
+                } catch (error) {
                     this.testResults.autoplaySupport = false;
                     console.log('[MCP Audio] Autoplay not supported:', error.message);
-                });
+                }
             } else {
                 // For older browsers that don't return a promise
-                if (!audio.paused) {
-                    this.testResults.autoplaySupport = true;
-                    console.log('[MCP Audio] Autoplay supported (legacy)');
+                this.testResults.autoplaySupport = !audio.paused;
+                console.log(`[MCP Audio] Autoplay ${this.testResults.autoplaySupport ? 'supported' : 'not supported'} (legacy)`);
+                if (this.testResults.autoplaySupport) {
                     audio.pause();
-                } else {
-                    this.testResults.autoplaySupport = false;
-                    console.log('[MCP Audio] Autoplay not supported (legacy)');
                 }
             }
         } catch (error) {

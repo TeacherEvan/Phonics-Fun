@@ -15,6 +15,7 @@ import java.util.Map;
  */
 public class AudioManager {
     private static final String TAG = "PhonicsAudioManager";
+    private static final String DEFAULT_VOICE_TEMPLATE = "british_female";
     
     private Context context;
     private SoundPool soundPool;
@@ -26,6 +27,7 @@ public class AudioManager {
     private float musicVolume = 0.5f;
     private float effectsVolume = 0.7f;
     private float voiceVolume = 0.8f;
+    private String currentVoiceTemplate = DEFAULT_VOICE_TEMPLATE;
     
     // Audio priorities
     private boolean highPriorityEnabled = true;
@@ -33,7 +35,7 @@ public class AudioManager {
     private boolean lowPriorityEnabled = true;
     
     public AudioManager(Context context) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         initializeSoundPool();
         initializeAudioMaps();
         loadDefaultSounds();
@@ -95,21 +97,35 @@ public class AudioManager {
         for (String word : words) {
             String voiceKey = "voice_" + word;
             try {
-                // Load different voice templates from proper Android resource structure
-                voiceMap.put(voiceKey + "_american_male", 
-                    soundPool.load(context, getResId("voices/american_male/" + voiceKey, "raw"), 1));
-                voiceMap.put(voiceKey + "_american_female", 
-                    soundPool.load(context, getResId("voices/american_female/" + voiceKey, "raw"), 1));
-                voiceMap.put(voiceKey + "_british_male", 
-                    soundPool.load(context, getResId("voices/british_male/" + voiceKey, "raw"), 1));
-                voiceMap.put(voiceKey + "_british_female", 
-                    soundPool.load(context, getResId("voices/british_female/" + voiceKey, "raw"), 1));
-                    
+                loadVoiceVariant(voiceKey, "american_male");
+                loadVoiceVariant(voiceKey, "american_female");
+                loadVoiceVariant(voiceKey, "british_male");
+                loadVoiceVariant(voiceKey, "british_female");
+                
                 Log.d(TAG, "Loaded voice assets for word: " + word);
             } catch (Exception e) {
                 Log.w(TAG, "Could not load voice asset for word: " + word + " - " + e.getMessage());
             }
         }
+    }
+
+    private void loadVoiceVariant(String voiceKey, String template) {
+        int resId = getVoiceResId(voiceKey, template);
+        if (resId != 0) {
+            voiceMap.put(voiceKey + "_" + template, soundPool.load(context, resId, 1));
+        } else {
+            Log.w(TAG, "Missing voice resource for " + voiceKey + " / " + template);
+        }
+    }
+
+    private int getVoiceResId(String voiceKey, String template) {
+        int resId = getResId(voiceKey + "_" + template, "raw");
+        if (resId != 0) return resId;
+
+        resId = getResId(template + "_" + voiceKey, "raw");
+        if (resId != 0) return resId;
+
+        return getResId(voiceKey, "raw");
     }
     
     private String[] getWordsForLetter(String letter) {
@@ -126,14 +142,14 @@ public class AudioManager {
     }
     
     private String[] getAnimateWordsForLetter(String letter) {
-        // Only animate characters should have voice files
+        // Load every in-game word so pronunciation is available for gameplay and previews
         switch (letter.toUpperCase()) {
             case "G":
-                return new String[]{"girl", "grandpa"};
+                return new String[]{"grape", "goat", "gold", "girl", "grandpa"};
             case "A":
-                return new String[]{}; // No animate characters for A yet
+                return new String[]{"apple", "ant"};
             case "B":
-                return new String[]{}; // No animate characters for B yet
+                return new String[]{"ball", "bat"};
             default:
                 return new String[]{};
         }
@@ -154,7 +170,11 @@ public class AudioManager {
     public void playVoice(String voiceKey, String voiceTemplate) {
         if (isMuted || !highPriorityEnabled) return;
         
-        String fullVoiceKey = voiceKey + "_" + voiceTemplate;
+        String normalizedVoiceKey = voiceKey.startsWith("voice_") ? voiceKey : "voice_" + voiceKey;
+        String normalizedTemplate = (voiceTemplate == null || voiceTemplate.trim().isEmpty())
+                ? currentVoiceTemplate
+                : normalizeTemplateId(voiceTemplate);
+        String fullVoiceKey = normalizedVoiceKey + "_" + normalizedTemplate;
         Integer soundId = voiceMap.get(fullVoiceKey);
         
         if (soundId != null) {
@@ -163,6 +183,34 @@ public class AudioManager {
         } else {
             Log.w(TAG, "Voice not found: " + fullVoiceKey);
         }
+    }
+
+    public void playVoice(String voiceKey) {
+        playVoice(voiceKey, currentVoiceTemplate);
+    }
+
+    public void setVoiceTemplate(String voiceTemplate) {
+        if (voiceTemplate == null || voiceTemplate.trim().isEmpty()) return;
+        this.currentVoiceTemplate = normalizeTemplateId(voiceTemplate);
+        Log.d(TAG, "Voice template set to: " + currentVoiceTemplate);
+    }
+
+    public String getVoiceTemplate() {
+        return currentVoiceTemplate;
+    }
+
+    public void setVolume(float volume) {
+        setMusicVolume(volume);
+        setEffectsVolume(volume);
+        setVoiceVolume(volume);
+    }
+
+    public void stopBackgroundMusic() {
+        stopMusic();
+    }
+
+    public void release() {
+        cleanup();
     }
     
     public void playBackgroundMusic() {
@@ -266,6 +314,10 @@ public class AudioManager {
     
     private int getResId(String resName, String resType) {
         return context.getResources().getIdentifier(resName, resType, context.getPackageName());
+    }
+
+    private String normalizeTemplateId(String templateId) {
+        return templateId.toLowerCase().replace('-', '_');
     }
     
     // Getters

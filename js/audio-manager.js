@@ -21,6 +21,9 @@ class AudioManager {
         this.musicVolume = 0.5;
         this.effectsVolume = 0.7;
         this.voiceVolume = 0.9;
+        this.canUseSpeechSynthesis = 'speechSynthesis' in window;
+        this.speechVoices = [];
+        this.speechVoicesReady = false;
 
         // Audio priority settings
         this.audioPriority = {
@@ -30,13 +33,10 @@ class AudioManager {
         };
 
         // Voice template settings
-        this.currentVoiceTemplate = 'american-female'; // Default - use only one template
+        this.currentVoiceTemplate = 'british_female'; // Default - use the clearest phonics voice
         this.availableVoiceTemplates = [
-            { id: 'american-female', name: 'American Female', description: 'Clear American female voice' }
-            // Other templates disabled to reduce memory usage
-            // { id: 'american-male', name: 'American Male', description: 'Clear American male voice' },
-            // { id: 'british-female', name: 'British Female', description: 'British female voice' },
-            // { id: 'british-male', name: 'British Male', description: 'British male voice' }
+            { id: 'american_female', name: 'American Female', description: 'Clear American female voice' },
+            { id: 'british_female', name: 'British Female', description: 'Clear British female voice' }
         ];
 
         // Initialize audio system
@@ -71,6 +71,17 @@ class AudioManager {
             console.log('Falling back to HTML5 Audio');
         }
 
+        // Prime speech voices and refresh when the browser finishes loading them.
+        if (this.canUseSpeechSynthesis) {
+            const refreshVoices = () => {
+                this.speechVoices = window.speechSynthesis.getVoices();
+                this.speechVoicesReady = this.speechVoices.length > 0;
+            };
+
+            refreshVoices();
+            window.speechSynthesis.onvoiceschanged = refreshVoices;
+        }
+
         // Load all sounds
         this.loadAllSounds();
     }
@@ -87,18 +98,23 @@ class AudioManager {
     }
 
     loadVoiceTemplate(templateId) {
-        console.log(`Loading voice template: ${templateId}`);
+        const normalizedTemplateId = this.normalizeTemplateId(templateId) || this.currentVoiceTemplate;
+        console.log(`Loading voice template: ${normalizedTemplateId}`);
 
         this.clearVoiceCache();
-        this.currentVoiceTemplate = templateId;
-        localStorage.setItem('voiceTemplate', templateId);
+        this.currentVoiceTemplate = normalizedTemplateId;
+        localStorage.setItem('voiceTemplate', normalizedTemplateId);
         this.ensureLetterAudio('G');
-        console.log(`Voice template loaded: ${templateId}`);
+        console.log(`Voice template loaded: ${normalizedTemplateId}`);
     }
 
     setVoiceTemplate(templateId) {
-        if (this.availableVoiceTemplates.find(t => t.id === templateId)) {
-            this.loadVoiceTemplate(templateId);
+        const normalizedTemplateId = this.normalizeTemplateId(templateId);
+        const allowedTemplates = this.availableVoiceTemplates
+            .map(t => this.normalizeTemplateId(t.id));
+
+        if (allowedTemplates.includes(normalizedTemplateId)) {
+            this.loadVoiceTemplate(normalizedTemplateId);
             return true;
         }
         return false;
@@ -227,7 +243,11 @@ class AudioManager {
         }
 
         if (!this.hasLoadedSound(id)) {
-            this.ensureSoundLoaded(id);
+            this.ensureSoundLoaded(id).finally(() => {
+                if (!this.hasLoadedSound(id) && id.startsWith('voice-') && this.canUseSpeechSynthesis) {
+                    this.speak(this.getVoiceFallbackText(id), { pitch: 1.15, rate: 0.88 });
+                }
+            });
             return;
         }
 
@@ -455,7 +475,7 @@ class AudioManager {
     speak(text, options = {}) {
         if (this.isMuted) return;
 
-        if ('speechSynthesis' in window) {
+        if (this.canUseSpeechSynthesis) {
             // Cancel any ongoing speech
             window.speechSynthesis.cancel();
 
@@ -466,16 +486,10 @@ class AudioManager {
             utterance.pitch = options.pitch || 1.1;
             utterance.volume = this.isMuted ? 0 : this.voiceVolume;
 
-            // Try to find a female voice for child-friendly sound
-            const voices = window.speechSynthesis.getVoices();
-            const femaleVoice = voices.find(voice =>
-                voice.name.toLowerCase().includes('female') ||
-                voice.name.toLowerCase().includes('girl') ||
-                voice.name.toLowerCase().includes('woman')
-            );
-
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
+            const voices = this.getSpeechVoices();
+            const selectedVoice = this.selectSpeechVoice(voices);
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
             }
 
             // Speak the text
@@ -486,6 +500,56 @@ class AudioManager {
             console.error('Speech synthesis not supported in this browser');
             return null;
         }
+    }
+
+    getSpeechVoices() {
+        if (!this.canUseSpeechSynthesis) return [];
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length) {
+            this.speechVoices = voices;
+            return voices;
+        }
+        return this.speechVoices || [];
+    }
+
+    selectSpeechVoice(voices) {
+        const list = voices || [];
+        const lower = value => (value || '').toLowerCase();
+        const matches = (...predicates) => list.find(v => predicates.every(fn => fn(v)));
+
+        if (this.currentVoiceTemplate === 'british_female') {
+            return matches(
+                v => lower(v.lang).startsWith('en-gb'),
+                v => /female|woman|girl|susan|hazel|sophie|emma|victoria/i.test(v.name)
+            ) || matches(v => lower(v.lang).startsWith('en-gb')) || list[0] || null;
+        }
+
+        return matches(
+            v => lower(v.lang).startsWith('en-us'),
+            v => /female|woman|girl|zira|jenny|aria|sarah|sara/i.test(v.name)
+        ) || matches(v => /female|woman|girl/i.test(v.name)) || list[0] || null;
+    }
+
+    getVoiceFallbackText(id) {
+        const map = {
+            'voice-grape': 'G is for grape!',
+            'voice-goat': 'G is for goat!',
+            'voice-gold': 'G is for gold!',
+            'voice-girl': 'G is for girl!',
+            'voice-grandpa': 'G is for grandpa!',
+            'voice-apple': 'A is for apple!',
+            'voice-ant': 'A is for ant!',
+            'voice-airplane': 'A is for airplane!',
+            'voice-alligator': 'A is for alligator!',
+            'voice-arrow': 'A is for arrow!',
+            'voice-ball': 'B is for ball!',
+            'voice-bat': 'B is for bat!',
+            'voice-bear': 'B is for bear!',
+            'voice-boat': 'B is for boat!',
+            'voice-butterfly': 'B is for butterfly!'
+        };
+
+        return map[id] || id.replace(/^voice-/, '').replace(/-/g, ' ');
     }
 
     // Generate dynamic sound effects using Web Audio API
@@ -564,8 +628,8 @@ class AudioManager {
 
         // Load voice template from localStorage or use default
         const savedTemplate = localStorage.getItem('voiceTemplate');
-        if (savedTemplate && this.availableVoiceTemplates.find(t => t.id === savedTemplate)) {
-            this.currentVoiceTemplate = savedTemplate;
+        if (savedTemplate) {
+            this.currentVoiceTemplate = this.normalizeTemplateId(savedTemplate) || this.currentVoiceTemplate;
         }
 
         this.updateVolumes();
@@ -610,8 +674,8 @@ class AudioManager {
 
         // Pause all voice sounds
         this.voices.forEach(voice => {
-            if (voice.audio && !voice.audio.paused) {
-                voice.audio.pause();
+            if (voice && !voice.paused) {
+                voice.pause();
             }
         });
 

@@ -518,6 +518,7 @@ class GameState {
         // Update audio manager with new template
         if (this.audioManager.setVoiceTemplate(templateId)) {
             console.log('Voice template loaded successfully');
+            this.updateVoiceTemplateSelector();
         } else {
             console.error('Failed to load voice template:', templateId);
         }

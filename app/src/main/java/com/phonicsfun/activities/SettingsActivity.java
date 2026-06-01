@@ -216,7 +216,7 @@ public class SettingsActivity extends Activity {
      */
     private void previewVoiceTemplate() {
         int selectedTemplate = voiceTemplateSpinner.getSelectedItemPosition();
-        String[] voiceTemplates = {"american-female", "american-male", "british-female", "british-male"};
+        String[] voiceTemplates = {"american_female", "american_male", "british_female", "british_male"};
         
         if (selectedTemplate < voiceTemplates.length) {
             String template = voiceTemplates[selectedTemplate];
