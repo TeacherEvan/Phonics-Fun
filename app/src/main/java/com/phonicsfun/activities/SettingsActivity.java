@@ -161,15 +161,25 @@ public class SettingsActivity extends Activity {
         // Load voice template
         int voiceTemplate = sharedPreferences.getInt("voice_template", 0);
         voiceTemplateSpinner.setSelection(voiceTemplate);
+        String[] voiceTemplates = {"american_female", "american_male", "british_female", "british_male"};
+        if (voiceTemplate >= 0 && voiceTemplate < voiceTemplates.length) {
+            audioManager.setVoiceTemplate(voiceTemplates[voiceTemplate]);
+        }
         
         // Load audio volume
         int audioVolume = sharedPreferences.getInt("audio_volume", 80);
         audioVolumeSeekBar.setProgress(audioVolume);
         audioVolumeValue.setText(audioVolume + "%");
+        audioManager.setVolume(audioVolume / 100.0f);
         
         // Load background music setting
         boolean backgroundMusic = sharedPreferences.getBoolean("background_music", true);
         backgroundMusicSwitch.setChecked(backgroundMusic);
+        if (backgroundMusic) {
+            audioManager.playBackgroundMusic();
+        } else {
+            audioManager.stopBackgroundMusic();
+        }
         
         // Load game speed
         float gameSpeed = sharedPreferences.getFloat("game_speed", 1.0f);
