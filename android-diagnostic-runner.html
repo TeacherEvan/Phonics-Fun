@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Phonics Fun - Android Diagnostic Runner</title>
+    <title>Phonics Fun - Legacy Android Diagnostic Runner</title>
     <style>
         body {
             font-family: 'Courier New', monospace;
@@ -86,15 +86,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Android Compatibility Diagnostic</h1>
+        <h1>🤖 Legacy Android Diagnostic Runner</h1>
         
         <div class="info">
             <h3>📱 About This Diagnostic</h3>
-            <p>This diagnostic tool will analyze your Phonics Fun game for Android compatibility issues specifically for BenQ Android board displays. It will check for common problems like touch event handling, audio playback, viewport scaling, and performance issues.</p>
+            <p>This legacy runner can still analyze Phonics Fun for Android compatibility issues on BenQ boards, but the canonical full diagnostic surface is <code>android-compatibility-test.html</code>. Use this page for console-captured legacy diagnostics or to jump to the primary test suite.</p>
+        </div>
+
+        <div class="warning">
+            <h3>📌 Preferred Diagnostic Surface</h3>
+            <p>Use <code>android-compatibility-test.html</code> for the primary compatibility and MCP diagnostics workflow. Keep this page only for legacy console capture and quick access.</p>
         </div>
         
         <div class="diagnostic-controls">
-            <button class="btn" onclick="runDiagnostic()">🔍 Run Diagnostic</button>
+            <button class="btn" onclick="runDiagnostic()">🔍 Run Legacy Diagnostic</button>
             <button class="btn" onclick="runCompatibilityTest()">🧪 Run Compatibility Test</button>
             <button class="btn" onclick="runMCPScan()">📊 Run MCP Scan</button>
             <button class="btn" onclick="exportReport()">📄 Export Report</button>
@@ -169,7 +174,7 @@
         
         function runDiagnostic() {
             clearConsole();
-            appendToConsole('🔍 Starting Android Compatibility Diagnostic...', 'info');
+            appendToConsole('🔍 Starting legacy Android Compatibility Diagnostic...', 'info');
             
             setTimeout(() => {
                 diagnosticInstance = new AndroidCompatibilityDiagnostic();

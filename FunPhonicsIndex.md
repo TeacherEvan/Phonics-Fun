@@ -43,7 +43,7 @@ Based on the existing structure and job cards, here is the most productive way t
 - **Primary Concern**: Performance on BenQ Android boards.
 - **Key Issues**: Potential problems with touch input and audio playback.
 - **Solution Approach**:
-    1.  Use the `android-test.html` and `android-diagnostic-runner.html` files to diagnose issues on the target device.
+    1.  Use `android-compatibility-test.html` as the primary diagnostic surface; use `android-diagnostic-runner.html` only for legacy console-capture troubleshooting.
     2.  Based on the diagnostics, implement solutions such as audio unlocking on user interaction and prioritizing touch events.
 - **Reference**: See `jobcard2.md` for the detailed diagnostic and resolution plan.
 

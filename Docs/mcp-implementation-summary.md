@@ -48,16 +48,16 @@ The controller module integrates all diagnostic tools into a unified interface:
 
 ## Integration Points
 
-The MCP tools have been integrated into two key files:
+The MCP tools have been integrated into two key files, with `android-compatibility-test.html` serving as the canonical diagnostic surface:
 
-### 1. `android-diagnostic-runner.html`
+### 1. `android-diagnostic-runner.html` (legacy runner)
 
 - Added script references to all MCP modules
 - Implemented MCP scan button and results display
 - Created functions for individual and comprehensive diagnostics
 - Added styling for results visualization
 
-### 2. `android-compatibility-test.html`
+### 2. `android-compatibility-test.html` (canonical test suite)
 
 - Added script references to all MCP modules
 - Created advanced diagnostics section with test buttons
@@ -69,13 +69,14 @@ The MCP tools have been integrated into two key files:
 
 To use the MCP diagnostic tools:
 
-1. Open either `android-diagnostic-runner.html` or `android-compatibility-test.html` on the target Android device
-2. For targeted diagnostics, use the individual category buttons:
+1. Open `android-compatibility-test.html` on the target Android device
+2. Use `android-diagnostic-runner.html` only when you need the legacy console-capture workflow
+3. For targeted diagnostics, use the individual category buttons:
    - Audio Diagnostics: Tests audio capabilities and playback
    - Touch Diagnostics: Tests touch input and event handling
    - Performance Diagnostics: Tests frame rate and memory usage
-3. For comprehensive diagnostics, use the "Run Full MCP Scan" button
-4. Review the diagnostic results including:
+4. For comprehensive diagnostics, use the "Run Full MCP Scan" button
+5. Review the diagnostic results including:
    - Overall and category-specific compatibility scores
    - Identified issues with severity ratings
    - Specific recommendations for fixing compatibility issues

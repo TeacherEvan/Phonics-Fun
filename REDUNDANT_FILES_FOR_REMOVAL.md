@@ -4,8 +4,8 @@
 
 ### HTML Files
 - `index.html` - Main web interface
-- `android-compatibility-test.html` - Web-based Android test
-- `android-diagnostic-runner.html` - Web diagnostic tool
+- `android-compatibility-test.html` - Canonical Android test surface (keep)
+- `android-diagnostic-runner.html` - Legacy diagnostic runner (keep for console-capture troubleshooting)
 - `android-test.html` - Web Android test
 - `generate-audio.html` - Web audio generator
 - `Tests/asset-generator.html` - Web asset generator

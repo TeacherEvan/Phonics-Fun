@@ -224,8 +224,8 @@ resumeAll() {
 ## Usage Instructions
 
 ### For Testing:
-1. Open `android-compatibility-test.html` for comprehensive testing
-2. Open `android-diagnostic-runner.html` for automated diagnostics
+1. Open `android-compatibility-test.html` as the canonical comprehensive test surface
+2. Use `android-diagnostic-runner.html` only for legacy console-capture diagnostics or quick handoff into the canonical suite
 3. Open `android-test.html` for basic functionality testing
 
 ### For Deployment:
