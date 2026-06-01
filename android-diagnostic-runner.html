@@ -3,270 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="refresh" content="0; url=android-compatibility-test.html">
     <title>Phonics Fun - Legacy Android Diagnostic Runner</title>
     <style>
         body {
-            font-family: 'Courier New', monospace;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #e5e5e5;
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+        .card {
+            max-width: 720px;
+            width: 100%;
+            border: 1px solid #2d2d2d;
+            border-radius: 16px;
             background: #1a1a1a;
-            color: #00ff00;
-            padding: 20px;
-            line-height: 1.6;
+            padding: 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
         }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
         h1 {
-            color: #00ff00;
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 2rem;
+            margin: 0 0 12px;
+            font-size: 1.8rem;
+            color: #7CFC98;
         }
-        
-        .diagnostic-controls {
-            background: rgba(0, 255, 0, 0.1);
-            border: 2px solid #00ff00;
+        p {
+            line-height: 1.6;
+            margin: 0 0 14px;
+        }
+        a, button {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 12px 16px;
             border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .btn {
-            background: #00ff00;
-            color: #1a1a1a;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            border-radius: 5px;
+            border: 0;
+            background: #7CFC98;
+            color: #111;
+            text-decoration: none;
+            font-weight: 700;
             cursor: pointer;
-            font-size: 1rem;
-            font-weight: bold;
         }
-        
-        .btn:hover {
-            background: #00cc00;
+        .muted {
+            color: #a8a8a8;
+            font-size: 0.95rem;
         }
-        
-        .console-output {
-            background: #000;
-            border: 2px solid #00ff00;
-            border-radius: 5px;
-            padding: 15px;
-            height: 60vh;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-        }
-        
-        .info {
-            background: rgba(0, 255, 255, 0.1);
-            border-left: 4px solid #00ffff;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .warning {
-            background: rgba(255, 255, 0, 0.1);
-            border-left: 4px solid #ffff00;
-            padding: 15px;
-            margin: 15px 0;
-        }
-        
-        .error {
-            background: rgba(255, 0, 0, 0.1);
-            border-left: 4px solid #ff0000;
-            padding: 15px;
-            margin: 15px 0;
+        code {
+            background: #222;
+            padding: 2px 6px;
+            border-radius: 6px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🤖 Legacy Android Diagnostic Runner</h1>
-        
-        <div class="info">
-            <h3>📱 About This Diagnostic</h3>
-            <p>This legacy runner can still analyze Phonics Fun for Android compatibility issues on BenQ boards, but the canonical full diagnostic surface is <code>android-compatibility-test.html</code>. Use this page for console-captured legacy diagnostics or to jump to the primary test suite.</p>
-        </div>
-
-        <div class="warning">
-            <h3>📌 Preferred Diagnostic Surface</h3>
-            <p>Use <code>android-compatibility-test.html</code> for the primary compatibility and MCP diagnostics workflow. Keep this page only for legacy console capture and quick access.</p>
-        </div>
-        
-        <div class="diagnostic-controls">
-            <button class="btn" onclick="runDiagnostic()">🔍 Run Legacy Diagnostic</button>
-            <button class="btn" onclick="runCompatibilityTest()">🧪 Run Compatibility Test</button>
-            <button class="btn" onclick="runMCPScan()">📊 Run MCP Scan</button>
-            <button class="btn" onclick="exportReport()">📄 Export Report</button>
-            <button class="btn" onclick="clearConsole()">🗑️ Clear Console</button>
-        </div>
-        
-        <div class="warning">
-            <h3>⚠️ Important Notes for BenQ Android Boards</h3>
-            <ul>
-                <li>BenQ Android boards often have specific touch calibration requirements</li>
-                <li>Audio autoplay policies may be stricter on commercial displays</li>
-                <li>Performance can vary significantly between different BenQ models</li>
-                <li>Some boards may have custom Android implementations with different behavior</li>
-            </ul>
-        </div>
-        
-        <div class="console-output" id="console-output">
-            <div style="color: #00ff00;">🎯 Android Diagnostic Console - Ready</div>
-            <div style="color: #ffff00;">Click "Run Diagnostic" to analyze your game for Android compatibility issues.</div>
-            <div style="color: #00ffff;">Console output will appear here...</div>
-        </div>
-    </div>
-
-    <!-- Include the diagnostic scripts -->
-    <script src="js/android-diagnostic.js"></script>
-    <script src="js/mcp-audio.js"></script>
-    <script src="js/mcp-perf.js"></script>
-    <script src="js/mcp-touch.js"></script>
-    <script src="js/mcp-controller.js"></script>
-    
+    <main class="card">
+        <h1>Legacy Diagnostic Runner</h1>
+        <p>This page is retired. The canonical diagnostic surface is <code>android-compatibility-test.html</code>.</p>
+        <p class="muted">You will be redirected automatically. If not, use the button below.</p>
+        <a href="android-compatibility-test.html">Open primary diagnostics</a>
+    </main>
     <script>
-        let diagnosticInstance = null;
-        let mcpController = null;
-        let originalConsoleLog = console.log;
-        let originalConsoleError = console.error;
-        let originalConsoleWarn = console.warn;
-        
-        // Override console methods to capture output
-        function setupConsoleCapture() {
-            console.log = function(...args) {
-                originalConsoleLog.apply(console, args);
-                appendToConsole(args.join(' '), 'log');
-            };
-            
-            console.error = function(...args) {
-                originalConsoleError.apply(console, args);
-                appendToConsole(args.join(' '), 'error');
-            };
-            
-            console.warn = function(...args) {
-                originalConsoleWarn.apply(console, args);
-                appendToConsole(args.join(' '), 'warn');
-            };
-        }
-        
-        function appendToConsole(message, type = 'log') {
-            const consoleOutput = document.getElementById('console-output');
-            const timestamp = new Date().toLocaleTimeString();
-            
-            let color = '#00ff00';
-            if (type === 'error') color = '#ff0000';
-            if (type === 'warn') color = '#ffff00';
-            if (type === 'info') color = '#00ffff';
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.style.color = color;
-            messageDiv.textContent = `[${timestamp}] ${message}`;
-            
-            consoleOutput.appendChild(messageDiv);
-            consoleOutput.scrollTop = consoleOutput.scrollHeight;
-        }
-        
-        function runDiagnostic() {
-            clearConsole();
-            appendToConsole('🔍 Starting legacy Android Compatibility Diagnostic...', 'info');
-            
-            setTimeout(() => {
-                diagnosticInstance = new AndroidCompatibilityDiagnostic();
-            }, 100);
-        }
-        
-        function runCompatibilityTest() {
-            const testUrl = 'android-compatibility-test.html';
-            appendToConsole(`🧪 Opening compatibility test: ${testUrl}`, 'info');
-            window.open(testUrl, '_blank');
-        }
-        
-        function exportReport() {
-            if (diagnosticInstance) {
-                diagnosticInstance.exportDetailedReport();
-                appendToConsole('📄 Detailed report exported as JSON file', 'info');
-            } else if (mcpController) {
-                mcpController.exportResults();
-                appendToConsole('📄 MCP report exported as JSON file', 'info');
-            } else {
-                appendToConsole('❌ No diagnostic data available. Run diagnostic or MCP scan first.', 'error');
-            }
-        }
-        
-        function clearConsole() {
-            const consoleOutput = document.getElementById('console-output');
-            consoleOutput.innerHTML = '<div style="color: #00ff00;">🎯 Console cleared</div>';
-        }
-        
-        function runMCPScan() {
-            clearConsole();
-            appendToConsole('📊 Starting MCP Diagnostic Scan...', 'info');
-            appendToConsole('⚙️ Initializing MCP diagnostic tools...', 'info');
-            
-            setTimeout(async () => {
-                mcpController = new MCPDiagnosticController();
-                const initSuccess = mcpController.initialize();
-                
-                if (initSuccess) {
-                    appendToConsole('✅ MCP diagnostic tools initialized successfully', 'info');
-                    appendToConsole('🔍 Running comprehensive MCP scan...', 'info');
-                    
-                    try {
-                        const results = await mcpController.startScan();
-                        appendToConsole(`✅ MCP scan complete: ${results.overall.compatibilityScore}/100 (${results.overall.compatibilityRating})`, 'info');
-                        
-                        // Display scores
-                        for (const [key, score] of Object.entries(results.overall.scores)) {
-                            appendToConsole(`   ${key.toUpperCase()}: ${score}/100`, 'info');
-                        }
-                        
-                        // Display top recommendations
-                        appendToConsole('📋 Top Recommendations:', 'info');
-                        results.overall.recommendations
-                            .filter(rec => rec.severity === 'critical' || rec.severity === 'high')
-                            .slice(0, 3)
-                            .forEach(rec => {
-                                appendToConsole(`   ${rec.severity.toUpperCase()}: ${rec.message}`, rec.severity === 'critical' ? 'error' : 'warn');
-                                appendToConsole(`   Solution: ${rec.solution}`, 'info');
-                            });
-                        
-                        // Create visual report
-                        const reportContainer = document.createElement('div');
-                        reportContainer.className = 'report-container';
-                        document.body.appendChild(reportContainer);
-                        
-                        mcpController.createVisualReport(reportContainer);
-                        appendToConsole('📊 Visual report created below console', 'info');
-                        
-                    } catch (error) {
-                        appendToConsole(`❌ MCP scan failed: ${error.message}`, 'error');
-                    }
-                } else {
-                    appendToConsole('❌ Failed to initialize MCP diagnostic tools', 'error');
-                }
-            }, 100);
-        }
-        
-        // Initialize console capture
-        setupConsoleCapture();
-        
-        // Add some initial system info
-        window.addEventListener('load', () => {
-            appendToConsole('🌍 System Information:', 'info');
-            appendToConsole(`   User Agent: ${navigator.userAgent}`, 'info');
-            appendToConsole(`   Screen: ${screen.width}x${screen.height}`, 'info');
-            appendToConsole(`   Viewport: ${window.innerWidth}x${window.innerHeight}`, 'info');
-            appendToConsole(`   Touch Support: ${('ontouchstart' in window) ? 'Yes' : 'No'}`, 'info');
-            appendToConsole(`   Device Pixel Ratio: ${window.devicePixelRatio || 1}`, 'info');
-            appendToConsole('', 'info');
-            appendToConsole('Ready to run diagnostic tests!', 'info');
-        });
+        window.location.replace('android-compatibility-test.html');
     </script>
 </body>
 </html>
