@@ -14,6 +14,50 @@
 // import CollisionManager from "./collision-manager.js";
 // import ParticleSystem from "./particles.js";
 
+const PHONICS_FUN_LETTER_DATA = Object.freeze({
+    A: ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
+    B: ['ball', 'bat', 'bear', 'boat', 'butterfly'],
+    C: ['cat', 'car', 'cake', 'cloud', 'crab'],
+    D: ['dog', 'duck', 'drum', 'dinosaur', 'door'],
+    E: ['elephant', 'egg', 'engine', 'elbow', 'earth'],
+    F: ['fish', 'frog', 'flower', 'feather', 'firetruck'],
+    G: ['grape', 'goat', 'gold', 'girl', 'grandpa'],
+    H: ['hat', 'hen', 'house', 'helicopter', 'hippo'],
+    I: ['igloo', 'insect', 'icecream', 'island', 'ink'],
+    J: ['jellyfish', 'jam', 'jet', 'jacket', 'jungle'],
+    K: ['kite', 'kangaroo', 'key', 'kitten', 'kettle'],
+    L: ['lion', 'lamp', 'leaf', 'ladder', 'lemon'],
+    M: ['moon', 'monkey', 'milk', 'mountain', 'mouse'],
+    N: ['nest', 'nose', 'net', 'night', 'noodles'],
+    O: ['octopus', 'orange', 'owl', 'ocean', 'oven'],
+    P: ['pig', 'pen', 'pizza', 'planet', 'pumpkin'],
+    Q: ['queen', 'quilt', 'quail', 'quarter', 'question'],
+    R: ['rabbit', 'rainbow', 'robot', 'rocket', 'rose'],
+    S: ['sun', 'snake', 'star', 'sock', 'sandwich'],
+    T: ['tiger', 'train', 'tree', 'turtle', 'toothbrush'],
+    U: ['umbrella', 'unicorn', 'up', 'urn', 'ukulele'],
+    V: ['van', 'vase', 'vegetable', 'violin', 'volcano'],
+    W: ['whale', 'window', 'watermelon', 'wagon', 'worm'],
+    X: ['xylophone', 'xray', 'xerus', 'xmas', 'xenops'],
+    Y: ['yacht', 'yak', 'yo-yo', 'yellow', 'yogurt'],
+    Z: ['zebra', 'zipper', 'zoo', 'zero', 'zigzag']
+});
+
+window.PHONICS_FUN_LETTER_DATA = PHONICS_FUN_LETTER_DATA;
+
+function buildLetterVocabulary(letterData) {
+    return Object.fromEntries(
+        Object.entries(letterData).map(([letter, words]) => [
+            letter,
+            words.map(word => ({
+                letter,
+                word,
+                audioKey: `voice-${word}`
+            }))
+        ])
+    );
+}
+
 /**
  * GameState - Main game state management class
  * Handles screen navigation, gameplay logic, and subsystem coordination
@@ -25,42 +69,17 @@ class GameState {
         
         // Gameplay state
         this.correctHitsCount = 0;
-        this.requiredHitsToComplete = 5;
         this.isGameplayActive = false;
         this.arePlanetsRendered = false;
         
         // Letter configuration
-        this.enabledLetters = ["G", "A", "B"];
+        this.letterVocabulary = buildLetterVocabulary(PHONICS_FUN_LETTER_DATA);
+        this.enabledLetters = Object.keys(this.letterVocabulary);
         this.activeLetterLevel = 'G';
-
-        // Organized vocabulary by letter
-        // TODO: [OPTIMIZATION] Consider moving vocabulary data to external JSON for easier content updates
-        this.letterVocabulary = {
-            'G': [
-                { letter: "G", word: "grape", audioKey: "voice-grape" },
-                { letter: "G", word: "goat", audioKey: "voice-goat" },
-                { letter: "G", word: "gold", audioKey: "voice-gold" },
-                { letter: "G", word: "girl", audioKey: "voice-girl" },
-                { letter: "G", word: "grandpa", audioKey: "voice-grandpa" }
-            ],
-            'A': [
-                { letter: "A", word: "apple", audioKey: "voice-apple" },
-                { letter: "A", word: "ant", audioKey: "voice-ant" },
-                { letter: "A", word: "airplane", audioKey: "voice-airplane" },
-                { letter: "A", word: "alligator", audioKey: "voice-alligator" },
-                { letter: "A", word: "arrow", audioKey: "voice-arrow" }
-            ],
-            'B': [
-                { letter: "B", word: "ball", audioKey: "voice-ball" },
-                { letter: "B", word: "bat", audioKey: "voice-bat" },
-                { letter: "B", word: "bear", audioKey: "voice-bear" },
-                { letter: "B", word: "boat", audioKey: "voice-boat" },
-                { letter: "B", word: "butterfly", audioKey: "voice-butterfly" }
-            ]
-        };
 
         // Active vocabulary for current level
         this.activeVocabulary = this.letterVocabulary['G'];
+        this.requiredHitsToComplete = this.activeVocabulary.length;
         this.vocabularyIndex = 0;
         
         // Audio settings
@@ -697,6 +716,7 @@ class GameState {
         console.log(`🚀 Starting ${letter} level...`);
         this.activeLetterLevel = letter;
         this.activeVocabulary = this.letterVocabulary[letter];
+        this.requiredHitsToComplete = this.activeVocabulary.length;
         this.syncLetterDisplays();
         this.audioManager.ensureLetterAudio(letter);
         this.displayOverlay('ready-overlay');
@@ -766,8 +786,8 @@ class GameState {
 
         const letterLower = this.activeLetterLevel.toLowerCase();
 
-        // Create target letter planets (5 planets to hit)
-        for (let i = 0; i < 5; i++) {
+        // Create target letter planets
+        for (let i = 0; i < this.activeVocabulary.length; i++) {
             const targetPlanet = document.createElement('div');
             targetPlanet.className = `planet ${letterLower}-planet`;
             targetPlanet.textContent = this.activeLetterLevel;
@@ -801,15 +821,13 @@ class GameState {
         }
 
         // Create distractor planets (3 random non-target letters)
-        for (let i = 0; i < 3; i++) {
+        const distractorLetters = this.shuffleLetters(
+            this.enabledLetters.filter(letter => letter !== this.activeLetterLevel)
+        ).slice(0, 3);
+
+        distractorLetters.forEach((distractorLetter, i) => {
             const distractorPlanet = document.createElement('div');
             distractorPlanet.className = 'planet other-planet';
-
-            // Select random letter that is not enabled
-            let distractorLetter;
-            do {
-                distractorLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-            } while (this.enabledLetters.includes(distractorLetter));
 
             distractorPlanet.textContent = distractorLetter;
             distractorPlanet.setAttribute('data-letter', distractorLetter);
@@ -838,7 +856,7 @@ class GameState {
                 'planet',
                 { isStatic: false, data: { letter: distractorLetter, index: i } }
             );
-        }
+        });
     }
     
     // Legacy alias
@@ -856,7 +874,7 @@ class GameState {
         const planetCenterX = rect.left + rect.width / 2;
         const planetCenterY = rect.top + rect.height / 2;
 
-        if (this.isLetterEnabled(letter)) {
+        if (this.isCorrectLetter(letter)) {
             this.processCorrectPlanetHit(planetElement, planetCenterX, planetCenterY);
         } else {
             this.processIncorrectPlanetHit(planetElement, planetCenterX, planetCenterY);
@@ -1090,6 +1108,15 @@ class GameState {
 
         // Show loading state
         wordBackground.classList.add('loading');
+        wordBackground.textContent = '';
+        wordBackground.style.display = '';
+        wordBackground.style.alignItems = '';
+        wordBackground.style.justifyContent = '';
+        wordBackground.style.textAlign = '';
+        wordBackground.style.color = '';
+        wordBackground.style.fontSize = '';
+        wordBackground.style.fontWeight = '';
+        wordBackground.style.padding = '';
         
         // Set background image with lazy loading path
         const imagePath = `Assets/images/${letter}-${letter.toLowerCase()}/Images/${word}.png`;
@@ -1109,6 +1136,7 @@ class GameState {
         // Load image progressively with loading indicator
         const img = new Image();
         img.onload = () => {
+            wordBackground.textContent = '';
             wordBackground.style.backgroundImage = `url('${imagePath}')`;
             wordBackground.classList.remove('loading');
             wordBackground.classList.add('visible');
@@ -1117,8 +1145,17 @@ class GameState {
         
         img.onerror = () => {
             console.warn(`Failed to load image: ${imagePath}`);
+            wordBackground.style.backgroundImage = 'none';
+            wordBackground.textContent = `${letter} is for ${word}`;
+            wordBackground.style.display = 'flex';
+            wordBackground.style.alignItems = 'center';
+            wordBackground.style.justifyContent = 'center';
+            wordBackground.style.textAlign = 'center';
+            wordBackground.style.color = '#ffffff';
+            wordBackground.style.fontSize = 'clamp(1.8rem, 4vw, 3.25rem)';
+            wordBackground.style.fontWeight = '700';
+            wordBackground.style.padding = '1.5rem';
             wordBackground.classList.remove('loading');
-            // Still show the word area even if image failed
             wordBackground.classList.add('visible');
             this.scheduleImageHide(wordBackground);
         };
@@ -1134,8 +1171,17 @@ class GameState {
         // Hide after display duration
         setTimeout(() => {
             wordBackground.classList.remove('visible');
-            // Remove loading class if still present
             wordBackground.classList.remove('loading');
+            wordBackground.textContent = '';
+            wordBackground.style.backgroundImage = '';
+            wordBackground.style.display = '';
+            wordBackground.style.alignItems = '';
+            wordBackground.style.justifyContent = '';
+            wordBackground.style.textAlign = '';
+            wordBackground.style.color = '';
+            wordBackground.style.fontSize = '';
+            wordBackground.style.fontWeight = '';
+            wordBackground.style.padding = '';
         }, 3000);
     }
     
@@ -1346,7 +1392,20 @@ class GameState {
     }
     
     // Legacy alias
-    isCorrectLetter(letter) { return this.isLetterEnabled(letter); }
+    isCorrectLetter(letter) { return letter === this.activeLetterLevel; }
+
+    shuffleLetters(letters) {
+        const shuffled = letters.slice();
+
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const swapIndex = Math.floor(Math.random() * (i + 1));
+            const current = shuffled[i];
+            shuffled[i] = shuffled[swapIndex];
+            shuffled[swapIndex] = current;
+        }
+
+        return shuffled;
+    }
     
     // Expose letterWords for backward compatibility
     get letterWords() { return this.letterVocabulary; }

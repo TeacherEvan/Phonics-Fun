@@ -263,13 +263,7 @@ class PerformanceUtils {
     preloadLetterImages(letter) {
         const letterLower = letter.toLowerCase();
         const imagePath = `Assets/images/${letter}-${letterLower}/Images/`;
-        
-        // Common word images for each letter
-        const letterImages = {
-            'G': ['girl', 'goat', 'gold', 'grape', 'grandpa'],
-            'A': ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
-            'B': ['ball', 'bat', 'bear', 'boat', 'butterfly']
-        };
+        const letterImages = window.PHONICS_FUN_LETTER_DATA || {};
 
         const images = (letterImages[letter] || []).filter(word => {
             return !this.resourceCache.has(`${letter}-${word}`);

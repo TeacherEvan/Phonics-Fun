@@ -33,10 +33,10 @@ class AudioManager {
         };
 
         // Voice template settings
-        this.currentVoiceTemplate = 'british_female'; // Default - use the clearest phonics voice
+        this.currentVoiceTemplate = 'british-female'; // Default - use the clearest phonics voice
         this.availableVoiceTemplates = [
-            { id: 'american_female', name: 'American Female', description: 'Clear American female voice' },
-            { id: 'british_female', name: 'British Female', description: 'Clear British female voice' }
+            { id: 'american-female', name: 'American Female', description: 'Clear American female voice' },
+            { id: 'british-female', name: 'British Female', description: 'Clear British female voice' }
         ];
 
         // Initialize audio system
@@ -246,6 +246,8 @@ class AudioManager {
             this.ensureSoundLoaded(id).finally(() => {
                 if (!this.hasLoadedSound(id) && id.startsWith('voice-') && this.canUseSpeechSynthesis) {
                     this.speak(this.getVoiceFallbackText(id), { pitch: 1.15, rate: 0.88 });
+                } else if (!this.hasLoadedSound(id) && id.startsWith('phoneme-')) {
+                    this.generatePhonemeSound(id.replace('phoneme-', ''));
                 }
             });
             return;
@@ -517,7 +519,7 @@ class AudioManager {
         const lower = value => (value || '').toLowerCase();
         const matches = (...predicates) => list.find(v => predicates.every(fn => fn(v)));
 
-        if (this.currentVoiceTemplate === 'british_female') {
+        if (this.currentVoiceTemplate === 'british-female') {
             return matches(
                 v => lower(v.lang).startsWith('en-gb'),
                 v => /female|woman|girl|susan|hazel|sophie|emma|victoria/i.test(v.name)
@@ -531,25 +533,16 @@ class AudioManager {
     }
 
     getVoiceFallbackText(id) {
-        const map = {
-            'voice-grape': 'G is for grape!',
-            'voice-goat': 'G is for goat!',
-            'voice-gold': 'G is for gold!',
-            'voice-girl': 'G is for girl!',
-            'voice-grandpa': 'G is for grandpa!',
-            'voice-apple': 'A is for apple!',
-            'voice-ant': 'A is for ant!',
-            'voice-airplane': 'A is for airplane!',
-            'voice-alligator': 'A is for alligator!',
-            'voice-arrow': 'A is for arrow!',
-            'voice-ball': 'B is for ball!',
-            'voice-bat': 'B is for bat!',
-            'voice-bear': 'B is for bear!',
-            'voice-boat': 'B is for boat!',
-            'voice-butterfly': 'B is for butterfly!'
-        };
+        const word = id.replace(/^voice-/, '');
+        const letterData = this.getLetterData();
 
-        return map[id] || id.replace(/^voice-/, '').replace(/-/g, ' ');
+        for (const [letter, words] of Object.entries(letterData)) {
+            if (words.includes(word)) {
+                return `${letter} is for ${word}!`;
+            }
+        }
+
+        return word.replace(/-/g, ' ');
     }
 
     // Generate dynamic sound effects using Web Audio API
@@ -735,6 +728,26 @@ class AudioManager {
         return this.sounds.has(id) || this.voices.has(id) || (id === 'background-music' && this.backgroundMusic !== null);
     }
 
+    getLetterData() {
+        return window.PHONICS_FUN_LETTER_DATA || {};
+    }
+
+    normalizeTemplateId(templateId) {
+        if (!templateId) {
+            return null;
+        }
+
+        const normalized = String(templateId).trim().toLowerCase().replace(/_/g, '-');
+        const aliasMap = {
+            americanfemale: 'american-female',
+            'american-female': 'american-female',
+            britishfemale: 'british-female',
+            'british-female': 'british-female'
+        };
+
+        return aliasMap[normalized.replace(/[^a-z-]/g, '')] || null;
+    }
+
     normalizeSoundId(id) {
         const aliasMap = {
             backgroundMusic: 'background-music',
@@ -814,11 +827,7 @@ class AudioManager {
 
     ensureLetterAudio(letter) {
         const upperLetter = letter.toUpperCase();
-        const letterWords = {
-            G: ['grape', 'goat', 'gold', 'girl', 'grandpa'],
-            A: ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
-            B: ['ball', 'bat', 'bear', 'boat', 'butterfly']
-        };
+        const letterWords = this.getLetterData();
 
         const requests = [
             this.ensureSoundLoaded(`phoneme-${upperLetter.toLowerCase()}`)
