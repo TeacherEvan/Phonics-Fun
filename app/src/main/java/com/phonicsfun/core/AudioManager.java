@@ -66,9 +66,9 @@ public class AudioManager {
             soundMap.put("celebration", soundPool.load(context, getResId("celebration", "raw"), 1));
             soundMap.put("explosion", soundPool.load(context, getResId("explosion", "raw"), 1));
             soundMap.put("phoneme_g", soundPool.load(context, getResId("phoneme_g", "raw"), 1));
-            
+
             Log.d(TAG, "Default sounds loaded successfully");
-        } catch (Exception e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             Log.e(TAG, "Error loading default sounds: " + e.getMessage());
         }
         
@@ -84,7 +84,7 @@ public class AudioManager {
                 backgroundMusicPlayer.setVolume(musicVolume, musicVolume);
                 Log.d(TAG, "Background music initialized");
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
             Log.e(TAG, "Error initializing background music: " + e.getMessage());
         }
     }
@@ -101,9 +101,9 @@ public class AudioManager {
                 loadVoiceVariant(voiceKey, "american_female");
                 loadVoiceVariant(voiceKey, "british_male");
                 loadVoiceVariant(voiceKey, "british_female");
-                
+
                 Log.d(TAG, "Loaded voice assets for word: " + word);
-            } catch (Exception e) {
+            } catch (IllegalStateException | IllegalArgumentException e) {
                 Log.w(TAG, "Could not load voice asset for word: " + word + " - " + e.getMessage());
             }
         }
@@ -215,13 +215,13 @@ public class AudioManager {
     
     public void playBackgroundMusic() {
         if (isMuted || !lowPriorityEnabled || backgroundMusicPlayer == null) return;
-        
+
         try {
             if (!backgroundMusicPlayer.isPlaying()) {
                 backgroundMusicPlayer.start();
                 Log.d(TAG, "Background music started");
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException e) {
             Log.e(TAG, "Error playing background music: " + e.getMessage());
         }
     }
