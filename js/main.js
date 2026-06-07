@@ -58,6 +58,17 @@ function buildLetterVocabulary(letterData) {
     );
 }
 
+// Import debounce from utils (with fallback for environments without modules)
+const { debounce } = (typeof require !== 'undefined') 
+    ? require('./utils.js') 
+    : { debounce: function(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }};
+
 /**
  * GameState - Main game state management class
  * Handles screen navigation, gameplay logic, and subsystem coordination
@@ -145,8 +156,7 @@ class GameState {
         }
     }
     
-    // Legacy method alias for backward compatibility
-    init() { this.initializeGame(); }
+    
 
     /**
      * Setup all DOM event listeners for user interactions
@@ -362,8 +372,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    handleOrientationChange() { this.handleDeviceOrientationChange(); }
+    
 
     /**
      * Configure audio manager with current settings
@@ -376,8 +385,7 @@ class GameState {
         });
     }
     
-    // Legacy alias
-    setupAudio() { this.setupAudioConfiguration(); }
+    
 
     setupEventSubscriptions() {
         // Subscribe to collision events
@@ -434,7 +442,7 @@ class GameState {
         console.log('Correct collision!');
 
         // Create explosion at collision point
-        this.createExplosion(x, y);
+        this.createExplosionEffect(x, y);
 
         // Play sound effects
         this.audioManager.play('explosion');
@@ -501,8 +509,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    toggleMute() { this.toggleAudioMute(); }
+    
 
     /**
      * Toggle settings panel visibility
@@ -528,8 +535,7 @@ class GameState {
         }, 300);
     }
     
-    // Legacy alias
-    toggleSettings() { this.toggleSettingsPanel(); }
+    
 
     handleVoiceTemplateChange(templateId) {
         console.log('Voice template changed to:', templateId);
@@ -615,8 +621,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    createWelcomeAnimations() { this.createWelcomeScreenAnimations(); }
+    
 
     /**
      * Create sparkle particle effect at element position
@@ -656,8 +661,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    createWelcomeSparkles(element) { this.createSparkleEffect(element); }
+    
 
     /**
      * Render the A-Z letter selection grid
@@ -690,8 +694,7 @@ class GameState {
         });
     }
     
-    // Legacy alias
-    createLetterGrid() { this.renderLetterSelectionGrid(); }
+    
 
     /**
      * Handle letter button click in level selection
@@ -705,8 +708,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    handleLetterClick(letter) { this.handleLetterSelection(letter); }
+    
 
     /**
      * Initialize and start a letter level
@@ -740,8 +742,7 @@ class GameState {
         }, 5000);
     }
     
-    // Legacy alias
-    startLetterLevel(letter) { this.initializeLetterLevel(letter); }
+    
 
     // Legacy method for G level compatibility
     startGLevel() {
@@ -772,8 +773,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    initializeGameplay() { this.startGameplaySession(); }
+    
 
     /**
      * Render target and distractor planets in the gameplay area
@@ -859,8 +859,7 @@ class GameState {
         });
     }
     
-    // Legacy alias
-    createPlanets() { this.renderGameplayPlanets(); }
+    
 
     /**
      * Handle planet click interaction
@@ -881,8 +880,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    handlePlanetClick(planet, letter) { this.handlePlanetInteraction(planet, letter); }
+    
 
     /**
      * Process a correct planet hit (target letter)
@@ -912,8 +910,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    handleCorrectHit(planet, x, y) { this.processCorrectPlanetHit(planet, x, y); }
+    
 
     /**
      * Process an incorrect planet hit (distractor letter)
@@ -928,8 +925,7 @@ class GameState {
         this.spawnAsteroid(x, y, 'dull', asteroidId);
     }
     
-    // Legacy alias
-    handleIncorrectHit(planet, x, y) { this.processIncorrectPlanetHit(planet, x, y); }
+    
 
     /**
      * Spawn an asteroid that flies toward a target position
@@ -1004,8 +1000,7 @@ class GameState {
         return asteroidElement;
     }
     
-    // Legacy alias
-    createAsteroid(targetX, targetY, type, id) { return this.spawnAsteroid(targetX, targetY, type, id); }
+    
 
     /**
      * Create visual explosion effect at coordinates
@@ -1036,8 +1031,7 @@ class GameState {
         }, 800);
     }
     
-    // Legacy alias
-    createExplosion(x, y) { this.createExplosionEffect(x, y); }
+    
 
     /**
      * Trigger screen shake effect for impact feedback
@@ -1052,8 +1046,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    createScreenShake() { this.triggerScreenShake(); }
+    
 
     /**
      * Play voice message for current vocabulary word
@@ -1086,8 +1079,7 @@ class GameState {
         this.vocabularyIndex = (this.vocabularyIndex + 1) % this.activeVocabulary.length;
     }
     
-    // Legacy alias
-    playVoiceMessage() { this.playVocabularyAudio(); }
+    
 
     /**
      * Display word image in the background
@@ -1185,8 +1177,7 @@ class GameState {
         }, 3000);
     }
     
-    // Legacy alias
-    showWordImage() { this.displayWordImage(); }
+    
 
     /**
      * Update progress bar and counter display
@@ -1217,8 +1208,7 @@ class GameState {
         });
     }
     
-    // Legacy alias
-    updateProgress() { this.updateProgressDisplay(); }
+    
 
     /**
      * Handle level completion
@@ -1241,8 +1231,7 @@ class GameState {
         this.displayPopup('level-complete-popup');
     }
     
-    // Legacy alias
-    completeLevel() { this.completeLevelSuccessfully(); }
+    
 
     /**
      * Navigate to a specific game screen
@@ -1285,8 +1274,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    showScreen(screenId) { this.navigateToScreen(screenId); }
+    
 
     /**
      * Display an overlay
@@ -1303,8 +1291,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    showOverlay(overlayId) { this.displayOverlay(overlayId); }
+    
 
     /**
      * Dismiss an overlay
@@ -1315,8 +1302,7 @@ class GameState {
         document.getElementById(overlayId).classList.add('hidden');
     }
     
-    // Legacy alias
-    hideOverlay(overlayId) { this.dismissOverlay(overlayId); }
+    
 
     /**
      * Display a popup modal
@@ -1333,8 +1319,7 @@ class GameState {
         }
     }
     
-    // Legacy alias
-    showPopup(popupId) { this.displayPopup(popupId); }
+    
 
     /**
      * Dismiss a popup modal
@@ -1345,8 +1330,7 @@ class GameState {
         document.getElementById(popupId).classList.add('hidden');
     }
     
-    // Legacy alias
-    hidePopup(popupId) { this.dismissPopup(popupId); }
+    
 
     /**
      * Reset gameplay state for new game
@@ -1379,8 +1363,7 @@ class GameState {
         document.querySelector('.word-background').classList.remove('visible');
     }
     
-    // Legacy alias
-    resetGame() { this.resetGameplayState(); }
+    
 
     /**
      * Check if a letter is enabled for play
@@ -1391,8 +1374,7 @@ class GameState {
         return this.enabledLetters.includes(letter);
     }
     
-    // Legacy alias
-    isCorrectLetter(letter) { return letter === this.activeLetterLevel; }
+    
 
     shuffleLetters(letters) {
         const shuffled = letters.slice();
@@ -1441,19 +1423,4 @@ document.addEventListener('visibilitychange', () => {
         }
     }
 });
-
-// Optimized debounce utility function
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func.apply(this, args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-// Export for testing and external access
 window.GameState = GameState;
