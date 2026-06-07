@@ -317,6 +317,9 @@ public class AudioManager {
     }
 
     private String normalizeTemplateId(String templateId) {
+        if (templateId == null || templateId.trim().isEmpty()) {
+            return DEFAULT_VOICE_TEMPLATE;
+        }
         return templateId.toLowerCase().replace('-', '_');
     }
     
