@@ -714,7 +714,7 @@ class GameState {
      * Initialize and start a letter level
      * @param {string} letter - The letter to start level for
      */
-    initializeLetterLevel(letter) {
+    async initializeLetterLevel(letter) {
         console.log(`🚀 Starting ${letter} level...`);
         this.activeLetterLevel = letter;
         this.activeVocabulary = this.letterVocabulary[letter];
@@ -730,16 +730,13 @@ class GameState {
 
         // Preload assets for this letter during loading screen
         if (this.performanceUtils) {
-            this.performanceUtils.preloadLetterImages(letter);
+            await this.performanceUtils.preloadLetterImages(letter);
         }
 
         // Transition to gameplay after loading
-        // TODO: [OPTIMIZATION] Replace setTimeout with actual asset preloading Promise
-        setTimeout(() => {
-            this.dismissOverlay('ready-overlay');
-            this.navigateToScreen('gameplay');
-            this.startGameplaySession();
-        }, 5000);
+        this.dismissOverlay('ready-overlay');
+        this.navigateToScreen('gameplay');
+        this.startGameplaySession();
     }
     
     

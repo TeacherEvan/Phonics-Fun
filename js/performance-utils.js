@@ -259,40 +259,61 @@ class PerformanceUtils {
     /**
      * Preload images for a specific letter level
      * @param {string} letter - The letter to preload images for
+     * @returns {Promise<void>} Resolves when all images are loaded or timeout
      */
     preloadLetterImages(letter) {
-        const letterLower = letter.toLowerCase();
-        const imagePath = `Assets/images/${letter}-${letterLower}/Images/`;
-        const letterImages = window.PHONICS_FUN_LETTER_DATA || {};
+        return new Promise((resolve) => {
+            const letterLower = letter.toLowerCase();
+            const imagePath = `Assets/images/${letter}-${letterLower}/Images/`;
+            const letterImages = window.PHONICS_FUN_LETTER_DATA || {};
 
-        const images = (letterImages[letter] || []).filter(word => {
-            return !this.resourceCache.has(`${letter}-${word}`);
-        });
-        const self = this;
-
-        if (images.length === 0) {
-            return;
-        }
-        
-        // Use requestIdleCallback for non-blocking preloading
-        PerformanceUtils.requestIdleCallback(() => {
-            images.forEach((word, index) => {
-                // Stagger image loading to avoid blocking
-                setTimeout(() => {
-                    const img = new Image();
-                    img.onload = () => {
-                        console.log(`✅ Preloaded: ${letter}-${word}`);
-                    };
-                    img.onerror = () => {
-                        console.log(`⚠️ Failed to preload: ${letter}-${word}`);
-                    };
-                    img.src = `${imagePath}${word}.png`;
-                    self.resourceCache.set(`${letter}-${word}`, img);
-                }, index * 100); // Stagger by 100ms
+            const images = (letterImages[letter] || []).filter(word => {
+                return !this.resourceCache.has(`${letter}-${word}`);
             });
-        });
+            const self = this;
 
-        console.log(`📦 Preloading images for letter: ${letter}`);
+            if (images.length === 0) {
+                resolve();
+                return;
+            }
+
+            let loadedCount = 0;
+            const totalImages = images.length;
+
+            const checkComplete = () => {
+                loadedCount++;
+                if (loadedCount >= totalImages) {
+                    console.log(`📦 Finished preloading images for letter: ${letter}`);
+                    resolve();
+                }
+            };
+
+            // Use requestIdleCallback for non-blocking preloading
+            PerformanceUtils.requestIdleCallback(() => {
+                images.forEach((word, index) => {
+                    // Stagger image loading to avoid blocking
+                    setTimeout(() => {
+                        const img = new Image();
+                        img.onload = () => {
+                            console.log(`✅ Preloaded: ${letter}-${word}`);
+                            checkComplete();
+                        };
+                        img.onerror = () => {
+                            console.log(`⚠️ Failed to preload: ${letter}-${word}`);
+                            checkComplete();
+                        };
+                        img.src = `${imagePath}${word}.png`;
+                        self.resourceCache.set(`${letter}-${word}`, img);
+                    }, index * 100); // Stagger by 100ms
+                });
+            });
+
+            // Fallback timeout in case images fail to load
+            setTimeout(() => {
+                console.log(`⏱️ Preload timeout for letter: ${letter}`);
+                resolve();
+            }, 5000);
+        });
     }
     
     /**
