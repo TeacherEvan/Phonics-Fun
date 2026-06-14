@@ -67,9 +67,12 @@ phonics-fun/
 │   ├── audio-test.html # Audio testing tool
 │   └── sound-test.html # Sound testing
 ├── Docs/
-│   ├── project-status.md # Current status
-│   ├── audio-enhancement-guide.md # Audio system documentation
-│   └── sound-generation-guide.md # Sound generation guide
+│   ├── README.md              # Documentation index
+│   ├── project-status.md      # Current status & merged tracking
+│   ├── audio-enhancement-guide.md  # Audio system, priority, assets
+│   ├── sound-generation-guide.md   # Sound generation tools & commands
+│   ├── enhancement-summary.md      # Visual enhancements & particle system
+│   └── audit-report.md             # Code quality & mobile audit
 ├── Dockerfile          # Docker container setup
 ├── README.md           # This file
 └── run.bat             # Windows startup script
@@ -81,8 +84,14 @@ phonics-fun/
 ├── assets/
 │   ├── images/         # Game images (planets, words, etc.)
 │   └── sounds/         # Audio files (effects, voices)
-├── docs/               # Documentation files
-├── tests/              # Test files
+├── Docs/               # Documentation files
+│   ├── README.md              # Documentation index
+│   ├── project-status.md      # Current status & merged tracking
+│   ├── audio-enhancement-guide.md  # Audio system, priority, assets
+│   ├── sound-generation-guide.md   # Sound generation tools & commands
+│   ├── enhancement-summary.md      # Visual enhancements & particle system
+│   └── audit-report.md             # Code quality & mobile audit
+├── Tests/              # Test files
 ├── Dockerfile          # Docker configuration
 └── README.md           # This file
 ```

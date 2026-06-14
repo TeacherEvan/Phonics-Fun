@@ -339,4 +339,9 @@ class PerformanceUtils {
 }
 
 // Export for global use
-window.PerformanceUtils = PerformanceUtils;
+export default PerformanceUtils;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.PerformanceUtils = PerformanceUtils;
+}

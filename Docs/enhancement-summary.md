@@ -95,3 +95,67 @@ The game now features:
 3. **Deploy and enjoy** the improved game!
 
 The Phonics Fun game is now a **premium educational experience** with professional-quality effects and comprehensive audio solutions! 🎉
+
+---
+
+## 📦 Merged: Welcome Screen Enhancements (from `Docs/welcome-screen-enhancements.md`)
+
+### Overview
+Enhancements made to the Phonics Fun welcome screen to create a more immersive and interactive experience.
+
+### New Features Implemented
+
+#### 1. Enhanced Text Animation
+- **Teacher Evan Text Flight**: The "Teacher Evan's" text now flies in from the side, makes a loop around the screen, and settles at the top
+- **Staged Text Appearance**: Welcome text appears in stages with different animations for each line
+- **Golden Glow Effect**: "Teacher Evan's" text has a golden glow and special text shadow effects
+
+#### 2. Interactive Welcome Background
+- **Animated Planets**: 4 different planets float across the screen with different sizes, colors, and animation timings
+- **Animated Asteroids**: 6 asteroids of varying sizes move across the screen with rotation effects
+- **Twinkling Stars**: Background stars twinkle with opacity animation
+- **Interactive Elements**: Planets and asteroids are clickable and have hover effects that create sparkle particles
+
+#### 3. Enhanced Explosion Effects
+- **Multi-layered Explosions**: Explosions now have multiple particle types (explosion, sparks, debris, shockwave)
+- **Particle System**: Advanced particle system with different behaviors for each particle type
+- **Screen Shake**: Explosions now cause a subtle screen shake effect
+- **Enhanced Visual Effects**: Explosions have improved colors, shadows, and blur effects
+
+#### 4. Background Music System
+- **Generated Ambient Music**: Web Audio API generates 20-second looping sci-fi ambient music
+- **Fallback Support**: Falls back to HTML audio elements if Web Audio API is not supported
+- **Volume Control**: Music volume can be adjusted independently from sound effects
+
+#### 5. Settings Panel
+- **Volume Controls**: Separate sliders for music and sound effects
+- **Mute Toggle**: Master mute button that affects all audio
+- **Persistent Settings**: Settings are maintained during the game session
+- **Modern UI**: Glassmorphism design with backdrop blur effects
+
+### Technical Implementation
+- **CSS Enhancements**: Advanced keyframe animations, particle effects, interactive states, responsive design
+- **JavaScript Features**: Particle system, audio management, interactive event handling, Web Audio API music generation
+- **File Structure**: Updated styles.css, main.js, particles.js with new animations and systems
+
+### User Experience Improvements
+- More engaging and dynamic welcome screen
+- Professional-looking particle effects
+- Smooth animations and transitions
+- Interactive feedback on hover and click
+- Immersive background music
+- Granular volume control and mute functionality
+- Accessibility improvements
+
+### Future Enhancements
+- More planet and asteroid varieties
+- Advanced background music compositions
+- Particle trail effects for moving objects
+- Achievement system for interactive elements
+- Customizable color themes
+
+### Browser Compatibility
+- Modern browsers with Web Audio API support
+- Fallback support for older browsers
+- Cross-platform compatibility (Windows, Mac, Linux)
+- Mobile device support

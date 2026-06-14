@@ -181,4 +181,9 @@ class EventManager {
 
 // Export for use in main game (ES6 modules temporarily disabled)
 // export default EventManager;
-window.EventManager = EventManager;
+export default EventManager;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.EventManager = EventManager;
+}

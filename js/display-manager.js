@@ -508,4 +508,9 @@ class DisplayManager {
 }
 
 // Export for global use
-window.DisplayManager = DisplayManager;
+export default DisplayManager;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.DisplayManager = DisplayManager;
+}

@@ -344,4 +344,9 @@ class CollisionManager {
 
 // Export for use in main game (ES6 modules temporarily disabled)
 // export default CollisionManager;
-window.CollisionManager = CollisionManager;
+export default CollisionManager;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.CollisionManager = CollisionManager;
+}

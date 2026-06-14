@@ -428,4 +428,9 @@ class ParticleSystem {
 
 // Export for use in main game (ES6 modules temporarily disabled)
 // export default ParticleSystem;
-window.ParticleSystem = ParticleSystem;
+export default ParticleSystem;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.ParticleSystem = ParticleSystem;
+}

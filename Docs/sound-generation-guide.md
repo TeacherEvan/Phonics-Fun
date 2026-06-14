@@ -208,7 +208,7 @@ The `Tests/asset-generator.html` file already includes:
 - All mentioned tools are free for educational use
 - No commercial licensing required
 - Open source alternatives available
-- Browser-based solutions require no installation
+---
 
 ## 🎵 Quick Start Commands
 
@@ -226,5 +226,11 @@ espeak -s 100 -p 70 "G is for grandpa!" -w assets/sounds/voice-grandpa.wav
 ffmpeg -i assets/sounds/phoneme-g.wav assets/sounds/phoneme-g.mp3
 # ... repeat for other files
 ```
+
+---
+
+## 📖 See Also
+
+- **Audio Enhancement Guide** → [`audio-enhancement-guide.md`](audio-enhancement-guide.md) — Architecture, priority system, asset status, and generated file details
 
 This guide provides multiple free, open-source options for generating all the audio needed for the Phonics Fun game!

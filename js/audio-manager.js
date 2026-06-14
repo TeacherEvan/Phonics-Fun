@@ -776,23 +776,23 @@ class AudioManager {
 
     getSoundPath(id) {
         if (id === 'background-music') {
-            return 'Assets/sounds/background-music.wav';
+            return '/sounds/background-music.wav';
         }
 
         if (id === 'explosion') {
-            return 'Assets/sounds/explosion.wav';
+            return '/sounds/explosion.wav';
         }
 
         if (id === 'celebration') {
-            return 'Assets/sounds/celebration.wav';
+            return '/sounds/celebration.wav';
         }
 
         if (id.startsWith('phoneme-')) {
-            return `Assets/sounds/${id}.wav`;
+            return `/sounds/${id}.wav`;
         }
 
         if (id.startsWith('voice-')) {
-            return `Assets/sounds/voices/${this.currentVoiceTemplate}/${id}.wav`;
+            return `/sounds/voices/${this.currentVoiceTemplate}/${id}.wav`;
         }
 
         return null;
@@ -853,6 +853,12 @@ class AudioManager {
 
 // Export for use in main game (ES6 modules temporarily disabled)
 // export default AudioManager;
-window.AudioManager = AudioManager;
+export default AudioManager;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.AudioManager = AudioManager;
+}
 
 // Global instance for easy access
+window.audioManager = new AudioManager();

@@ -72,7 +72,9 @@ class AndroidBenQInitializer {
             document.head.appendChild(viewport);
         }
         
-        viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui';
+        // Allow user scaling for accessibility (required for WCAG 2.1)
+        // The original restrictive settings caused Lighthouse failures
+        viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=yes';
         
         // Add Android-specific meta tags
         const androidMeta = document.createElement('meta');
@@ -426,4 +428,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Export for global use
-window.AndroidBenQInitializer = AndroidBenQInitializer;
+export default AndroidBenQInitializer;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.AndroidBenQInitializer = AndroidBenQInitializer;
+}

@@ -535,4 +535,9 @@ class UIUtils {
 }
 
 // Export for global use
-window.UIUtils = UIUtils;
+export default UIUtils;
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.UIUtils = UIUtils;
+}

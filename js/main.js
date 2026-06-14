@@ -7,12 +7,16 @@
  * @version 2.0.0
  */
 
-// Note: ES6 imports commented out for compatibility - using global classes instead
-// import EventBus from "./event-bus.js";
-// import AudioManager from "./audio-manager.js";
-// import EventManager from "./event-manager.js";
-// import CollisionManager from "./collision-manager.js";
-// import ParticleSystem from "./particles.js";
+import EventBus from './event-bus.js';
+import AudioManager from './audio-manager.js';
+import EventManager from './event-manager.js';
+import CollisionManager from './collision-manager.js';
+import ParticleSystem from './particles.js';
+import PerformanceUtils from './performance-utils.js';
+import UIUtils from './ui-utils.js';
+import DisplayManager from './display-manager.js';
+import AndroidBenQInitializer from './android-benq-init.js';
+import { debounce } from './utils.js';
 
 const PHONICS_FUN_LETTER_DATA = Object.freeze({
     A: ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
@@ -43,7 +47,12 @@ const PHONICS_FUN_LETTER_DATA = Object.freeze({
     Z: ['zebra', 'zipper', 'zoo', 'zero', 'zigzag']
 });
 
-window.PHONICS_FUN_LETTER_DATA = PHONICS_FUN_LETTER_DATA;
+export { PHONICS_FUN_LETTER_DATA };
+
+// Also attach to window for backward compatibility with tests
+if (typeof window !== 'undefined') {
+    window.PHONICS_FUN_LETTER_DATA = PHONICS_FUN_LETTER_DATA;
+}
 
 function buildLetterVocabulary(letterData) {
     return Object.fromEntries(
@@ -57,17 +66,6 @@ function buildLetterVocabulary(letterData) {
         ])
     );
 }
-
-// Import debounce from utils (with fallback for environments without modules)
-const { debounce } = (typeof require !== 'undefined') 
-    ? require('./utils.js') 
-    : { debounce: function(func, wait) {
-        let timeout;
-        return function(...args) {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => func.apply(this, args), wait);
-        };
-    }};
 
 /**
  * GameState - Main game state management class
@@ -87,7 +85,7 @@ class GameState {
         this.letterVocabulary = buildLetterVocabulary(PHONICS_FUN_LETTER_DATA);
         this.enabledLetters = Object.keys(this.letterVocabulary);
         this.activeLetterLevel = 'G';
-
+        
         // Active vocabulary for current level
         this.activeVocabulary = this.letterVocabulary['G'];
         this.requiredHitsToComplete = this.activeVocabulary.length;
@@ -97,7 +95,7 @@ class GameState {
         this.isAudioMuted = false;
         this.backgroundMusicVolume = 0.5;
         this.soundEffectsVolume = 0.7;
-
+        
         // Initialize subsystems
         this.audioManager = new AudioManager();
         this.eventManager = new EventManager();
@@ -105,12 +103,15 @@ class GameState {
         this.particleSystem = null;
         
         // Performance and UI utilities
-        this.performanceUtils = window.PerformanceUtils ? new PerformanceUtils() : null;
-        this.uiUtils = window.UIUtils ? new UIUtils() : null;
+        this.performanceUtils = new PerformanceUtils();
+        this.uiUtils = new UIUtils();
         
         // Display management for responsive design
-        this.displayManager = window.DisplayManager ? new DisplayManager() : null;
-
+        this.displayManager = new DisplayManager();
+        
+        // Initialize Android/BenQ compatibility
+        this.androidBenQInitializer = new AndroidBenQInitializer();
+        
         this.initializeGame();
     }
 
@@ -1230,12 +1231,18 @@ class GameState {
     
     
 
-    /**
+    /** 
      * Navigate to a specific game screen
      * @param {string} screenId - The screen identifier (welcome, level-select, gameplay)
      */
     navigateToScreen(screenId) {
         console.log(`🔄 Navigating to screen: ${screenId}`);
+
+        // Prevent navigating to the same screen
+        if (this.currentScreen === screenId) {
+            console.log(`Already on screen: ${screenId}, skipping navigation`);
+            return;
+        }
 
         // Get current and target screens
         const currentScreenElement = document.querySelector('.screen.active');

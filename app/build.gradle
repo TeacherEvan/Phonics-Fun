@@ -4,6 +4,7 @@ plugins {
 
 android {
     compileSdk 34
+    namespace "com.phonicsfun"
 
     defaultConfig {
         applicationId "com.phonicsfun"
