@@ -2490,3 +2490,38 @@ h1, h2, h3,
         box-shadow: inherit;
     }
 }
+
+/* Screen reader skip links & utility classes */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+    background: #1a1a2e;
+    color: #ffd700;
+    padding: 10px;
+    border: 2px solid #ffd700;
+    z-index: 1000;
+    display: block;
+}
+
+:focus-visible {
+    outline: 3px solid #ffd700 !important;
+    outline-offset: 2px !important;
+}

@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.widget.ImageView;
 import java.util.Random;
 
+import com.phonicsfun.R;
 import com.phonicsfun.core.GameState;
 import com.phonicsfun.core.EventManager;
 
@@ -172,7 +173,7 @@ public class WelcomeActivity extends Activity {
             star.setY(y);
             
             // Add to layout
-            findViewById(R.id.welcome_container).addView(star);
+            ((android.view.ViewGroup) findViewById(R.id.welcome_container)).addView(star);
             
             // Animate star
             ObjectAnimator starTwinkle = ObjectAnimator.ofFloat(star, "alpha", 0.0f, 1.0f, 0.0f);
@@ -183,7 +184,7 @@ public class WelcomeActivity extends Activity {
             animationHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    findViewById(R.id.welcome_container).removeView(star);
+                    ((android.view.ViewGroup) findViewById(R.id.welcome_container)).removeView(star);
                 }
             }, 1000);
         }
@@ -218,7 +219,7 @@ public class WelcomeActivity extends Activity {
         planet.setY(startY);
         
         // Add to layout
-        findViewById(R.id.welcome_container).addView(planet);
+        ((android.view.ViewGroup) findViewById(R.id.welcome_container)).addView(planet);
         
         // Animate planet movement
         ObjectAnimator planetMove = ObjectAnimator.ofFloat(planet, "x", startX, endX);
@@ -229,7 +230,7 @@ public class WelcomeActivity extends Activity {
         animationHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                findViewById(R.id.welcome_container).removeView(planet);
+                ((android.view.ViewGroup) findViewById(R.id.welcome_container)).removeView(planet);
             }
         }, 8000);
     }

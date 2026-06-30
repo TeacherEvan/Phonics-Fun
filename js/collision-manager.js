@@ -198,6 +198,16 @@ class CollisionManager {
     update(deltaTime) {
         if (!this.enabled || this.objects.size === 0) return;
         
+        // Performance optimization: if no asteroids are currently active,
+        // skip position updates and collision checks to avoid layout thrashing.
+        let hasAsteroid = false;
+        this.objects.forEach(obj => {
+            if (obj.type === 'asteroid') {
+                hasAsteroid = true;
+            }
+        });
+        if (!hasAsteroid) return;
+        
         // Update positions of all objects
         this.objects.forEach(obj => {
             this.updateObjectPosition(obj.id);

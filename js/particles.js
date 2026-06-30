@@ -11,6 +11,7 @@ class ParticleSystem {
         this.container = null;
         this.animationId = null;
         this.isActive = false;
+        this.elementPool = []; // DOM element pool for particles
         
         this.init();
     }
@@ -73,7 +74,9 @@ class ParticleSystem {
     }
 
     createParticleElement(particle) {
-        const element = document.createElement('div');
+        // Reuse element from pool if available
+        const element = this.elementPool.length > 0 ? this.elementPool.pop() : document.createElement('div');
+        
         element.className = `particle particle-${particle.type}`;
         element.style.cssText = `
             position: absolute;
@@ -114,22 +117,24 @@ class ParticleSystem {
                 element.style.borderRadius = '20% 80% 60% 40%';
                 element.style.boxShadow = `0 0 ${particle.size}px rgba(139, 69, 19, 0.8)`;
                 break;
-                element.style.background = particle.color;
-                element.style.boxShadow = `0 0 ${particle.size * 2}px ${particle.color}`;
-                break;
-            case 'debris':
-                element.style.background = particle.color;
-                element.style.borderRadius = '0';
-                element.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
-                break;
         }
 
         return element;
     }
 
     removeParticle(particle) {
-        if (particle.element && particle.element.parentNode) {
-            particle.element.parentNode.removeChild(particle.element);
+        if (particle.element) {
+            if (particle.element.parentNode) {
+                particle.element.parentNode.removeChild(particle.element);
+            }
+            // Reset style and class name before returning to the pool
+            particle.element.style.cssText = '';
+            particle.element.className = 'particle';
+            // Cap pool size to prevent excessive memory retention
+            if (this.elementPool.length < 150) {
+                this.elementPool.push(particle.element);
+            }
+            particle.element = null;
         }
         const index = this.particles.indexOf(particle);
         if (index > -1) {

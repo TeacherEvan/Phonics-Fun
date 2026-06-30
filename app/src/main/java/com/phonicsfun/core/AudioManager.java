@@ -4,8 +4,10 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -22,6 +24,7 @@ public class AudioManager {
     private MediaPlayer backgroundMusicPlayer;
     private Map<String, Integer> soundMap;
     private Map<String, Integer> voiceMap;
+    private TextToSpeech textToSpeech;
     
     private boolean isMuted = false;
     private float musicVolume = 0.5f;
@@ -39,6 +42,7 @@ public class AudioManager {
         initializeSoundPool();
         initializeAudioMaps();
         loadDefaultSounds();
+        initializeTextToSpeech();
     }
     
     private void initializeSoundPool() {
@@ -181,7 +185,8 @@ public class AudioManager {
             soundPool.play(soundId, voiceVolume, voiceVolume, 1, 0, 1.0f);
             Log.d(TAG, "Playing voice: " + fullVoiceKey);
         } else {
-            Log.w(TAG, "Voice not found: " + fullVoiceKey);
+            Log.w(TAG, "Voice not found: " + fullVoiceKey + ". Falling back to TextToSpeech.");
+            speakWithTts(voiceKey);
         }
     }
 
@@ -193,6 +198,7 @@ public class AudioManager {
         if (voiceTemplate == null || voiceTemplate.trim().isEmpty()) return;
         this.currentVoiceTemplate = normalizeTemplateId(voiceTemplate);
         Log.d(TAG, "Voice template set to: " + currentVoiceTemplate);
+        updateTtsLanguage();
     }
 
     public String getVoiceTemplate() {
@@ -294,6 +300,23 @@ public class AudioManager {
         }
         Log.d(TAG, "Audio priority " + priority + " set to: " + enabled);
     }
+
+    public void playPhoneme(char letter) {
+        String soundKey = "phoneme_" + String.valueOf(letter).toLowerCase();
+        playEffect(soundKey);
+    }
+
+    public void playCelebration() {
+        playEffect("celebration");
+    }
+
+    public void resume() {
+        resumeMusic();
+    }
+
+    public void pause() {
+        pauseMusic();
+    }
     
     public void cleanup() {
         Log.d(TAG, "Cleaning up audio resources...");
@@ -308,15 +331,66 @@ public class AudioManager {
             backgroundMusicPlayer = null;
         }
         
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+        }
+        
         soundMap.clear();
         voiceMap.clear();
+    }
+
+    private void initializeTextToSpeech() {
+        Log.d(TAG, "Initializing TextToSpeech engine...");
+        textToSpeech = new TextToSpeech(context, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                Log.d(TAG, "TextToSpeech engine initialized successfully");
+                updateTtsLanguage();
+            } else {
+                Log.e(TAG, "Failed to initialize TextToSpeech engine");
+            }
+        });
+    }
+
+    private void updateTtsLanguage() {
+        if (textToSpeech == null) return;
+        Locale locale = currentVoiceTemplate.contains("british") ? Locale.UK : Locale.US;
+        int result = textToSpeech.setLanguage(locale);
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            Log.w(TAG, "Language is not supported by TTS: " + locale);
+        } else {
+            Log.d(TAG, "TTS language set to: " + locale);
+        }
+    }
+
+    private void speakWithTts(String voiceKey) {
+        if (textToSpeech == null || isMuted || !highPriorityEnabled) return;
+        
+        // Clean up key (e.g., "voice_grape" -> "grape")
+        String word = voiceKey.replace("voice_", "").replace("voice-", "");
+        
+        // Generate a child-friendly phrase for educational engagement
+        String textToSpeak = word;
+        if (word.equalsIgnoreCase("grape") || word.equalsIgnoreCase("goat") || 
+            word.equalsIgnoreCase("gold") || word.equalsIgnoreCase("girl") || 
+            word.equalsIgnoreCase("grandpa") || word.equalsIgnoreCase("apple") || 
+            word.equalsIgnoreCase("ant") || word.equalsIgnoreCase("ball") || 
+            word.equalsIgnoreCase("bat") || word.equalsIgnoreCase("bear") || 
+            word.equalsIgnoreCase("boat") || word.equalsIgnoreCase("butterfly")) {
+            char firstLetter = word.toUpperCase().charAt(0);
+            textToSpeak = firstLetter + " is for " + word + "!";
+        }
+        
+        Log.d(TAG, "Speaking via TTS: " + textToSpeak);
+        textToSpeech.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, "phonics_fun_tts_" + System.currentTimeMillis());
     }
     
     private int getResId(String resName, String resType) {
         return context.getResources().getIdentifier(resName, resType, context.getPackageName());
     }
 
-    private String normalizeTemplateId(String templateId) {
+    private static String normalizeTemplateId(String templateId) {
         if (templateId == null || templateId.trim().isEmpty()) {
             return DEFAULT_VOICE_TEMPLATE;
         }

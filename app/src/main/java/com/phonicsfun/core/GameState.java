@@ -12,6 +12,7 @@ import java.util.List;
  */
 public class GameState {
     private static final String TAG = "PhonicsGameState";
+    private static GameState instance;
     
     public enum Screen {
         WELCOME, LEVEL_SELECT, GAMEPLAY, SETTINGS
@@ -34,6 +35,12 @@ public class GameState {
     private float effectsVolume;
     private String currentLetter;
     
+    // Adaptive difficulty states
+    private int correctAnswersCount;
+    private int totalAnswersCount;
+    private float difficultySpeedMultiplier;
+    private int difficultyPlanetCount;
+    
     // Game components
     private AudioManager audioManager;
     private EventManager eventManager;
@@ -53,8 +60,18 @@ public class GameState {
         this.effectsVolume = 0.7f;
         this.currentLetter = "G";
         
+        this.correctAnswersCount = 0;
+        this.totalAnswersCount = 0;
+        this.difficultySpeedMultiplier = 1.0f;
+        this.difficultyPlanetCount = 3;
+        
         initializeData();
         initializeComponents();
+        instance = this;
+    }
+
+    public static GameState getInstance() {
+        return instance;
     }
     
     private void initializeData() {
@@ -116,7 +133,9 @@ public class GameState {
     public void registerHit(boolean isCorrect) {
         if (gameStatus != GameStatus.ACTIVE) return;
         
+        totalAnswersCount++;
         if (isCorrect) {
+            correctAnswersCount++;
             correctHits++;
             Log.d(TAG, "Correct hit! Total: " + correctHits + "/" + totalHits);
             
@@ -124,6 +143,8 @@ public class GameState {
                 completeGame();
             }
         }
+        
+        updateAdaptiveDifficulty();
         
         // Play appropriate sound
         audioManager.playEffect(isCorrect ? "celebration" : "explosion");
@@ -221,6 +242,22 @@ public class GameState {
         currentWordIndex++;
     }
     
+    public void markLetterCompleted(char letter) {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("PhonicsGamePrefs", Context.MODE_PRIVATE);
+        String completedStr = prefs.getString("completed_letters", "");
+        String letterStr = String.valueOf(letter);
+        if (completedStr.indexOf(letterStr) == -1) {
+            completedStr += letterStr;
+            prefs.edit().putString("completed_letters", completedStr).apply();
+        }
+    }
+
+    public int getCompletedLettersCount() {
+        android.content.SharedPreferences prefs = context.getSharedPreferences("PhonicsGamePrefs", Context.MODE_PRIVATE);
+        String completedStr = prefs.getString("completed_letters", "");
+        return completedStr.length();
+    }
+    
     /**
      * Inner class to represent word messages
      */
@@ -239,4 +276,27 @@ public class GameState {
         public String getWord() { return word; }
         public String getSoundKey() { return soundKey; }
     }
+
+    private void updateAdaptiveDifficulty() {
+        if (totalAnswersCount == 0) {
+            difficultySpeedMultiplier = 1.0f;
+            difficultyPlanetCount = 3;
+            return;
+        }
+        
+        float accuracy = (float) correctAnswersCount / totalAnswersCount;
+        if (accuracy >= 0.85f) {
+            difficultySpeedMultiplier = 1.25f;
+            difficultyPlanetCount = 4;
+        } else if (accuracy <= 0.60f) {
+            difficultySpeedMultiplier = 0.8f;
+            difficultyPlanetCount = 2;
+        } else {
+            difficultySpeedMultiplier = 1.0f;
+            difficultyPlanetCount = 3;
+        }
+    }
+
+    public float getDifficultySpeedMultiplier() { return difficultySpeedMultiplier; }
+    public int getDifficultyPlanetCount() { return difficultyPlanetCount; }
 }

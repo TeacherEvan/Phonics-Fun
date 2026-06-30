@@ -78,6 +78,12 @@ class GameState {
         
         // Gameplay state
         this.correctHitsCount = 0;
+        this.incorrectHitsCount = 0;
+        this.totalAnswersCount = 0;
+        this.difficultySpeedMultiplier = 1.0;
+        this.difficultyPlanetCount = 3;
+        this.completedLevels = [];
+        this.sessionId = Math.random().toString(36).substring(2, 9);
         this.isGameplayActive = false;
         this.arePlanetsRendered = false;
         
@@ -111,6 +117,9 @@ class GameState {
         
         // Initialize Android/BenQ compatibility
         this.androidBenQInitializer = new AndroidBenQInitializer();
+        
+        // Load saved stats and set initial adaptive difficulty
+        this.loadSavedStats();
         
         this.initializeGame();
     }
@@ -220,6 +229,11 @@ class GameState {
 
         document.getElementById('preview-voice').addEventListener('click', () => {
             this.previewVoiceTemplate();
+        });
+
+        // Export progress data for teachers
+        document.getElementById('export-data-btn').addEventListener('click', () => {
+            this.exportTeacherData();
         });
 
         // Level complete popup actions
@@ -469,7 +483,13 @@ class GameState {
 
         // Update progress
         this.correctHits++;
+        this.totalAnswersCount++;
+        this.updateAdaptiveDifficulty();
+        this.saveStatsToLocalStorage();
         this.updateProgress();
+
+        // Announce correct hit to screen readers
+        this.announceToScreenReader(`Correct! You matched the letter ${this.activeLetterLevel}.`);
 
         // Check if level complete
         if (this.correctHits >= this.totalHits) {
@@ -485,10 +505,19 @@ class GameState {
         // Remove asteroid from collision manager
         this.collisionManager.unregisterObject(asteroidId);
 
+        // Track stats for adaptive difficulty
+        this.incorrectHitsCount++;
+        this.totalAnswersCount++;
+        this.updateAdaptiveDifficulty();
+        this.saveStatsToLocalStorage();
+
         // Create smaller explosion or visual feedback
         if (this.particleSystem) {
             this.particleSystem.asteroidHit(x, y, false);
         }
+
+        // Announce incorrect hit to screen readers
+        this.announceToScreenReader("Oops! That was a distractor planet.");
     }
 
     /**
@@ -778,11 +807,14 @@ class GameState {
      * Creates interactive letter planets for the current level
      */
     renderGameplayPlanets() {
-        console.log('🪐 Creating planets...');
+        console.log(`🪐 Creating planets (Speed Multiplier: ${this.difficultySpeedMultiplier}, Distractors: ${this.difficultyPlanetCount})...`);
         const planetsContainer = document.querySelector('.planets-container');
         planetsContainer.innerHTML = '';
 
         const letterLower = this.activeLetterLevel.toLowerCase();
+        
+        // Dynamic speed based on adaptive difficulty
+        const targetSpeed = 8 / this.difficultySpeedMultiplier;
 
         // Create target letter planets
         for (let i = 0; i < this.activeVocabulary.length; i++) {
@@ -799,7 +831,8 @@ class GameState {
             targetPlanet.style.left = `${posX}px`;
             targetPlanet.style.top = `${posY}px`;
 
-            // Staggered animation for visual interest
+            // Staggered animation and dynamic speed
+            targetPlanet.style.animation = `planetOrbit ${targetSpeed}s linear infinite, planetGlow 2s ease-in-out infinite alternate`;
             targetPlanet.style.animationDelay = `${Math.random() * 8}s`;
 
             targetPlanet.addEventListener('click', () => {
@@ -818,10 +851,12 @@ class GameState {
             );
         }
 
-        // Create distractor planets (3 random non-target letters)
+        // Create distractor planets based on adaptive difficulty count
         const distractorLetters = this.shuffleLetters(
             this.enabledLetters.filter(letter => letter !== this.activeLetterLevel)
-        ).slice(0, 3);
+        ).slice(0, this.difficultyPlanetCount);
+
+        const distractorSpeed = 12 / this.difficultySpeedMultiplier;
 
         distractorLetters.forEach((distractorLetter, i) => {
             const distractorPlanet = document.createElement('div');
@@ -837,7 +872,8 @@ class GameState {
             distractorPlanet.style.left = `${posX}px`;
             distractorPlanet.style.top = `${posY}px`;
 
-            // Slower animation for distractors
+            // Slower animation and dynamic speed
+            distractorPlanet.style.animation = `planetOrbit ${distractorSpeed}s linear infinite, planetGlow 3s ease-in-out infinite alternate`;
             distractorPlanet.style.animationDelay = `${Math.random() * 12}s`;
 
             distractorPlanet.addEventListener('click', () => {
@@ -1216,6 +1252,15 @@ class GameState {
         this.isGameplayActive = false;
         this.audioManager.play('celebration');
 
+        // Track completed level
+        if (!this.completedLevels.includes(this.activeLetterLevel)) {
+            this.completedLevels.push(this.activeLetterLevel);
+        }
+        
+        // Save state and update difficulty
+        this.updateAdaptiveDifficulty();
+        this.saveStatsToLocalStorage();
+
         // Create celebration particle effects
         if (this.particleSystem) {
             this.particleSystem.levelComplete();
@@ -1226,15 +1271,14 @@ class GameState {
             this.uiUtils.showToast('Level Complete! Great job!', 'success', 3000);
         }
 
+        // Announce to screen readers
+        this.announceToScreenReader(`Fantastic! You completed the mission for letter ${this.activeLetterLevel}!`);
+
         this.displayPopup('level-complete-popup');
     }
     
     
 
-    /** 
-     * Navigate to a specific game screen
-     * @param {string} screenId - The screen identifier (welcome, level-select, gameplay)
-     */
     navigateToScreen(screenId) {
         console.log(`🔄 Navigating to screen: ${screenId}`);
 
@@ -1248,6 +1292,12 @@ class GameState {
         const currentScreenElement = document.querySelector('.screen.active');
         const targetScreenElement = document.getElementById(`${screenId}-screen`);
 
+        // Focus the new screen for accessibility (WCAG focus routing)
+        if (targetScreenElement) {
+            targetScreenElement.setAttribute('tabindex', '-1');
+            targetScreenElement.focus();
+        }
+
         // Use smooth transition if UI utilities available
         if (this.uiUtils && currentScreenElement && targetScreenElement) {
             this.uiUtils.transitionScreens(currentScreenElement, targetScreenElement, () => {
@@ -1258,7 +1308,9 @@ class GameState {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
             });
-            targetScreenElement.classList.add('active');
+            if (targetScreenElement) {
+                targetScreenElement.classList.add('active');
+            }
             this.onScreenTransitionComplete(screenId);
         }
 
@@ -1276,6 +1328,9 @@ class GameState {
         } else {
             this.audioManager.stop('background-music');
         }
+
+        // Announce screen change for screen readers
+        this.announceToScreenReader(`Space mission screen loaded: ${screenId}.`);
     }
     
     
@@ -1395,6 +1450,101 @@ class GameState {
     
     // Expose letterWords for backward compatibility
     get letterWords() { return this.letterVocabulary; }
+
+    announceToScreenReader(message) {
+        const announcer = document.getElementById('game-announcer');
+        if (announcer) {
+            announcer.textContent = message;
+        }
+    }
+
+    loadSavedStats() {
+        try {
+            const savedData = localStorage.getItem('phonics_fun_stats');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                this.completedLevels = parsed.completedLevels || [];
+                this.correctHitsCount = parsed.correctHitsCount || 0;
+                this.incorrectHitsCount = parsed.incorrectHitsCount || 0;
+                this.totalAnswersCount = parsed.totalAnswersCount || 0;
+                this.updateAdaptiveDifficulty();
+            }
+        } catch (e) {
+            console.error('Failed to load stats from localStorage:', e);
+        }
+    }
+
+    saveStatsToLocalStorage() {
+        try {
+            const stats = {
+                completedLevels: this.completedLevels,
+                correctHitsCount: this.correctHitsCount,
+                incorrectHitsCount: this.incorrectHitsCount,
+                totalAnswersCount: this.totalAnswersCount
+            };
+            localStorage.setItem('phonics_fun_stats', JSON.stringify(stats));
+        } catch (e) {
+            console.error('Failed to save stats to localStorage:', e);
+        }
+    }
+
+    updateAdaptiveDifficulty() {
+        if (this.totalAnswersCount === 0) {
+            this.difficultySpeedMultiplier = 1.0;
+            this.difficultyPlanetCount = 3;
+            return;
+        }
+        
+        const accuracy = this.correctHitsCount / this.totalAnswersCount;
+        console.log(`📊 Accuracy is: ${(accuracy * 100).toFixed(1)}% (${this.correctHitsCount}/${this.totalAnswersCount})`);
+        
+        if (accuracy >= 0.85) {
+            this.difficultySpeedMultiplier = 1.25;
+            this.difficultyPlanetCount = 4;
+            console.log('⚡ Adaptive Difficulty: Hard (faster planets, more distractors)');
+        } else if (accuracy <= 0.60) {
+            this.difficultySpeedMultiplier = 0.8;
+            this.difficultyPlanetCount = 2;
+            console.log('🐢 Adaptive Difficulty: Easy (slower planets, fewer distractors)');
+        } else {
+            this.difficultySpeedMultiplier = 1.0;
+            this.difficultyPlanetCount = 3;
+            console.log('⚖️ Adaptive Difficulty: Normal');
+        }
+    }
+
+    exportTeacherData() {
+        const stats = {
+            sessionId: this.sessionId || Math.random().toString(36).substring(2, 9),
+            exportTimestamp: new Date().toISOString(),
+            correctHits: this.correctHitsCount,
+            incorrectHits: this.incorrectHitsCount,
+            accuracy: this.totalAnswersCount > 0 ? (this.correctHitsCount / this.totalAnswersCount).toFixed(2) : '1.00',
+            completedLevels: Array.from(new Set(this.completedLevels || [])),
+            difficultySpeedMultiplier: this.difficultySpeedMultiplier,
+            difficultyPlanetCount: this.difficultyPlanetCount
+        };
+        
+        try {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(stats, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `phonics-fun-progress-${stats.sessionId}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            
+            this.announceToScreenReader('Progress report downloaded successfully.');
+            if (this.uiUtils) {
+                this.uiUtils.showToast('Progress report downloaded!', 'success', 3000);
+            }
+        } catch (e) {
+            console.error('Failed to export progress data:', e);
+            if (this.uiUtils) {
+                this.uiUtils.showToast('Failed to export progress data', 'error', 3000);
+            }
+        }
+    }
 }
 
 // Global error handling with enhanced logging

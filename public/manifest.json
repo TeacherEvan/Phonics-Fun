@@ -1,0 +1,18 @@
+{
+  "name": "Phonics Fun",
+  "short_name": "Phonics Fun",
+  "description": "Educational phonics game for learning letters through interactive space-themed gameplay",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "categories": ["education", "games"],
+  "icons": [
+    {
+      "src": "/images/G-g/Images/girl-clipart-lg.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
