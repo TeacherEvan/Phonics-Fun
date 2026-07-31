@@ -10,7 +10,6 @@ app/.gradle/
 local.properties
 *.class
 *.jar
-package-lock.json
 .prettierrc
 vitest.config.mjs.timestamp-*
 *.tsbuildinfo
