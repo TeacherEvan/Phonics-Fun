@@ -12,7 +12,7 @@ class ParticleSystem {
         this.animationId = null;
         this.isActive = false;
         this.elementPool = []; // DOM element pool for particles
-        
+
         this.init();
     }
 
@@ -35,7 +35,7 @@ class ParticleSystem {
             pointer-events: none;
             z-index: 25;
         `;
-        
+
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
             gameArea.appendChild(this.container);
@@ -59,11 +59,11 @@ class ParticleSystem {
             color: options.color || '#ffffff',
             velocity: {
                 x: (Math.random() - 0.5) * (options.speed || 2),
-                y: (Math.random() - 0.5) * (options.speed || 2)
+                y: (Math.random() - 0.5) * (options.speed || 2),
             },
             gravity: options.gravity || 0,
             element: null,
-            ...options
+            ...options,
         };
 
         particle.element = this.createParticleElement(particle);
@@ -75,8 +75,11 @@ class ParticleSystem {
 
     createParticleElement(particle) {
         // Reuse element from pool if available
-        const element = this.elementPool.length > 0 ? this.elementPool.pop() : document.createElement('div');
-        
+        const element =
+            this.elementPool.length > 0
+                ? this.elementPool.pop()
+                : document.createElement('div');
+
         element.className = `particle particle-${particle.type}`;
         element.style.cssText = `
             position: absolute;
@@ -145,7 +148,7 @@ class ParticleSystem {
     updateParticle(particle, deltaTime) {
         // Update life
         particle.life -= deltaTime * (1 / particle.maxLife);
-        
+
         if (particle.life <= 0) {
             this.removeParticle(particle);
             return;
@@ -154,7 +157,7 @@ class ParticleSystem {
         // Update position
         particle.x += particle.velocity.x * deltaTime * 60;
         particle.y += particle.velocity.y * deltaTime * 60;
-        
+
         // Apply gravity
         particle.velocity.y += particle.gravity * deltaTime * 60;
 
@@ -163,7 +166,7 @@ class ParticleSystem {
             particle.element.style.left = `${particle.x}px`;
             particle.element.style.top = `${particle.y}px`;
             particle.element.style.opacity = particle.life;
-            
+
             // Type-specific updates
             switch (particle.type) {
                 case 'explosion':
@@ -182,8 +185,12 @@ class ParticleSystem {
         }
 
         // Remove if off screen
-        if (particle.x < -50 || particle.x > window.innerWidth + 50 ||
-            particle.y < -50 || particle.y > window.innerHeight + 50) {
+        if (
+            particle.x < -50 ||
+            particle.x > window.innerWidth + 50 ||
+            particle.y < -50 ||
+            particle.y > window.innerHeight + 50
+        ) {
             this.removeParticle(particle);
         }
     }
@@ -207,13 +214,13 @@ class ParticleSystem {
     createExplosion(x, y, intensity = 1) {
         const particleCount = Math.floor(20 * intensity);
         const colors = ['#ff6b6b', '#ff8e53', '#ff6b35', '#ffd93d', '#fff'];
-        
+
         for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2;
             const speed = (Math.random() * 100 + 50) * intensity;
             const size = Math.random() * 6 + 2;
             const color = colors[Math.floor(Math.random() * colors.length)];
-            
+
             this.createParticle(x, y, 'explosion', {
                 size: size,
                 color: color,
@@ -221,9 +228,9 @@ class ParticleSystem {
                 speed: speed,
                 velocity: {
                     x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
+                    y: Math.sin(angle) * speed,
                 },
-                gravity: 0.1
+                gravity: 0.1,
             });
         }
 
@@ -236,8 +243,8 @@ class ParticleSystem {
                 speed: Math.random() * 150 + 100,
                 velocity: {
                     x: (Math.random() - 0.5) * 200,
-                    y: (Math.random() - 0.5) * 200
-                }
+                    y: (Math.random() - 0.5) * 200,
+                },
             });
         }
     }
@@ -245,66 +252,66 @@ class ParticleSystem {
     createEnhancedExplosion(x, y, intensity = 1) {
         const baseParticleCount = 15;
         const particleCount = Math.floor(baseParticleCount * intensity);
-        
+
         // Create main explosion particles
         for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2;
             const speed = (Math.random() * 3 + 2) * intensity;
             const size = Math.random() * 6 + 4;
-            
+
             this.createParticle(x, y, 'explosion', {
                 velocity: {
                     x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
+                    y: Math.sin(angle) * speed,
                 },
                 size: size,
                 color: `hsl(${Math.random() * 60 + 15}, 100%, ${Math.random() * 30 + 60}%)`,
                 maxLife: Math.random() * 0.5 + 0.5,
-                gravity: 0.1
+                gravity: 0.1,
             });
         }
-        
+
         // Create sparks
         for (let i = 0; i < particleCount * 2; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = (Math.random() * 5 + 3) * intensity;
-            
+
             this.createParticle(x, y, 'spark', {
                 velocity: {
                     x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
+                    y: Math.sin(angle) * speed,
                 },
                 size: Math.random() * 3 + 1,
                 color: '#ffffff',
                 maxLife: Math.random() * 0.3 + 0.2,
-                gravity: 0.05
+                gravity: 0.05,
             });
         }
-        
+
         // Create debris
         for (let i = 0; i < Math.floor(particleCount * 0.5); i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = (Math.random() * 2 + 1) * intensity;
-            
+
             this.createParticle(x, y, 'debris', {
                 velocity: {
                     x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
+                    y: Math.sin(angle) * speed,
                 },
                 size: Math.random() * 4 + 2,
                 color: '#8B4513',
                 maxLife: Math.random() * 0.8 + 0.7,
-                gravity: 0.2
+                gravity: 0.2,
             });
         }
-        
+
         // Create shockwave ring
         this.createParticle(x, y, 'shockwave', {
             velocity: { x: 0, y: 0 },
             size: 10,
             color: 'rgba(255, 255, 255, 0.6)',
             maxLife: 0.4,
-            gravity: 0
+            gravity: 0,
         });
     }
 
@@ -321,7 +328,7 @@ class ParticleSystem {
                     color: '#ff6b6b',
                     maxLife: 0.5,
                     speed: 0,
-                    velocity: { x: 0, y: 0 }
+                    velocity: { x: 0, y: 0 },
                 }
             );
         }
@@ -329,22 +336,22 @@ class ParticleSystem {
 
     createDebris(x, y, count = 15) {
         const colors = ['#8B4513', '#A0522D', '#CD853F', '#D2691E'];
-        
+
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
             const speed = Math.random() * 80 + 20;
             const size = Math.random() * 4 + 1;
             const color = colors[Math.floor(Math.random() * colors.length)];
-            
+
             this.createParticle(x, y, 'debris', {
                 size: size,
                 color: color,
                 maxLife: 1.5,
                 velocity: {
                     x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
+                    y: Math.sin(angle) * speed,
                 },
-                gravity: 0.05
+                gravity: 0.05,
             });
         }
     }
@@ -357,13 +364,13 @@ class ParticleSystem {
             const y = Math.random() * window.innerHeight;
             const size = Math.random() * 2 + 1;
             const brightness = Math.random() * 0.8 + 0.2;
-            
+
             this.createParticle(x, y, 'star', {
                 size: size,
                 color: `rgba(255, 255, 255, ${brightness})`,
                 maxLife: 10,
                 velocity: { x: 0, y: 0 },
-                twinkle: true
+                twinkle: true,
             });
         }
     }
@@ -391,18 +398,24 @@ class ParticleSystem {
         // Create celebration particles
         const centerX = window.innerWidth / 2;
         const centerY = window.innerHeight / 2;
-        
+
         for (let i = 0; i < 100; i++) {
             setTimeout(() => {
                 this.createParticle(centerX, centerY, 'explosion', {
                     size: Math.random() * 8 + 4,
-                    color: ['#ffd700', '#ffed4e', '#00b894', '#74b9ff', '#fd79a8'][Math.floor(Math.random() * 5)],
+                    color: [
+                        '#ffd700',
+                        '#ffed4e',
+                        '#00b894',
+                        '#74b9ff',
+                        '#fd79a8',
+                    ][Math.floor(Math.random() * 5)],
                     maxLife: 2,
                     velocity: {
                         x: (Math.random() - 0.5) * 200,
-                        y: (Math.random() - 0.5) * 200
+                        y: (Math.random() - 0.5) * 200,
                     },
-                    gravity: 0.02
+                    gravity: 0.02,
                 });
             }, i * 50);
         }
@@ -426,7 +439,7 @@ class ParticleSystem {
     }
 
     clear() {
-        this.particles.forEach(particle => this.removeParticle(particle));
+        this.particles.forEach((particle) => this.removeParticle(particle));
         this.particles = [];
     }
 }

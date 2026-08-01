@@ -13,6 +13,7 @@
     "lint": "eslint js/",
     "lint:fix": "eslint js/ --fix",
     "format": "prettier --write js/",
+    "format:check": "prettier --check js/",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

@@ -7,21 +7,24 @@
 class AndroidBenQInitializer {
     constructor() {
         this.isAndroid = /Android/i.test(navigator.userAgent);
-        this.isBenQ = /BenQ/i.test(navigator.userAgent) || this.detectBenQBoard();
+        this.isBenQ =
+            /BenQ/i.test(navigator.userAgent) || this.detectBenQBoard();
         this.init();
     }
 
     init() {
         if (this.isAndroid) {
-            console.log('🤖 Android device detected, initializing compatibility fixes...');
+            console.log(
+                '🤖 Android device detected, initializing compatibility fixes...'
+            );
             this.applyAndroidFixes();
         }
-        
+
         if (this.isBenQ) {
             console.log('📺 BenQ board detected, applying specific fixes...');
             this.applyBenQFixes();
         }
-        
+
         this.setupAudioCompatibility();
         this.setupTouchOptimization();
         this.setupPerformanceOptimization();
@@ -31,9 +34,10 @@ class AndroidBenQInitializer {
     detectBenQBoard() {
         // Check for BenQ-specific characteristics
         const hasLargeScreen = screen.width >= 1920 || screen.height >= 1080;
-        const hasSpecificResolution = (screen.width === 1920 && screen.height === 1080) || 
-                                     (screen.width === 3840 && screen.height === 2160);
-        
+        const hasSpecificResolution =
+            (screen.width === 1920 && screen.height === 1080) ||
+            (screen.width === 3840 && screen.height === 2160);
+
         // BenQ boards often have specific screen characteristics
         return hasLargeScreen && hasSpecificResolution;
     }
@@ -41,16 +45,16 @@ class AndroidBenQInitializer {
     applyAndroidFixes() {
         // Fix viewport issues
         this.fixViewport();
-        
+
         // Fix touch events
         this.fixTouchEvents();
-        
+
         // Fix audio autoplay
         this.fixAudioAutoplay();
-        
+
         // Fix orientation issues
         this.fixOrientation();
-        
+
         // Fix performance issues
         this.fixPerformance();
     }
@@ -70,11 +74,12 @@ class AndroidBenQInitializer {
             viewport.name = 'viewport';
             document.head.appendChild(viewport);
         }
-        
+
         // Allow user scaling for accessibility (required for WCAG 2.1)
         // The original restrictive settings caused Lighthouse failures
-        viewport.content = 'width=device-width, initial-scale=1.0, user-scalable=yes';
-        
+        viewport.content =
+            'width=device-width, initial-scale=1.0, user-scalable=yes';
+
         // Add Android-specific meta tags
         const androidMeta = document.createElement('meta');
         androidMeta.name = 'mobile-web-app-capable';
@@ -87,7 +92,7 @@ class AndroidBenQInitializer {
         if (!window.TouchEvent) {
             console.log('Adding TouchEvent polyfill for older Android');
             // Basic TouchEvent polyfill
-            window.TouchEvent = function(type, eventInit) {
+            window.TouchEvent = function (type, eventInit) {
                 const event = document.createEvent('Event');
                 event.initEvent(type, true, true);
                 event.touches = eventInit.touches || [];
@@ -103,50 +108,64 @@ class AndroidBenQInitializer {
 
     fixTouchDelay() {
         // Implement FastClick-like functionality for Android
-        const gameElements = document.querySelectorAll('.planet, .primary-button, .secondary-button');
-        
-        gameElements.forEach(element => {
+        const gameElements = document.querySelectorAll(
+            '.planet, .primary-button, .secondary-button'
+        );
+
+        gameElements.forEach((element) => {
             let touchStartTime = 0;
             let touchMoved = false;
-            
-            element.addEventListener('touchstart', (_e) => {
-                touchStartTime = Date.now();
-                touchMoved = false;
-            }, { passive: false });
-            
-            element.addEventListener('touchmove', (_e) => {
-                touchMoved = true;
-            }, { passive: false });
-            
-            element.addEventListener('touchend', (e) => {
-                const touchDuration = Date.now() - touchStartTime;
-                
-                if (!touchMoved && touchDuration < 300) {
-                    // Simulate a click event
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    const clickEvent = new MouseEvent('click', {
-                        bubbles: true,
-                        cancelable: true,
-                        view: window
-                    });
-                    
-                    element.dispatchEvent(clickEvent);
-                }
-            }, { passive: false });
+
+            element.addEventListener(
+                'touchstart',
+                (_e) => {
+                    touchStartTime = Date.now();
+                    touchMoved = false;
+                },
+                { passive: false }
+            );
+
+            element.addEventListener(
+                'touchmove',
+                (_e) => {
+                    touchMoved = true;
+                },
+                { passive: false }
+            );
+
+            element.addEventListener(
+                'touchend',
+                (e) => {
+                    const touchDuration = Date.now() - touchStartTime;
+
+                    if (!touchMoved && touchDuration < 300) {
+                        // Simulate a click event
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const clickEvent = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window,
+                        });
+
+                        element.dispatchEvent(clickEvent);
+                    }
+                },
+                { passive: false }
+            );
         });
     }
 
     fixAudioAutoplay() {
         // Handle Android audio autoplay restrictions
         const audioElements = document.querySelectorAll('audio');
-        
-        audioElements.forEach(audio => {
+
+        audioElements.forEach((audio) => {
             audio.addEventListener('play', () => {
                 console.log(`Audio element ${audio.id} attempting to play`);
             });
-            
+
             audio.addEventListener('error', (e) => {
                 console.error(`Audio element ${audio.id} error:`, e);
             });
@@ -155,25 +174,38 @@ class AndroidBenQInitializer {
         // Create user interaction handler for audio
         const enableAudioOnInteraction = () => {
             console.log('User interaction detected, enabling audio...');
-            
+
             // Try to play and immediately pause each audio element
-            audioElements.forEach(audio => {
-                audio.play().then(() => {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }).catch(error => {
-                    console.log(`Audio ${audio.id} initialization failed:`, error);
-                });
+            audioElements.forEach((audio) => {
+                audio
+                    .play()
+                    .then(() => {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    })
+                    .catch((error) => {
+                        console.log(
+                            `Audio ${audio.id} initialization failed:`,
+                            error
+                        );
+                    });
             });
-            
+
             // Remove the event listeners after first interaction
-            document.removeEventListener('touchstart', enableAudioOnInteraction);
+            document.removeEventListener(
+                'touchstart',
+                enableAudioOnInteraction
+            );
             document.removeEventListener('click', enableAudioOnInteraction);
         };
-        
+
         // Add event listeners for first user interaction
-        document.addEventListener('touchstart', enableAudioOnInteraction, { once: true });
-        document.addEventListener('click', enableAudioOnInteraction, { once: true });
+        document.addEventListener('touchstart', enableAudioOnInteraction, {
+            once: true,
+        });
+        document.addEventListener('click', enableAudioOnInteraction, {
+            once: true,
+        });
     }
 
     fixOrientation() {
@@ -184,12 +216,12 @@ class AndroidBenQInitializer {
                 document.body.style.display = 'none';
                 document.body.offsetHeight; // Trigger reflow
                 document.body.style.display = '';
-                
+
                 // Dispatch custom event
                 window.dispatchEvent(new CustomEvent('orientationFixed'));
             }, 100);
         };
-        
+
         window.addEventListener('orientationchange', handleOrientationChange);
         window.addEventListener('resize', handleOrientationChange);
     }
@@ -198,8 +230,11 @@ class AndroidBenQInitializer {
         // Optimize performance for Android
         if (this.isAndroid) {
             // Reduce animation complexity
-            document.documentElement.style.setProperty('--animation-duration', '0.2s');
-            
+            document.documentElement.style.setProperty(
+                '--animation-duration',
+                '0.2s'
+            );
+
             // Disable some visual effects on lower-end devices
             const isLowEnd = navigator.hardwareConcurrency <= 2;
             if (isLowEnd) {
@@ -210,7 +245,7 @@ class AndroidBenQInitializer {
 
     fixBenQTouch() {
         console.log('Applying BenQ-specific touch fixes...');
-        
+
         // BenQ boards sometimes have touch calibration issues
         const touchArea = document.querySelector('.game-area');
         if (touchArea) {
@@ -220,7 +255,7 @@ class AndroidBenQInitializer {
             touchArea.style.mozUserSelect = 'none';
             touchArea.style.msUserSelect = 'none';
         }
-        
+
         // Increase touch target sizes for BenQ boards
         const style = document.createElement('style');
         style.textContent = `
@@ -240,14 +275,14 @@ class AndroidBenQInitializer {
 
     fixBenQAudio() {
         console.log('Applying BenQ-specific audio fixes...');
-        
+
         // BenQ boards may have different audio requirements
         const audioElements = document.querySelectorAll('audio');
-        
-        audioElements.forEach(audio => {
+
+        audioElements.forEach((audio) => {
             audio.preload = 'auto';
             audio.volume = 0.8; // Slightly lower volume for board speakers
-            
+
             // Add error handling specific to BenQ boards
             audio.addEventListener('error', (e) => {
                 console.error('BenQ audio error:', e);
@@ -261,12 +296,12 @@ class AndroidBenQInitializer {
 
     fixBenQDisplay() {
         console.log('Applying BenQ-specific display fixes...');
-        
+
         // Optimize for large displays
         const isLargeDisplay = screen.width >= 1920;
         if (isLargeDisplay) {
             document.documentElement.classList.add('large-display');
-            
+
             // Add CSS for large displays
             const style = document.createElement('style');
             style.textContent = `
@@ -286,20 +321,30 @@ class AndroidBenQInitializer {
 
     setupAudioCompatibility() {
         // Web Audio API compatibility
-        if (typeof AudioContext === 'undefined' && typeof webkitAudioContext !== 'undefined') {
+        if (
+            typeof AudioContext === 'undefined' &&
+            typeof webkitAudioContext !== 'undefined'
+        ) {
             window.AudioContext = webkitAudioContext;
         }
-        
+
         // Handle audio context suspension (common on mobile)
         if (typeof AudioContext !== 'undefined') {
             const resumeAudioContext = () => {
-                if (window.audioContext && window.audioContext.state === 'suspended') {
+                if (
+                    window.audioContext &&
+                    window.audioContext.state === 'suspended'
+                ) {
                     window.audioContext.resume();
                 }
             };
-            
-            document.addEventListener('touchstart', resumeAudioContext, { once: true });
-            document.addEventListener('click', resumeAudioContext, { once: true });
+
+            document.addEventListener('touchstart', resumeAudioContext, {
+                once: true,
+            });
+            document.addEventListener('click', resumeAudioContext, {
+                once: true,
+            });
         }
     }
 
@@ -309,15 +354,19 @@ class AndroidBenQInitializer {
             const gameArea = document.querySelector('.game-area');
             if (gameArea) {
                 // Use passive event listeners where possible
-                gameArea.addEventListener('touchstart', (e) => {
-                    // Only prevent default if necessary
-                    if (e.target.classList.contains('planet')) {
-                        e.preventDefault();
-                    }
-                }, { passive: false });
+                gameArea.addEventListener(
+                    'touchstart',
+                    (e) => {
+                        // Only prevent default if necessary
+                        if (e.target.classList.contains('planet')) {
+                            e.preventDefault();
+                        }
+                    },
+                    { passive: false }
+                );
             }
         };
-        
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', optimizeTouchEvents);
         } else {
@@ -330,14 +379,15 @@ class AndroidBenQInitializer {
         if (window.performance && window.performance.memory) {
             const checkMemory = () => {
                 const memory = window.performance.memory;
-                const memoryUsage = memory.usedJSHeapSize / memory.totalJSHeapSize;
-                
+                const memoryUsage =
+                    memory.usedJSHeapSize / memory.totalJSHeapSize;
+
                 if (memoryUsage > 0.8) {
                     console.warn('High memory usage detected, optimizing...');
                     this.optimizeForLowMemory();
                 }
             };
-            
+
             setInterval(checkMemory, 30000); // Check every 30 seconds
         }
     }
@@ -345,7 +395,7 @@ class AndroidBenQInitializer {
     optimizeForLowMemory() {
         // Reduce visual effects and animations
         document.documentElement.classList.add('low-memory');
-        
+
         // Add CSS for low memory mode
         const style = document.createElement('style');
         style.textContent = `
@@ -364,20 +414,23 @@ class AndroidBenQInitializer {
         // Global error handler for Android-specific issues
         window.addEventListener('error', (event) => {
             console.error('Android compatibility error:', event.error);
-            
+
             // Handle specific Android errors
             if (event.error.message.includes('Audio')) {
                 console.log('Audio error detected, attempting to recover...');
                 this.recoverAudio();
             }
         });
-        
+
         // Handle unhandled promise rejections
         window.addEventListener('unhandledrejection', (event) => {
             console.error('Unhandled promise rejection:', event.reason);
-            
+
             // Don't let audio playback failures crash the game
-            if (event.reason.toString().includes('play') || event.reason.toString().includes('audio')) {
+            if (
+                event.reason.toString().includes('play') ||
+                event.reason.toString().includes('audio')
+            ) {
                 event.preventDefault();
                 console.log('Audio playback error handled gracefully');
             }
@@ -387,11 +440,11 @@ class AndroidBenQInitializer {
     recoverAudio() {
         // Attempt to recover from audio errors
         const audioElements = document.querySelectorAll('audio');
-        
-        audioElements.forEach(audio => {
+
+        audioElements.forEach((audio) => {
             audio.load();
         });
-        
+
         // Reinitialize audio manager if available
         if (window.audioManager) {
             setTimeout(() => {
@@ -407,12 +460,14 @@ class AndroidBenQInitializer {
             isBenQ: this.isBenQ,
             touchSupport: 'ontouchstart' in window,
             audioSupport: !!window.Audio,
-            webAudioSupport: !!(window.AudioContext || window.webkitAudioContext),
+            webAudioSupport: !!(
+                window.AudioContext || window.webkitAudioContext
+            ),
             screenSize: `${screen.width}x${screen.height}`,
             devicePixelRatio: window.devicePixelRatio || 1,
-            userAgent: navigator.userAgent
+            userAgent: navigator.userAgent,
         };
-        
+
         console.log('🧪 Android BenQ Compatibility Test Results:', results);
         return results;
     }
@@ -421,7 +476,7 @@ class AndroidBenQInitializer {
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.androidBenQInitializer = new AndroidBenQInitializer();
-    
+
     // Run compatibility test
     window.androidBenQInitializer.runCompatibilityTest();
 });

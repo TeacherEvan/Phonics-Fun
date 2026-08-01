@@ -10,7 +10,7 @@ class PerformanceUtils {
         this.performanceMetrics = {
             loadTime: 0,
             firstContentfulPaint: 0,
-            largestContentfulPaint: 0
+            largestContentfulPaint: 0,
         };
         this.resourceCache = new Map();
         this.init();
@@ -32,22 +32,29 @@ class PerformanceUtils {
             const observerOptions = {
                 root: null,
                 rootMargin: '50px 0px', // Start loading 50px before entering viewport
-                threshold: 0.01
+                threshold: 0.01,
             };
 
-            this.imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const lazyImage = entry.target;
-                        this.loadImage(lazyImage);
-                        observer.unobserve(lazyImage);
-                    }
-                });
-            }, observerOptions);
+            this.imageObserver = new IntersectionObserver(
+                (entries, observer) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            const lazyImage = entry.target;
+                            this.loadImage(lazyImage);
+                            observer.unobserve(lazyImage);
+                        }
+                    });
+                },
+                observerOptions
+            );
 
-            console.log('✅ Lazy loading initialized with Intersection Observer');
+            console.log(
+                '✅ Lazy loading initialized with Intersection Observer'
+            );
         } else {
-            console.log('⚠️ Intersection Observer not supported, using fallback');
+            console.log(
+                '⚠️ Intersection Observer not supported, using fallback'
+            );
             this.loadAllLazyImages();
         }
     }
@@ -70,7 +77,7 @@ class PerformanceUtils {
             image.classList.remove('loading');
             image.classList.add('loaded');
             image.removeAttribute('data-src');
-            
+
             // Trigger fade-in animation
             requestAnimationFrame(() => {
                 image.style.opacity = '1';
@@ -106,7 +113,7 @@ class PerformanceUtils {
      */
     observeAllLazyImages() {
         const lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(image => this.observeImage(image));
+        lazyImages.forEach((image) => this.observeImage(image));
     }
 
     /**
@@ -114,7 +121,7 @@ class PerformanceUtils {
      */
     loadAllLazyImages() {
         const lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(image => this.loadImage(image));
+        lazyImages.forEach((image) => this.loadImage(image));
     }
 
     /**
@@ -137,11 +144,11 @@ class PerformanceUtils {
         link.rel = 'preload';
         link.href = url;
         link.as = type;
-        
+
         if (type === 'font') {
             link.crossOrigin = 'anonymous';
         }
-        
+
         document.head.appendChild(link);
     }
 
@@ -166,10 +173,14 @@ class PerformanceUtils {
                 const lcpObserver = new PerformanceObserver((entryList) => {
                     const entries = entryList.getEntries();
                     const lastEntry = entries[entries.length - 1];
-                    this.performanceMetrics.largestContentfulPaint = lastEntry.startTime;
+                    this.performanceMetrics.largestContentfulPaint =
+                        lastEntry.startTime;
                     console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
                 });
-                lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+                lcpObserver.observe({
+                    type: 'largest-contentful-paint',
+                    buffered: true,
+                });
             } catch {
                 console.log('LCP observation not supported');
             }
@@ -178,10 +189,13 @@ class PerformanceUtils {
             try {
                 const fcpObserver = new PerformanceObserver((entryList) => {
                     const entries = entryList.getEntries();
-                    entries.forEach(entry => {
+                    entries.forEach((entry) => {
                         if (entry.name === 'first-contentful-paint') {
-                            this.performanceMetrics.firstContentfulPaint = entry.startTime;
-                            console.log(`📊 FCP: ${entry.startTime.toFixed(2)}ms`);
+                            this.performanceMetrics.firstContentfulPaint =
+                                entry.startTime;
+                            console.log(
+                                `📊 FCP: ${entry.startTime.toFixed(2)}ms`
+                            );
                         }
                     });
                 });
@@ -267,7 +281,7 @@ class PerformanceUtils {
             const imagePath = `Assets/images/${letter}-${letterLower}/Images/`;
             const letterImages = window.PHONICS_FUN_LETTER_DATA || {};
 
-            const images = (letterImages[letter] || []).filter(word => {
+            const images = (letterImages[letter] || []).filter((word) => {
                 return !this.resourceCache.has(`${letter}-${word}`);
             });
             const self = this;
@@ -283,7 +297,9 @@ class PerformanceUtils {
             const checkComplete = () => {
                 loadedCount++;
                 if (loadedCount >= totalImages) {
-                    console.log(`📦 Finished preloading images for letter: ${letter}`);
+                    console.log(
+                        `📦 Finished preloading images for letter: ${letter}`
+                    );
                     resolve();
                 }
             };
@@ -299,7 +315,9 @@ class PerformanceUtils {
                             checkComplete();
                         };
                         img.onerror = () => {
-                            console.log(`⚠️ Failed to preload: ${letter}-${word}`);
+                            console.log(
+                                `⚠️ Failed to preload: ${letter}-${word}`
+                            );
                             checkComplete();
                         };
                         img.src = `${imagePath}${word}.png`;
@@ -315,7 +333,7 @@ class PerformanceUtils {
             }, 5000);
         });
     }
-    
+
     /**
      * Get cached image for a letter-word combination
      * @param {string} letter - The letter

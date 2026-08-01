@@ -27,12 +27,12 @@ class EventManager {
             id: this.generateId(),
             callback,
             priority: options.priority || 0,
-            once: options.once || false
+            once: options.once || false,
         };
 
         const subscribers = this.events.get(eventName);
         subscribers.push(subscription);
-        
+
         // Sort by priority (higher priority first)
         subscribers.sort((a, b) => b.priority - a.priority);
 
@@ -63,7 +63,7 @@ class EventManager {
         }
 
         const subscribers = this.events.get(eventName);
-        const index = subscribers.findIndex(sub => sub.id === subscriptionId);
+        const index = subscribers.findIndex((sub) => sub.id === subscriptionId);
 
         if (index === -1) {
             return false;
@@ -89,13 +89,16 @@ class EventManager {
         for (const subscription of subscribers) {
             try {
                 subscription.callback(data);
-                
+
                 // Mark for removal if it's a one-time subscription
                 if (subscription.once) {
                     subscribersToRemove.push(subscription.id);
                 }
             } catch (error) {
-                console.error(`Error in event handler for "${eventName}":`, error);
+                console.error(
+                    `Error in event handler for "${eventName}":`,
+                    error
+                );
             }
         }
 
@@ -112,7 +115,7 @@ class EventManager {
      */
     queueEvent(eventName, data = {}) {
         this.eventQueue.push({ eventName, data });
-        
+
         if (!this.isProcessingQueue) {
             this.processEventQueue();
         }
@@ -127,15 +130,15 @@ class EventManager {
         }
 
         this.isProcessingQueue = true;
-        
+
         const { eventName, data } = this.eventQueue.shift();
-        
+
         // Add a small delay to ensure events don't process too quickly
-        await new Promise(resolve => setTimeout(resolve, 10));
-        
+        await new Promise((resolve) => setTimeout(resolve, 10));
+
         // Emit the event
         this.emit(eventName, data);
-        
+
         // Continue processing the queue
         this.isProcessingQueue = false;
         this.processEventQueue();
@@ -146,8 +149,10 @@ class EventManager {
      * @returns {string} - Unique ID
      */
     generateId() {
-        return Math.random().toString(36).substring(2, 15) + 
-               Math.random().toString(36).substring(2, 15);
+        return (
+            Math.random().toString(36).substring(2, 15) +
+            Math.random().toString(36).substring(2, 15)
+        );
     }
 
     /**
@@ -156,7 +161,9 @@ class EventManager {
      * @returns {boolean} - Whether the event has subscribers
      */
     hasSubscribers(eventName) {
-        return this.events.has(eventName) && this.events.get(eventName).length > 0;
+        return (
+            this.events.has(eventName) && this.events.get(eventName).length > 0
+        );
     }
 
     /**

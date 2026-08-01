@@ -260,7 +260,9 @@ class UIUtils {
      */
     setupRippleEffect() {
         document.addEventListener('click', (e) => {
-            const button = e.target.closest('.primary-button, .secondary-button, .letter-button');
+            const button = e.target.closest(
+                '.primary-button, .secondary-button, .letter-button'
+            );
             if (!button) return;
 
             // Add ripple container class if not present
@@ -284,8 +286,8 @@ class UIUtils {
 
         const size = Math.max(rect.width, rect.height);
         ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
-        ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+        ripple.style.left = event.clientX - rect.left - size / 2 + 'px';
+        ripple.style.top = event.clientY - rect.top - size / 2 + 'px';
 
         element.appendChild(ripple);
 
@@ -340,7 +342,7 @@ class UIUtils {
             }, 300);
         }
     }
-    
+
     /**
      * Show loading state for image with progressive enhancement
      * @param {string} src - Image source URL
@@ -353,22 +355,22 @@ class UIUtils {
             this.showSkeleton(container, {
                 width: '100%',
                 height: '100%',
-                borderRadius: '8px'
+                borderRadius: '8px',
             });
-            
+
             const img = new Image();
-            
+
             img.onload = () => {
                 this.hideSkeleton(container);
                 img.classList.add('loaded');
                 resolve(img);
             };
-            
+
             img.onerror = () => {
                 this.hideSkeleton(container);
                 reject(new Error(`Failed to load image: ${src}`));
             };
-            
+
             img.src = src;
         });
     }
@@ -394,7 +396,7 @@ class UIUtils {
         const icons = {
             success: '✓',
             error: '✗',
-            info: 'ℹ'
+            info: 'ℹ',
         };
 
         toast.innerHTML = `
@@ -444,7 +446,11 @@ class UIUtils {
         fromScreen.classList.add('screen-transition-exit-active');
 
         setTimeout(() => {
-            fromScreen.classList.remove('active', 'screen-transition-exit', 'screen-transition-exit-active');
+            fromScreen.classList.remove(
+                'active',
+                'screen-transition-exit',
+                'screen-transition-exit-active'
+            );
 
             // Enter animation for new screen
             toScreen.classList.add('screen-transition-enter');
@@ -467,7 +473,7 @@ class UIUtils {
      * @param {string} selector - CSS selector for elements
      */
     makeInteractive(selector) {
-        document.querySelectorAll(selector).forEach(element => {
+        document.querySelectorAll(selector).forEach((element) => {
             element.classList.add('interactive-element');
         });
     }
@@ -496,20 +502,22 @@ class UIUtils {
     animateEntrance(element, animation = 'fadeIn') {
         const animations = {
             fadeIn: 'opacity 0.3s ease',
-            slideUp: 'opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            scaleIn: 'opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
+            slideUp:
+                'opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            scaleIn:
+                'opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
         };
 
         const initialStyles = {
             fadeIn: { opacity: '0' },
             slideUp: { opacity: '0', transform: 'translateY(20px)' },
-            scaleIn: { opacity: '0', transform: 'scale(0.8)' }
+            scaleIn: { opacity: '0', transform: 'scale(0.8)' },
         };
 
         const finalStyles = {
             fadeIn: { opacity: '1' },
             slideUp: { opacity: '1', transform: 'translateY(0)' },
-            scaleIn: { opacity: '1', transform: 'scale(1)' }
+            scaleIn: { opacity: '1', transform: 'scale(1)' },
         };
 
         Object.assign(element.style, initialStyles[animation]);

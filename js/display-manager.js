@@ -13,14 +13,14 @@ class DisplayManager {
             tablet: 768,
             desktop: 1024,
             largeDesktop: 1440,
-            ultraWide: 1920
+            ultraWide: 1920,
         };
 
         this.viewport = {
             width: window.innerWidth,
             height: window.innerHeight,
             aspectRatio: window.innerWidth / window.innerHeight,
-            devicePixelRatio: window.devicePixelRatio || 1
+            devicePixelRatio: window.devicePixelRatio || 1,
         };
 
         this.deviceType = this.detectDeviceType();
@@ -36,11 +36,13 @@ class DisplayManager {
      */
     init() {
         console.log('📱 Initializing Display Manager...');
-        console.log(`📐 Viewport: ${this.viewport.width}x${this.viewport.height}`);
+        console.log(
+            `📐 Viewport: ${this.viewport.width}x${this.viewport.height}`
+        );
         console.log(`🖥️ Device Type: ${this.deviceType}`);
         console.log(`📊 Display Category: ${this.displayCategory}`);
         console.log(`🔄 Orientation: ${this.orientation}`);
-        
+
         this.applyDisplayOptimizations();
         this.setupEventListeners();
         this.applyDeviceSpecificStyles();
@@ -55,11 +57,20 @@ class DisplayManager {
         const userAgent = navigator.userAgent.toLowerCase();
         const width = window.innerWidth;
         const height = window.innerHeight;
-        const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const touchSupport =
+            'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
         // Check for specific device types
-        if (/android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent)) {
-            if (width <= this.breakpoints.mobile || (touchSupport && Math.min(width, height) <= this.breakpoints.mobile)) {
+        if (
+            /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+                userAgent
+            )
+        ) {
+            if (
+                width <= this.breakpoints.mobile ||
+                (touchSupport &&
+                    Math.min(width, height) <= this.breakpoints.mobile)
+            ) {
                 return 'mobile';
             } else if (width <= this.breakpoints.tablet) {
                 return 'tablet';
@@ -98,7 +109,7 @@ class DisplayManager {
      */
     detectOrientation() {
         const { width, height, aspectRatio } = this.viewport;
-        
+
         if (Math.abs(aspectRatio - 1) < 0.1) return 'square';
         return width > height ? 'landscape' : 'portrait';
     }
@@ -116,7 +127,7 @@ class DisplayManager {
         if (cores >= 6 || memory >= 8 || devicePixelRatio >= 2) {
             return 'high';
         }
-        
+
         // Low-end: 2 cores, 2GB RAM
         if (cores <= 2 && memory <= 2) {
             return 'low';
@@ -130,23 +141,29 @@ class DisplayManager {
      */
     applyDisplayOptimizations() {
         const root = document.documentElement;
-        
+
         // Set CSS custom properties for responsive scaling
         root.style.setProperty('--viewport-width', `${this.viewport.width}px`);
-        root.style.setProperty('--viewport-height', `${this.viewport.height}px`);
-        root.style.setProperty('--device-pixel-ratio', this.viewport.devicePixelRatio);
-        
+        root.style.setProperty(
+            '--viewport-height',
+            `${this.viewport.height}px`
+        );
+        root.style.setProperty(
+            '--device-pixel-ratio',
+            this.viewport.devicePixelRatio
+        );
+
         // Calculate and apply dynamic font scaling
         const baseFontSize = this.calculateBaseFontSize();
         root.style.setProperty('--base-font-size', `${baseFontSize}px`);
-        
+
         // Apply scaling factors for game elements
         const planetScale = this.calculateElementScale('planet');
         const buttonScale = this.calculateElementScale('button');
-        
+
         root.style.setProperty('--planet-scale', planetScale);
         root.style.setProperty('--button-scale', buttonScale);
-        
+
         // Apply device-specific classes
         document.body.classList.add(`device-${this.deviceType}`);
         document.body.classList.add(`display-${this.displayCategory}`);
@@ -162,14 +179,14 @@ class DisplayManager {
         const minSize = 12;
         const maxSize = 20;
         const { width } = this.viewport;
-        
+
         // Linear interpolation between breakpoints
         if (width <= this.breakpoints.mobile) {
             return minSize;
         } else if (width >= this.breakpoints.ultraWide) {
             return maxSize;
         }
-        
+
         const range = this.breakpoints.ultraWide - this.breakpoints.mobile;
         const progress = (width - this.breakpoints.mobile) / range;
         return minSize + (maxSize - minSize) * progress;
@@ -183,26 +200,26 @@ class DisplayManager {
     calculateElementScale(elementType) {
         const { width, height } = this.viewport;
         const minDimension = Math.min(width, height);
-        
+
         const scales = {
             planet: {
                 min: 0.6,
                 max: 1.4,
-                referenceSize: 800
+                referenceSize: 800,
             },
             button: {
                 min: 0.8,
                 max: 1.2,
-                referenceSize: 1200
-            }
+                referenceSize: 1200,
+            },
         };
-        
+
         const config = scales[elementType] || scales.button;
         const scale = Math.min(
             config.max,
             Math.max(config.min, minDimension / config.referenceSize)
         );
-        
+
         return scale.toFixed(3);
     }
 
@@ -212,7 +229,7 @@ class DisplayManager {
     applyDeviceSpecificStyles() {
         const styles = document.createElement('style');
         styles.id = 'display-manager-styles';
-        
+
         styles.textContent = `
             /* Dynamic viewport-based scaling */
             .planet {
@@ -332,7 +349,7 @@ class DisplayManager {
                 }
             }
         `;
-        
+
         document.head.appendChild(styles);
     }
 
@@ -342,17 +359,21 @@ class DisplayManager {
     optimizeForPerformance() {
         if (this.performanceProfile === 'low') {
             console.log('⚡ Applying low-end device optimizations...');
-            
+
             // Disable expensive animations
             document.body.classList.add('low-memory');
-            
+
             // Reduce particle effects if particle system exists
-            if (window.game && window.game.particleSystem && window.game.particleSystem.maxParticles) {
+            if (
+                window.game &&
+                window.game.particleSystem &&
+                window.game.particleSystem.maxParticles
+            ) {
                 window.game.particleSystem.maxParticles = 20;
             }
         } else if (this.performanceProfile === 'high') {
             console.log('🚀 Enabling high-performance features...');
-            
+
             // Enable enhanced visual effects
             document.body.classList.add('high-performance');
         }
@@ -393,35 +414,37 @@ class DisplayManager {
      */
     handleViewportChange() {
         console.log('📐 Viewport changed');
-        
+
         // Update viewport metrics
         this.viewport.width = window.innerWidth;
         this.viewport.height = window.innerHeight;
         this.viewport.aspectRatio = this.viewport.width / this.viewport.height;
-        
+
         // Re-detect device type and display category
         const previousDeviceType = this.deviceType;
         this.deviceType = this.detectDeviceType();
         this.displayCategory = this.categorizeDisplay();
-        
+
         // Update if device type changed (e.g., tablet rotated to desktop size)
         if (previousDeviceType !== this.deviceType) {
             document.body.classList.remove(`device-${previousDeviceType}`);
             document.body.classList.add(`device-${this.deviceType}`);
         }
-        
+
         // Reapply optimizations
         this.applyDisplayOptimizations();
-        
+
         // Notify game of viewport change
         if (window.game) {
-            window.dispatchEvent(new CustomEvent('displaychange', {
-                detail: {
-                    viewport: this.viewport,
-                    deviceType: this.deviceType,
-                    displayCategory: this.displayCategory
-                }
-            }));
+            window.dispatchEvent(
+                new CustomEvent('displaychange', {
+                    detail: {
+                        viewport: this.viewport,
+                        deviceType: this.deviceType,
+                        displayCategory: this.displayCategory,
+                    },
+                })
+            );
         }
     }
 
@@ -430,13 +453,13 @@ class DisplayManager {
      */
     handleOrientationChange() {
         console.log('🔄 Orientation changed');
-        
+
         const previousOrientation = this.orientation;
         this.orientation = this.detectOrientation();
-        
+
         document.body.classList.remove(`orientation-${previousOrientation}`);
         document.body.classList.add(`orientation-${this.orientation}`);
-        
+
         // Force layout recalculation
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
@@ -451,11 +474,13 @@ class DisplayManager {
      */
     pauseExpensiveOperations() {
         console.log('⏸️ Pausing expensive operations');
-        
+
         // Pause animations
-        document.querySelectorAll('.welcome-planet, .welcome-asteroid').forEach(el => {
-            el.style.animationPlayState = 'paused';
-        });
+        document
+            .querySelectorAll('.welcome-planet, .welcome-asteroid')
+            .forEach((el) => {
+                el.style.animationPlayState = 'paused';
+            });
     }
 
     /**
@@ -463,11 +488,13 @@ class DisplayManager {
      */
     resumeExpensiveOperations() {
         console.log('▶️ Resuming operations');
-        
+
         // Resume animations
-        document.querySelectorAll('.welcome-planet, .welcome-asteroid').forEach(el => {
-            el.style.animationPlayState = 'running';
-        });
+        document
+            .querySelectorAll('.welcome-planet, .welcome-asteroid')
+            .forEach((el) => {
+                el.style.animationPlayState = 'running';
+            });
     }
 
     /**
@@ -481,7 +508,7 @@ class DisplayManager {
             displayCategory: this.displayCategory,
             orientation: this.orientation,
             performanceProfile: this.performanceProfile,
-            breakpoints: this.breakpoints
+            breakpoints: this.breakpoints,
         };
     }
 
@@ -501,7 +528,7 @@ class DisplayManager {
     destroy() {
         const styles = document.getElementById('display-manager-styles');
         if (styles) styles.remove();
-        
+
         // Remove event listeners would go here if we stored references
         console.log('🧹 Display Manager cleaned up');
     }

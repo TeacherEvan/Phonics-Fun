@@ -27,16 +27,24 @@ class AudioManager {
 
         // Audio priority settings
         this.audioPriority = {
-            highPriority: true,  // Voice files and phoneme sounds (always enabled)
+            highPriority: true, // Voice files and phoneme sounds (always enabled)
             mediumPriority: true, // Celebration and explosion sounds
-            lowPriority: false   // Background music (disabled by default)
+            lowPriority: false, // Background music (disabled by default)
         };
 
         // Voice template settings
         this.currentVoiceTemplate = 'british-female'; // Default - use the clearest phonics voice
         this.availableVoiceTemplates = [
-            { id: 'american-female', name: 'American Female', description: 'Clear American female voice' },
-            { id: 'british-female', name: 'British Female', description: 'Clear British female voice' }
+            {
+                id: 'american-female',
+                name: 'American Female',
+                description: 'Clear American female voice',
+            },
+            {
+                id: 'british-female',
+                name: 'British Female',
+                description: 'Clear British female voice',
+            },
         ];
 
         // Initialize audio system
@@ -48,7 +56,9 @@ class AudioManager {
 
         // Initialize Web Audio API
         try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioContext = new (
+                window.AudioContext || window.webkitAudioContext
+            )();
 
             // Create gain nodes for volume control
             this.masterGain = this.audioContext.createGain();
@@ -98,7 +108,8 @@ class AudioManager {
     }
 
     loadVoiceTemplate(templateId) {
-        const normalizedTemplateId = this.normalizeTemplateId(templateId) || this.currentVoiceTemplate;
+        const normalizedTemplateId =
+            this.normalizeTemplateId(templateId) || this.currentVoiceTemplate;
         console.log(`Loading voice template: ${normalizedTemplateId}`);
 
         this.clearVoiceCache();
@@ -110,8 +121,9 @@ class AudioManager {
 
     setVoiceTemplate(templateId) {
         const normalizedTemplateId = this.normalizeTemplateId(templateId);
-        const allowedTemplates = this.availableVoiceTemplates
-            .map(t => this.normalizeTemplateId(t.id));
+        const allowedTemplates = this.availableVoiceTemplates.map((t) =>
+            this.normalizeTemplateId(t.id)
+        );
 
         if (allowedTemplates.includes(normalizedTemplateId)) {
             this.loadVoiceTemplate(normalizedTemplateId);
@@ -143,26 +155,31 @@ class AudioManager {
 
         if (this.audioContext) {
             const loadPromise = fetch(url)
-                .then(response => {
+                .then((response) => {
                     if (!response.ok) {
                         throw new Error(`Failed to load sound: ${url}`);
                     }
                     return response.arrayBuffer();
                 })
-                .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-                .then(audioBuffer => {
+                .then((arrayBuffer) =>
+                    this.audioContext.decodeAudioData(arrayBuffer)
+                )
+                .then((audioBuffer) => {
                     this.sounds.set(id, {
                         buffer: audioBuffer,
                         type: type,
                         source: null,
-                        loop: type === 'music'
+                        loop: type === 'music',
                     });
                     console.log(`Sound loaded successfully: ${id}`);
                 })
-                .catch(error => {
+                .catch((error) => {
                     console.error(`Error loading sound ${id}:`, error);
 
-                    if (error.message && error.message.startsWith('Failed to load sound:')) {
+                    if (
+                        error.message &&
+                        error.message.startsWith('Failed to load sound:')
+                    ) {
                         return Promise.resolve();
                     }
 
@@ -174,8 +191,9 @@ class AudioManager {
             return loadPromise;
         }
 
-        const loadPromise = this.loadFallbackSound(id, url, type)
-            .finally(finalizeLoad);
+        const loadPromise = this.loadFallbackSound(id, url, type).finally(
+            finalizeLoad
+        );
         this.loadingSounds.set(id, loadPromise);
         return loadPromise;
     }
@@ -193,15 +211,23 @@ class AudioManager {
         }
 
         const loadPromise = new Promise((resolve, reject) => {
-            audio.addEventListener('canplaythrough', () => {
-                console.log(`Fallback sound loaded successfully: ${id}`);
-                resolve();
-            }, { once: true });
+            audio.addEventListener(
+                'canplaythrough',
+                () => {
+                    console.log(`Fallback sound loaded successfully: ${id}`);
+                    resolve();
+                },
+                { once: true }
+            );
 
-            audio.addEventListener('error', (e) => {
-                console.error(`Error loading fallback sound ${id}:`, e);
-                reject(e);
-            }, { once: true });
+            audio.addEventListener(
+                'error',
+                (e) => {
+                    console.error(`Error loading fallback sound ${id}:`, e);
+                    reject(e);
+                },
+                { once: true }
+            );
 
             audio.src = url;
 
@@ -212,7 +238,7 @@ class AudioManager {
             } else {
                 this.sounds.set(id, {
                     audio: audio,
-                    type: type
+                    type: type,
                 });
             }
         });
@@ -228,25 +254,45 @@ class AudioManager {
 
         // Check priority before playing
         if (id === 'background-music' && !this.audioPriority.lowPriority) {
-            console.log('Skipping background music (low priority sound disabled)');
+            console.log(
+                'Skipping background music (low priority sound disabled)'
+            );
             return;
         }
 
-        const soundType = id.startsWith('voice-') ? 'high' :
-            (id.startsWith('phoneme-') ? 'high' :
-                (id === 'background-music' ? 'low' : 'medium'));
+        const soundType = id.startsWith('voice-')
+            ? 'high'
+            : id.startsWith('phoneme-')
+              ? 'high'
+              : id === 'background-music'
+                ? 'low'
+                : 'medium';
 
-        if ((soundType === 'medium' && !this.audioPriority.mediumPriority) ||
-            (soundType === 'high' && !this.audioPriority.highPriority)) {
-            console.log(`Skipping ${id} (${soundType} priority sound disabled)`);
+        if (
+            (soundType === 'medium' && !this.audioPriority.mediumPriority) ||
+            (soundType === 'high' && !this.audioPriority.highPriority)
+        ) {
+            console.log(
+                `Skipping ${id} (${soundType} priority sound disabled)`
+            );
             return;
         }
 
         if (!this.hasLoadedSound(id)) {
             this.ensureSoundLoaded(id).finally(() => {
-                if (!this.hasLoadedSound(id) && id.startsWith('voice-') && this.canUseSpeechSynthesis) {
-                    this.speak(this.getVoiceFallbackText(id), { pitch: 1.15, rate: 0.88 });
-                } else if (!this.hasLoadedSound(id) && id.startsWith('phoneme-')) {
+                if (
+                    !this.hasLoadedSound(id) &&
+                    id.startsWith('voice-') &&
+                    this.canUseSpeechSynthesis
+                ) {
+                    this.speak(this.getVoiceFallbackText(id), {
+                        pitch: 1.15,
+                        rate: 0.88,
+                    });
+                } else if (
+                    !this.hasLoadedSound(id) &&
+                    id.startsWith('phoneme-')
+                ) {
                     this.generatePhonemeSound(id.replace('phoneme-', ''));
                 }
             });
@@ -294,21 +340,21 @@ class AudioManager {
         if (id === 'background-music' && this.backgroundMusic) {
             this.backgroundMusic.currentTime = 0;
             this.backgroundMusic.volume = this.isMuted ? 0 : this.musicVolume;
-            this.backgroundMusic.play().catch(e => {
+            this.backgroundMusic.play().catch((e) => {
                 console.error(`Could not play background music:`, e);
             });
         } else if (id.startsWith('voice-') && this.voices.has(id)) {
             const voice = this.voices.get(id);
             voice.currentTime = 0;
             voice.volume = this.isMuted ? 0 : this.voiceVolume;
-            voice.play().catch(e => {
+            voice.play().catch((e) => {
                 console.error(`Could not play voice: ${id}`, e);
             });
         } else if (this.sounds.has(id) && this.sounds.get(id).audio) {
             const sound = this.sounds.get(id);
             sound.audio.currentTime = 0;
             sound.audio.volume = this.isMuted ? 0 : this.effectsVolume;
-            sound.audio.play().catch(e => {
+            sound.audio.play().catch((e) => {
                 console.error(`Could not play sound: ${id}`, e);
             });
         } else {
@@ -317,7 +363,7 @@ class AudioManager {
             if (audioElement) {
                 audioElement.currentTime = 0;
                 audioElement.volume = this.isMuted ? 0 : this.effectsVolume;
-                audioElement.play().catch(e => {
+                audioElement.play().catch((e) => {
                     console.error(`Could not play DOM audio: ${id}`, e);
                 });
             } else {
@@ -396,7 +442,7 @@ class AudioManager {
         });
 
         // Stop all DOM audio elements
-        document.querySelectorAll('audio').forEach(audio => {
+        document.querySelectorAll('audio').forEach((audio) => {
             audio.pause();
             audio.currentTime = 0;
         });
@@ -465,10 +511,13 @@ class AudioManager {
 
         this.sounds.forEach((sound) => {
             if (sound.audio) {
-                sound.audio.volume = this.isMuted ? 0 :
-                    (sound.type === 'music' ? this.musicVolume :
-                        sound.type === 'voice' ? this.voiceVolume :
-                            this.effectsVolume);
+                sound.audio.volume = this.isMuted
+                    ? 0
+                    : sound.type === 'music'
+                      ? this.musicVolume
+                      : sound.type === 'voice'
+                        ? this.voiceVolume
+                        : this.effectsVolume;
             }
         });
     }
@@ -516,20 +565,35 @@ class AudioManager {
 
     selectSpeechVoice(voices) {
         const list = voices || [];
-        const lower = value => (value || '').toLowerCase();
-        const matches = (...predicates) => list.find(v => predicates.every(fn => fn(v)));
+        const lower = (value) => (value || '').toLowerCase();
+        const matches = (...predicates) =>
+            list.find((v) => predicates.every((fn) => fn(v)));
 
         if (this.currentVoiceTemplate === 'british-female') {
-            return matches(
-                v => lower(v.lang).startsWith('en-gb'),
-                v => /female|woman|girl|susan|hazel|sophie|emma|victoria/i.test(v.name)
-            ) || matches(v => lower(v.lang).startsWith('en-gb')) || list[0] || null;
+            return (
+                matches(
+                    (v) => lower(v.lang).startsWith('en-gb'),
+                    (v) =>
+                        /female|woman|girl|susan|hazel|sophie|emma|victoria/i.test(
+                            v.name
+                        )
+                ) ||
+                matches((v) => lower(v.lang).startsWith('en-gb')) ||
+                list[0] ||
+                null
+            );
         }
 
-        return matches(
-            v => lower(v.lang).startsWith('en-us'),
-            v => /female|woman|girl|zira|jenny|aria|sarah|sara/i.test(v.name)
-        ) || matches(v => /female|woman|girl/i.test(v.name)) || list[0] || null;
+        return (
+            matches(
+                (v) => lower(v.lang).startsWith('en-us'),
+                (v) =>
+                    /female|woman|girl|zira|jenny|aria|sarah|sara/i.test(v.name)
+            ) ||
+            matches((v) => /female|woman|girl/i.test(v.name)) ||
+            list[0] ||
+            null
+        );
     }
 
     getVoiceFallbackText(id) {
@@ -551,7 +615,11 @@ class AudioManager {
 
         const duration = 1.0;
         const sampleRate = this.audioContext.sampleRate;
-        const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+        const buffer = this.audioContext.createBuffer(
+            1,
+            duration * sampleRate,
+            sampleRate
+        );
         const data = buffer.getChannelData(0);
 
         for (let i = 0; i < buffer.length; i++) {
@@ -574,7 +642,11 @@ class AudioManager {
 
         const duration = 0.5;
         const sampleRate = this.audioContext.sampleRate;
-        const buffer = this.audioContext.createBuffer(1, duration * sampleRate, sampleRate);
+        const buffer = this.audioContext.createBuffer(
+            1,
+            duration * sampleRate,
+            sampleRate
+        );
         const data = buffer.getChannelData(0);
 
         // Different frequencies for different phonemes
@@ -591,7 +663,8 @@ class AudioManager {
             const t = i / sampleRate;
             const envelope = Math.exp(-t * 3) * (1 - Math.exp(-t * 50));
             // Create a throaty sound for 'g'
-            const oscillation = Math.sin(t * 2 * Math.PI * frequency) +
+            const oscillation =
+                Math.sin(t * 2 * Math.PI * frequency) +
                 0.5 * Math.sin(t * 2 * Math.PI * (frequency * 1.5)) +
                 0.25 * Math.sin(t * 2 * Math.PI * (frequency * 0.5));
             data[i] = oscillation * envelope * 0.3;
@@ -622,7 +695,9 @@ class AudioManager {
         // Load voice template from localStorage or use default
         const savedTemplate = localStorage.getItem('voiceTemplate');
         if (savedTemplate) {
-            this.currentVoiceTemplate = this.normalizeTemplateId(savedTemplate) || this.currentVoiceTemplate;
+            this.currentVoiceTemplate =
+                this.normalizeTemplateId(savedTemplate) ||
+                this.currentVoiceTemplate;
         }
 
         this.updateVolumes();
@@ -631,7 +706,7 @@ class AudioManager {
     // Helper function to preload all audio files
     preloadAllAudio() {
         const audioElements = document.querySelectorAll('audio');
-        audioElements.forEach(audio => {
+        audioElements.forEach((audio) => {
             audio.load();
         });
     }
@@ -641,11 +716,14 @@ class AudioManager {
         this.stopAll();
 
         if (this.audioContext) {
-            this.audioContext.close().then(() => {
-                console.log('Audio context closed successfully');
-            }).catch(error => {
-                console.error('Error closing audio context:', error);
-            });
+            this.audioContext
+                .close()
+                .then(() => {
+                    console.log('Audio context closed successfully');
+                })
+                .catch((error) => {
+                    console.error('Error closing audio context:', error);
+                });
         }
     }
 
@@ -659,14 +737,14 @@ class AudioManager {
         }
 
         // Pause all sound effects
-        this.sounds.forEach(sound => {
+        this.sounds.forEach((sound) => {
             if (sound.audio && !sound.audio.paused) {
                 sound.audio.pause();
             }
         });
 
         // Pause all voice sounds
-        this.voices.forEach(voice => {
+        this.voices.forEach((voice) => {
             if (voice && !voice.paused) {
                 voice.pause();
             }
@@ -680,8 +758,12 @@ class AudioManager {
      */
     resumeAll() {
         // Resume background music if it was playing
-        if (this.backgroundMusic && this.backgroundMusic.paused && this.backgroundMusic.currentTime > 0) {
-            this.backgroundMusic.play().catch(error => {
+        if (
+            this.backgroundMusic &&
+            this.backgroundMusic.paused &&
+            this.backgroundMusic.currentTime > 0
+        ) {
+            this.backgroundMusic.play().catch((error) => {
                 console.log('Background music resume failed:', error);
             });
         }
@@ -725,7 +807,11 @@ class AudioManager {
     }
 
     hasLoadedSound(id) {
-        return this.sounds.has(id) || this.voices.has(id) || (id === 'background-music' && this.backgroundMusic !== null);
+        return (
+            this.sounds.has(id) ||
+            this.voices.has(id) ||
+            (id === 'background-music' && this.backgroundMusic !== null)
+        );
     }
 
     getLetterData() {
@@ -737,12 +823,15 @@ class AudioManager {
             return null;
         }
 
-        const normalized = String(templateId).trim().toLowerCase().replace(/_/g, '-');
+        const normalized = String(templateId)
+            .trim()
+            .toLowerCase()
+            .replace(/_/g, '-');
         const aliasMap = {
             americanfemale: 'american-female',
             'american-female': 'american-female',
             britishfemale: 'british-female',
-            'british-female': 'british-female'
+            'british-female': 'british-female',
         };
 
         return aliasMap[normalized.replace(/[^a-z-]/g, '')] || null;
@@ -768,7 +857,7 @@ class AudioManager {
             voiceBat: 'voice-bat',
             voiceBear: 'voice-bear',
             voiceBoat: 'voice-boat',
-            voiceButterfly: 'voice-butterfly'
+            voiceButterfly: 'voice-butterfly',
         };
 
         return aliasMap[id] || id;
@@ -822,7 +911,11 @@ class AudioManager {
             return Promise.resolve();
         }
 
-        return this.loadSound(normalizedId, soundPath, this.getSoundType(normalizedId));
+        return this.loadSound(
+            normalizedId,
+            soundPath,
+            this.getSoundType(normalizedId)
+        );
     }
 
     ensureLetterAudio(letter) {
@@ -830,10 +923,10 @@ class AudioManager {
         const letterWords = this.getLetterData();
 
         const requests = [
-            this.ensureSoundLoaded(`phoneme-${upperLetter.toLowerCase()}`)
+            this.ensureSoundLoaded(`phoneme-${upperLetter.toLowerCase()}`),
         ];
 
-        (letterWords[upperLetter] || []).forEach(word => {
+        (letterWords[upperLetter] || []).forEach((word) => {
             requests.push(this.ensureSoundLoaded(`voice-${word}`));
         });
 
@@ -842,8 +935,8 @@ class AudioManager {
 
     clearVoiceCache() {
         Array.from(this.sounds.keys())
-            .filter(id => id.startsWith('voice-'))
-            .forEach(id => {
+            .filter((id) => id.startsWith('voice-'))
+            .forEach((id) => {
                 this.sounds.delete(id);
             });
 
