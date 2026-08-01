@@ -2,7 +2,7 @@
 
 A space-themed educational web game that teaches children the **full A–Z** letter sounds through adaptive, interactive gameplay. Ships as an installable **PWA** with native Android packaging via **Capacitor**, offline support, teacher data export, and adaptive difficulty.
 
-Live demo: deployed to Vercel from `main` (see `vercel.json` for headers/MIME config).
+Live demo: **https://phonics-fun-theta.vercel.app** (deployed from `main` via Vercel — see `vercel.json` for headers/MIME config).
 
 ## Features
 
