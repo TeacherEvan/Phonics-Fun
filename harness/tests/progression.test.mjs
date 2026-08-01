@@ -10,7 +10,7 @@ function setupDOM() {
     <div id="ready-overlay" class="overlay hidden"></div>
     <div id="settings-panel" class="settings-panel hidden"></div>
     <div id="coming-soon-popup" class="popup hidden"></div>
-    <div id="level-complete-popup" class="popup hidden"></div>
+    <div id="level-complete-popup" class="popup hidden"><div class="popup-content"></div></div>
     <button id="start-game-btn"></button>
     <button id="settings-btn"></button>
     <button id="close-settings"></button>
@@ -30,6 +30,10 @@ function setupDOM() {
     <button id="next-level-btn"></button>
     <button id="exit-btn"></button>
     <button id="close-popup"></button>
+    <button id="export-data-btn"></button>
+    <span id="progress-fill"></span>
+    <span id="hits-counter"></span>
+    <div id="game-announcer" aria-live="polite"></div>
     <div class="letter-grid"></div>
     <div class="planets-container"></div>
     <div class="welcome-background"></div>
@@ -207,5 +211,36 @@ describe('word audio routing', () => {
       ([id]) => typeof id === 'string' && id.startsWith('voice-')
     );
     expect(voiceCalls.length).toBeGreaterThan(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 3: progression pointer (next-uncompleted + advance)
+// ---------------------------------------------------------------------------
+describe('letter progression pointer', () => {
+  let gs;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupDOM();
+    gs = new window.GameState();
+  });
+
+  it('starts at A by default', () => {
+    expect(gs.activeLetterLevel).toBe('A');
+  });
+
+  it('advances to the next uncompleted letter after completion', () => {
+    gs.completedLevels = [];
+    gs.activeLetterLevel = 'A';
+    gs.completeLevelSuccessfully();
+    expect(gs.completedLevels).toContain('A');
+    expect(gs.activeLetterLevel).toBe('B');
+  });
+
+  it('returns null and stays put when all letters are complete', () => {
+    gs.completedLevels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    expect(gs.getNextUncompletedLetter()).toBeNull();
+    gs.advanceToNextLetter();
+    expect('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).toContain(gs.activeLetterLevel);
   });
 });

@@ -90,10 +90,10 @@ class GameState {
         // Letter configuration
         this.letterVocabulary = buildLetterVocabulary(PHONICS_FUN_LETTER_DATA);
         this.enabledLetters = Object.keys(this.letterVocabulary);
-        this.activeLetterLevel = 'G';
+        this.activeLetterLevel = 'A';
 
         // Active vocabulary for current level
-        this.activeVocabulary = this.letterVocabulary['G'];
+        this.activeVocabulary = this.letterVocabulary['A'];
         this.requiredHitsToComplete = this.activeVocabulary.length;
         this.vocabularyIndex = 0;
 
@@ -1396,6 +1396,12 @@ class GameState {
             this.completedLevels.push(this.activeLetterLevel);
         }
 
+        // Advance the progression pointer to the next uncompleted letter
+        // (no-op / stays put when all letters are complete → free practice).
+        this.advanceToNextLetter();
+        this.renderLetterSelectionGrid();
+        this.syncLetterDisplays();
+
         // Save state and update difficulty
         this.updateAdaptiveDifficulty();
         this.saveStatsToLocalStorage();
@@ -1580,6 +1586,31 @@ class GameState {
      */
     isLetterEnabled(letter) {
         return this.enabledLetters.includes(letter);
+    }
+
+    /**
+     * Return the first A-Z letter not yet completed, or null when all done.
+     * @returns {string|null}
+     */
+    getNextUncompletedLetter() {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (const letter of alphabet) {
+            if (!this.completedLevels.includes(letter)) {
+                return letter;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Advance the active letter to the next uncompleted one.
+     * When all letters are complete, the pointer stays (free-practice mode).
+     */
+    advanceToNextLetter() {
+        const next = this.getNextUncompletedLetter();
+        if (next) {
+            this.activeLetterLevel = next;
+        }
     }
 
     shuffleLetters(letters) {
