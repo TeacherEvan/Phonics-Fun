@@ -80,6 +80,11 @@ class GameState {
         this.correctHitsCount = 0;
         this.incorrectHitsCount = 0;
         this.totalAnswersCount = 0;
+        // Cumulative counters preserved across letters for teacher export.
+        // Live counters (above) reset each letter; cumulatives do not.
+        this.cumCorrect = 0;
+        this.cumIncorrect = 0;
+        this.cumTotal = 0;
         this.difficultySpeedMultiplier = 1.0;
         this.difficultyPlanetCount = 3;
         this.completedLevels = [];
@@ -582,6 +587,8 @@ class GameState {
         // Update progress
         this.correctHits++;
         this.totalAnswersCount++;
+        this.cumCorrect++;
+        this.cumTotal++;
         this.updateAdaptiveDifficulty();
         this.saveStatsToLocalStorage();
         this.updateProgress();
@@ -608,6 +615,8 @@ class GameState {
         // Track stats for adaptive difficulty
         this.incorrectHitsCount++;
         this.totalAnswersCount++;
+        this.cumIncorrect++;
+        this.cumTotal++;
         this.updateAdaptiveDifficulty();
         this.saveStatsToLocalStorage();
 
@@ -899,9 +908,10 @@ class GameState {
         console.log('🎯 Initializing gameplay session...');
         this.isGameplayActive = true;
         this.correctHitsCount = 0;
+        this.incorrectHitsCount = 0;
+        this.totalAnswersCount = 0;
         this.vocabularyIndex = 0;
         this.updateProgressDisplay();
-
         // Initialize particle system for visual effects
         if (window.ParticleSystem) {
             this.particleSystem = new ParticleSystem();
@@ -1673,6 +1683,9 @@ class GameState {
                 correctHitsCount: this.correctHitsCount,
                 incorrectHitsCount: this.incorrectHitsCount,
                 totalAnswersCount: this.totalAnswersCount,
+                cumCorrect: this.cumCorrect,
+                cumIncorrect: this.cumIncorrect,
+                cumTotal: this.cumTotal,
             };
             localStorage.setItem('phonics_fun_stats', JSON.stringify(stats));
         } catch (e) {
@@ -1716,13 +1729,14 @@ class GameState {
             sessionId:
                 this.sessionId || Math.random().toString(36).substring(2, 9),
             exportTimestamp: new Date().toISOString(),
-            correctHits: this.correctHitsCount,
-            incorrectHits: this.incorrectHitsCount,
+            correctHits: this.cumCorrect + this.correctHitsCount,
+            incorrectHits: this.cumIncorrect + this.incorrectHitsCount,
             accuracy:
-                this.totalAnswersCount > 0
-                    ? (this.correctHitsCount / this.totalAnswersCount).toFixed(
-                          2
-                      )
+                this.cumTotal + this.totalAnswersCount > 0
+                    ? (
+                          (this.cumCorrect + this.correctHitsCount) /
+                          (this.cumTotal + this.totalAnswersCount)
+                      ).toFixed(2)
                     : '1.00',
             completedLevels: Array.from(new Set(this.completedLevels || [])),
             difficultySpeedMultiplier: this.difficultySpeedMultiplier,
@@ -1763,6 +1777,8 @@ class GameState {
                 );
             }
         }
+
+        return stats;
     }
 }
 

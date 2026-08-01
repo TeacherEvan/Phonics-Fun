@@ -273,3 +273,37 @@ describe('letter grid three-state rendering', () => {
     expect(c.getAttribute('aria-label')).toContain('available');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Task 5: per-letter adaptive difficulty (reset live; keep cumulative)
+// ---------------------------------------------------------------------------
+describe('per-letter adaptive difficulty', () => {
+  let gs;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupDOM();
+    gs = new window.GameState();
+  });
+
+  it('resets live counters at the start of each letter session', () => {
+    gs.correctHitsCount = 5;
+    gs.incorrectHitsCount = 2;
+    gs.totalAnswersCount = 7;
+    gs.startGameplaySession();
+    expect(gs.correctHitsCount).toBe(0);
+    expect(gs.incorrectHitsCount).toBe(0);
+    expect(gs.totalAnswersCount).toBe(0);
+  });
+
+  it('accumulates cumulative stats for teacher export across letters', () => {
+    gs.cumCorrect = 3;
+    gs.cumIncorrect = 1;
+    gs.cumTotal = 4;
+    gs.startGameplaySession();
+    gs.correctHitsCount = 1;
+    gs.totalAnswersCount = 1;
+    const data = gs.exportTeacherData();
+    expect(data.correctHits).toBe(4); // 3 + 1
+    expect(data.incorrectHits).toBe(1);
+  });
+});
