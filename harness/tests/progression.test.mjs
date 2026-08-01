@@ -179,3 +179,33 @@ describe('generatePhonemeSound per-letter profiles', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Task 2: offline-safe word audio routing (skip fetch for unrecorded letters)
+// ---------------------------------------------------------------------------
+describe('word audio routing', () => {
+  let am;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupDOM();
+    am = new window.AudioManager();
+  });
+
+  it('does not attempt to fetch a .wav for letters without recorded assets', () => {
+    const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
+    am.ensureLetterAudio('A');
+    const voiceCalls = fetchSpy.mock.calls.filter(
+      ([id]) => typeof id === 'string' && id.startsWith('voice-')
+    );
+    expect(voiceCalls).toHaveLength(0);
+  });
+
+  it('does fetch recorded voice assets for letter G', () => {
+    const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
+    am.ensureLetterAudio('G');
+    const voiceCalls = fetchSpy.mock.calls.filter(
+      ([id]) => typeof id === 'string' && id.startsWith('voice-')
+    );
+    expect(voiceCalls.length).toBeGreaterThan(0);
+  });
+});

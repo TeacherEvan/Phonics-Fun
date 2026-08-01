@@ -32,6 +32,11 @@ class AudioManager {
             lowPriority: false, // Background music (disabled by default)
         };
 
+        // Letters that have real prerecorded .wav voice assets bundled.
+        // Only 'G' ships with voice-girl/voice-grandpa today; every other letter
+        // is spoken via speechSynthesis at play() time (no network fetch).
+        this.hasRecordedAssets = new Set(['G']);
+
         // Voice template settings
         this.currentVoiceTemplate = 'british-female'; // Default - use the clearest phonics voice
         this.availableVoiceTemplates = [
@@ -926,9 +931,14 @@ class AudioManager {
             this.ensureSoundLoaded(`phoneme-${upperLetter.toLowerCase()}`),
         ];
 
-        (letterWords[upperLetter] || []).forEach((word) => {
-            requests.push(this.ensureSoundLoaded(`voice-${word}`));
-        });
+        // Only fetch prerecorded voice assets for letters that actually ship
+        // them. Other letters rely on the speechSynthesis fallback already wired
+        // inside play() (audio-manager.js) — no network fetch, fully offline.
+        if (this.hasRecordedAssets.has(upperLetter)) {
+            (letterWords[upperLetter] || []).forEach((word) => {
+                requests.push(this.ensureSoundLoaded(`voice-${word}`));
+            });
+        }
 
         return Promise.allSettled(requests);
     }
