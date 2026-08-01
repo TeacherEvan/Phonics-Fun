@@ -1,152 +1,67 @@
-# Phonics Fun - Educational Game Development
+# Phonics Fun — Agent / Contributor Instructions
 
-**CRITICAL: Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.**
+**CRITICAL:** Reference these instructions first; fall back to search/bash only when something here is out of date.
 
-Phonics Fun is an HTML5, CSS3, and vanilla JavaScript educational game for teaching children phonics, with Android app capability through Gradle build system. The game teaches letters through interactive space-themed gameplay.
+Phonics Fun is a **Vite-built, vanilla-JS (ES modules) educational web game** for teaching children phonics (full A–Z). It ships as a **PWA** (service worker + manifest) with native Android packaging via **Capacitor**. Gameplay is space-themed: planets, asteroids, collision-driven feedback.
 
-## Working Effectively
+## Reality Check (current architecture)
 
-### Bootstrap and Run the Web Application
-**ALWAYS start with these steps:**
-- `cd /home/runner/work/Phonics-Fun/Phonics-Fun`
-- **Web server options (choose one):**
-  - **Python (recommended):** `python3 -m http.server 8000` - starts in ~1 second
-  - **Node.js:** `npx http-server -p 8000` - takes ~8 seconds initial install, then starts quickly
-  - **Docker:** See Docker section below
-- Open `http://localhost:8000` in browser
-- **Direct file access:** Open `index.html` directly (works but limited functionality)
+- **Build system:** Vite (`vite.config.mjs`). `npm run build` → `dist/`. This is NOT a no-build static project anymore.
+- **Package manager:** npm. `package.json` has `devDependencies` only (Vite, Vitest, ESLint, Prettier, Capacitor, TypeScript). There are **no runtime npm dependencies** — the game imports zero npm packages (pure DOM + Web Audio).
+- **Tests:** Vitest with jsdom (`vitest.config.mjs`, `environment: 'jsdom'`). Specs live in `harness/tests/**/*.test.mjs`. Run `npm test`.
+- **Lint:** ESLint flat config (`eslint.config.cjs`), scope `js/`. CI fails on ANY warning — keep it clean.
+- **Android:** Capacitor (`capacitor.config.ts`), NOT the old Gradle `app/` Java project. Do not build `app/`; it is legacy.
+- **Deploy:** Vercel from `main` (`vercel.json` sets CSP/security headers + JS MIME types). Not Docker-only.
 
-### Build and Test Commands
-- **Docker build:** `docker build -t phonics-fun .` - **NEVER CANCEL** - takes 2-5 minutes. Use timeout of 10+ minutes.
-- **Docker run:** `docker run -d -p 8080:80 --name phonics-fun-container phonics-fun`
-- **Android build:** **DOES NOT WORK** - Gradle fails due to missing Android plugin repositories
-- **Tests:** Open test files directly in browser via web server (no automated test runners)
+## Local Dev Commands
 
-### Time Expectations - NEVER CANCEL
-- **Web server startup:** 1-8 seconds (Python fast, NPX slower first time)
-- **Docker build:** 2-5 minutes - **NEVER CANCEL, set timeout to 600+ seconds**
-- **Docker container startup:** 2-3 seconds
-- **NPX http-server initial install:** ~8 seconds first time, instant after
-
-## Validation and Testing
-
-### Manual Validation Scenarios
-**ALWAYS run through these scenarios after making changes:**
-
-1. **Web Application Flow:**
-   - Start web server with `python3 -m http.server 8000`
-   - Navigate to `http://localhost:8000`
-   - Click "Start Game" button
-   - Click letter "G" in level select
-   - Click on "G" planets in gameplay (should trigger asteroid animations)
-   - Verify audio plays (explosion sounds, voice messages)
-   - Complete level (5 hits) and verify completion popup
-
-2. **Test Suite Validation:**
-   - Access `http://localhost:8000/Tests/test-suite.html`
-   - Access `http://localhost:8000/Tests/audio-test.html`
-   - Access `http://localhost:8000/Tests/asset-generator.html`
-   - Access `http://localhost:8000/Tests/sound-test.html`
-
-3. **Docker Container Validation (if needed):**
-   - **Note:** Original Dockerfile fails due to network issues
-   - Use simplified build if Docker is required
-   - Build: `docker build -f Dockerfile.simple -t phonics-simple .` (set 600+ second timeout)
-   - Run: `docker run -d -p 8080:80 --name test-container phonics-simple`
-   - Test: `curl -s http://localhost:8080 | head -5`
-   - Cleanup: `docker stop test-container && docker rm test-container`
-
-### Asset Verification
-**Before making changes, verify these critical files exist:**
-- `index.html` - Main game file
-- `css/styles.css` - All game styling
-- `js/main.js` - Core game logic  
-- `js/audio-manager.js` - Audio system
-- `js/collision-manager.js` - Physics system
-- `Assets/sounds/` - Audio files (some are .placeholder files)
-- `Assets/images/` - Image files (some are .placeholder files)
-
-## Build System Details
-
-### Web Application (PRIMARY)
-- **Technology:** HTML5 + CSS3 + Vanilla JavaScript
-- **No build process required** - static files served directly
-- **No package.json** - no npm dependencies
-- **No linting/formatting tools** - manual code review only
-
-### Android Application (BROKEN)
-- **Status:** DOES NOT WORK - do not attempt Android builds
-- **Issue:** `gradle tasks` fails with plugin resolution errors
-- **Files:** `build.gradle`, `settings.gradle`, `app/build.gradle` exist but broken
-- **Error:** Android Gradle Plugin 8.1.4 not found in repositories
-
-### Docker Deployment (PARTIALLY WORKING)
-- **Original Dockerfile:** FAILS due to network issues with Alpine package manager
-- **Workaround:** Use simplified Dockerfile without package installations
-- **Build time:** 2-5 minutes - **CRITICAL: NEVER CANCEL, use 600+ second timeouts**
-- **Simple Docker build:** `docker build -f Dockerfile.simple -t phonics-simple .` (works reliably)
-
-## Common Tasks and Workflows
-
-### Adding New Letters/Content
-1. Update `js/main.js` - modify `handleLetterClick` method
-2. Add corresponding audio files to `Assets/sounds/voices/`
-3. Add image files to `Assets/images/`
-4. Test with web server: `python3 -m http.server 8000`
-5. Validate complete gameplay flow manually
-
-### Audio System Changes
-1. Modify `js/audio-manager.js` for audio logic
-2. Test with `Tests/audio-test.html`
-3. Verify browser console for audio errors
-4. Test across browsers (audio support varies)
-
-### UI/Animation Changes
-1. Modify `css/styles.css` for styling
-2. Modify `js/main.js` for interactions
-3. Test responsive design on different screen sizes
-4. Validate animations work smoothly
-
-## Troubleshooting
-
-### Common Issues and Solutions
-- **"Game doesn't load":** Check browser console for JavaScript errors, verify all files in correct paths
-- **"Audio doesn't play":** Many audio files are .placeholder - real audio files may be missing
-- **"Android build fails":** Expected - Android builds are broken, use web version only
-- **"Docker build hangs":** Original Dockerfile has network issues with Alpine package manager, use simplified version without package installations
-- **"Tests don't work":** Tests are HTML files - access via web server, not direct file opening
-
-### Debug Commands
-- `python3 -m http.server 8000 > /dev/null 2>&1 &` - Start web server in background
-- `pkill -f "python3 -m http.server"` - Stop all Python web servers  
-- `docker ps` - List running containers
-- `docker images | grep phonics` - List built images
-- Browser Developer Tools (F12) - Check console for JavaScript errors
-
-## File Structure Quick Reference
-```
-phonics-fun/
-├── index.html              # Main game file - START HERE
-├── css/styles.css          # All game styling and animations  
-├── js/
-│   ├── main.js            # Core game logic and state management
-│   ├── audio-manager.js   # Audio system with Web Audio API
-│   ├── collision-manager.js # Physics-based collision detection
-│   └── [other modules]    # Event management, particles, etc.
-├── Assets/
-│   ├── images/           # Game images (some .placeholder files)
-│   └── sounds/           # Audio files (some .placeholder files)
-├── Tests/               # Browser-based test suites (HTML files)
-├── Docs/               # Extensive project documentation
-├── app/                # Android app structure (BROKEN)
-├── Dockerfile          # Docker deployment (has network issues)
-└── run.bat            # Windows convenience script
+```bash
+npm ci            # install (Node 22+)
+npm run dev       # Vite dev server
+npm run build     # production build -> dist/
+npm run preview   # serve dist/ locally
+npm test          # Vitest suite (jsdom)
+npm run coverage  # Vitest + coverage
+npm run lint      # ESLint js/ (zero-warning gate)
+npm run lint:fix  # auto-fix
+npm run format    # Prettier js/
+npm run gen:audio # regenerate phoneme/voice audio (scripts/generate-audio.cjs)
+npm run gen:music # regenerate background music
 ```
 
-## Critical Reminders
-- **NEVER attempt Android builds** - they are broken and will waste time
-- **ALWAYS use 600+ second timeouts** for Docker builds 
-- **ALWAYS validate changes** by running complete game scenarios manually
-- **Test audio functionality** explicitly - many audio files are placeholders
-- **Use Python web server** for fastest/most reliable local development
-- **Check browser console** for JavaScript errors when debugging issues
+## Project Layout (what matters)
+
+- `index.html` — game entry; loads `js/main.js` as a module.
+- `js/` — **the shipped runtime bundle** (only this code goes to players). 11 modules: main, audio-manager, event-bus, event-manager, collision-manager, particles, performance-utils, ui-utils, display-manager, android-benq-init, utils.
+- `public/` — static assets served as-is: `sw.js` (service worker), `manifest.json`, `images/`, `sounds/`.
+- `harness/` — **dev/test only, never shipped**: `tests/` (Vitest specs + manual HTML harnesses), `mcp-*.js` (Android diagnostic), `android-*.{js,html}` (BenQ/board harnesses), `legacy/` (retired asteroid.js/planet.js).
+- `scripts/` — Node build helpers (`generate-audio.cjs`, `generate-music.cjs`). Use `.cjs` for CommonJS under `"type": "module"`.
+- `docs/` — canonical documentation hub (`docs/ROADMAP.md` first). `docs/archive/` holds retired material.
+
+## How to Add a Letter
+
+1. Add the word list to `PHONICS_FUN_LETTER_DATA` in `js/main.js`.
+2. Generate audio: `npm run gen:audio` (drops into `public/sounds/voices/...`).
+3. Add art to `public/images/`.
+4. Verify: `npm test && npm run lint && npm run build`.
+
+## Testing Before Claiming Done
+
+- Run `npm test` — all specs must pass (currently 105 passing / 4 skipped).
+- Run `npm run lint` — zero warnings.
+- Run `npm run build` — must produce `dist/index.html`.
+- Manual smoke (optional): `npm run preview`, open the URL, play a level.
+
+## Do NOT
+
+- Do not add npm packages to `dependencies` — the runtime uses none. If you need a build/test tool, add it to `devDependencies` and run `npm install`.
+- Do not edit files under `harness/legacy/` expecting them to affect gameplay (they are not imported).
+- Do not attempt the Gradle `app/` Android build — it is legacy/superseded by Capacitor.
+- Do not reintroduce the duplicated `Docs/` (uppercase) directory — canonical docs are `docs/`.
+
+## File References
+
+- Audio logic: `js/audio-manager.js`
+- Collision: `js/collision-manager.js`
+- State/screens/vocabulary: `js/main.js`
+- Docs hub: `docs/ROADMAP.md`

@@ -231,6 +231,6 @@ ffmpeg -i assets/sounds/phoneme-g.wav assets/sounds/phoneme-g.mp3
 
 ## 📖 See Also
 
-- **Audio Enhancement Guide** → [`audio-enhancement-guide.md`](audio-enhancement-guide.md) — Architecture, priority system, asset status, and generated file details
+- **Audio Enhancement Guide** → [`audio-system.md`](audio-system.md) — Architecture, priority system, asset status, and generated file details
 
 This guide provides multiple free, open-source options for generating all the audio needed for the Phonics Fun game!

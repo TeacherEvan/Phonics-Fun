@@ -1,277 +1,111 @@
-# Phonics Fun - Letter G Game
+# Phonics Fun
 
-A fun, educational web game that teaches children the letter "G" through interactive gameplay.
+A space-themed educational web game that teaches children the **full A–Z** letter sounds through adaptive, interactive gameplay. Ships as an installable **PWA** with native Android packaging via **Capacitor**, offline support, teacher data export, and adaptive difficulty.
+
+Live demo: deployed to Vercel from `main` (see `vercel.json` for headers/MIME config).
 
 ## Features
 
-- **Welcome Screen**: Animated welcome message with pulsating colors
-- **Level Selection**: A-Z letter grid with only "G" playable
-- **Space-themed Gameplay**: Interactive planets in a galaxy setting
-- **Enhanced Audio System**: Advanced sound effects and voice messages
-- **Physics-Based Collisions**: Accurate asteroid-planet interactions
-- **Event-Driven Architecture**: Responsive gameplay experience
-- **Responsive Design**: Works on desktop and mobile devices
-- **Cross-browser Compatible**: Tested on Chrome, Safari, Firefox, and Edge
+- **A–Z letter curriculum** — `js/main.js` holds the full `PHONICS_FUN_LETTER_DATA` vocabulary map.
+- **Adaptive difficulty** — gameplay adjusts to the learner.
+- **Space-themed gameplay** — planets, asteroids, collision-driven feedback.
+- **Enhanced audio** — Web Audio API + speech-synthesis voice fallback (`js/audio-manager.js`).
+- **Event-driven architecture** — `event-bus.js` / `event-manager.js` / `collision-manager.js`.
+- **PWA + offline** — service worker (`public/sw.js`) + `public/manifest.json`.
+- **Native Android** — Capacitor wrapper (`capacitor.config.ts`); build via `@capacitor/cli`.
+- **Teacher export** — classroom data export (see harness/diagnostic tooling).
+- **Accessibility** — responsive, touch + mouse, reduced-motion aware.
 
 ## Quick Start
 
-### Option 1: Direct HTML File
-1. Download or clone this repository
-2. Open `index.html` in your web browser
-3. Start playing!
-
-### Option 2: Local Server
 ```bash
-# Using Python 3
-python -m http.server 8000
-
-# Using Node.js (if you have http-server installed)
-npx http-server
-
-# Using PHP
-php -S localhost:8000
+npm ci            # install dev dependencies (Node 22+)
+npm run dev       # local dev server (Vite)
+npm test          # run the Vitest suite (105 tests)
+npm run lint      # ESLint on js/
+npm run build     # production build -> dist/
+npm run preview   # serve the production build locally
 ```
 
-Then open `http://localhost:8000` in your browser.
+Open the Vite dev URL (or the `preview` URL) in a browser to play.
 
-### Option 3: Docker
-```bash
-# Build the image
-docker build -t phonics-fun .
-
-# Run the container
-docker run -p 8080:80 phonics-fun
-```
-
-Then open `http://localhost:8080` in your browser.
-
-## File Structure
+## Project Structure
 
 ```plaintext
 phonics-fun/
-├── index.html          # Main HTML file
-├── css/
-│   └── styles.css      # Game styles and animations
-├── js/
-│   ├── main.js         # Core game logic
-│   ├── audio-manager.js # Advanced audio system
-│   ├── event-manager.js # Event coordination system
-│   ├── collision-manager.js # Physics-based collision system
-│   └── particles.js    # Particle effects system
-├── assets/
-│   ├── images/         # Game images
-│   └── sounds/         # Audio files
-├── Tests/
-│   ├── test-suite.html # General tests
-│   ├── asset-generator.html # Asset generator
-│   ├── audio-test.html # Audio testing tool
-│   └── sound-test.html # Sound testing
-├── Docs/
-│   ├── README.md              # Documentation index
-│   ├── project-status.md      # Current status & merged tracking
-│   ├── audio-enhancement-guide.md  # Audio system, priority, assets
-│   ├── sound-generation-guide.md   # Sound generation tools & commands
-│   ├── enhancement-summary.md      # Visual enhancements & particle system
-│   └── audit-report.md             # Code quality & mobile audit
-├── Dockerfile          # Docker container setup
-├── README.md           # This file
-└── run.bat             # Windows startup script
+├── index.html              # Game entry (loads js/main.js as a module)
+├── css/styles.css          # All styles and animations
+├── js/                     # Runtime game bundle (the only code shipped to players)
+│   ├── main.js             # Core controller: state, screens, A–Z vocabulary
+│   ├── audio-manager.js    # Web Audio + speech-synthesis voice fallback
+│   ├── event-bus.js        # Pub/sub event backbone
+│   ├── event-manager.js    # Event coordination
+│   ├── collision-manager.js# Asteroid/planet collision detection
+│   ├── particles.js        # Explosion / trail particle system
+│   ├── performance-utils.js# Preload + web-vitals instrumentation
+│   ├── ui-utils.js         # Image loading, skeletons, toasts
+│   ├── display-manager.js  # Display-category detection
+│   ├── android-benq-init.js# Android / BenQ board shims (runtime)
+│   └── utils.js            # Shared helpers (debounce, etc.)
+├── public/                 # Static assets served as-is
+│   ├── sw.js               # Service worker (PWA offline)
+│   ├── manifest.json       # PWA manifest
+│   ├── images/             # Letter/word art
+│   └── sounds/             # Generated audio (phonemes, voices, effects)
+├── harness/                # Dev/test tooling — NOT shipped to players
+│   ├── tests/              # Vitest specs (*.test.mjs) + manual HTML harnesses
+│   ├── mcp-*.js            # Android compatibility diagnostic harness
+│   ├── android-*.js/html   # BenQ / Android board test harnesses
+│   └── legacy/             # Retired architecture samples (asteroid.js, planet.js)
+├── scripts/                # Node build helpers (generate-audio.cjs, generate-music.cjs)
+├── docs/                   # Canonical documentation (see docs/ROADMAP.md)
+├── capacitor.config.ts     # Native Android (Capacitor) config
+├── vercel.json             # Vercel deploy: headers + JS MIME types
+├── vite.config.mjs         # Vite build config
+├── vitest.config.mjs       # Test config (harness/tests/**)
+├── eslint.config.cjs       # Lint rules (zero-warning gate in CI)
+└── package.json            # Scripts + devDependencies (no runtime npm deps)
 ```
-├── css/
-│   └── styles.css      # All styles and animations
-├── js/
-│   └── main.js         # Game logic and state management
-├── assets/
-│   ├── images/         # Game images (planets, words, etc.)
-│   └── sounds/         # Audio files (effects, voices)
-├── Docs/               # Documentation files
-│   ├── README.md              # Documentation index
-│   ├── project-status.md      # Current status & merged tracking
-│   ├── audio-enhancement-guide.md  # Audio system, priority, assets
-│   ├── sound-generation-guide.md   # Sound generation tools & commands
-│   ├── enhancement-summary.md      # Visual enhancements & particle system
-│   └── audit-report.md             # Code quality & mobile audit
-├── Tests/              # Test files
-├── Dockerfile          # Docker configuration
-└── README.md           # This file
-```
+
+> **Note on `app/` and legacy artifacts:** a native Android *Java* project under `app/` (Gradle) and several `*.ps1` voice generators + an `Assets/` folder are legacy from an earlier architecture. The current product is the web PWA (Capacitor-based). See `docs/archive/android-migration-java.md` for the historical record. Do not build `app/` — use Capacitor instead.
 
 ## How to Play
 
-1. **Welcome Screen**: Click "Start Game" to begin
-2. **Level Select**: Click on the letter "G" to start the phonics lesson
-3. **Gameplay**: 
-   - Click on planets showing the letter "G"
-   - Watch asteroids collide with planets
-   - Enjoy explosions and hear the "/g/" sound
-   - Listen to words that start with "G"
-   - Complete all 5 hits to finish the level
-
-## Game Flow
-
-### Welcome Screen
-- Displays animated welcome message
-- Single "Start Game" button
-
-### Level Selection
-- Shows A-Z grid of letters
-- Only "G" is playable (green button)
-- Other letters show "COMING SOON!" popup
-- Clicking "G" shows loading screen
-
-### Gameplay
-- Space-themed background with moving stars
-- 5 planets with letter "G" orbit around the screen
-- 3 decoy planets with other letters
-- Clicking correct "G" planets triggers:
-  - Fiery asteroid from random screen edge
-  - Explosion animation and sound
-  - Low-pitched "/g/" phoneme sound
-  - Voice message: "G is for [Word]!" 
-  - Semi-transparent word image in background
-- Progress bar shows completion (5 hits needed)
-- Level complete popup offers "Next Level" or "Exit"
-
-## Browser Support
-
-- **Chrome**: 88+ ✅
-- **Safari**: 14+ ✅
-- **Firefox**: 85+ ✅
-- **Edge**: 88+ ✅
-- **Mobile Safari**: iOS 14+ ✅
-- **Chrome Mobile**: Android 8+ ✅
-
-## Technical Details
-
-### Technologies Used
-- HTML5 with semantic markup
-- CSS3 with animations and transitions
-- Vanilla JavaScript (ES6+)
-- Web Audio API for sound
-- CSS Grid and Flexbox for layout
-- CSS animations for visual effects
-
-### Key Features
-- **State Management**: Simple state machine for screen transitions
-- **Event Handling**: Touch and mouse event optimization
-- **Responsive Design**: Mobile-first approach with breakpoints
-- **Performance**: Efficient DOM manipulation and animation
-- **Accessibility**: Semantic HTML and proper ARIA attributes
-- **Error Handling**: Graceful degradation for missing assets
-
-### Audio Files Required
-Place these files in `assets/sounds/`:
-- `explosion.mp3` - Explosion sound effect
-- `phoneme-g.mp3` - Low-pitched "/g/" sound
-- `celebration.mp3` - Level completion sound
-- `voice-grape.mp3` - "G is for Grape!"
-- `voice-goat.mp3` - "G is for Goat!"
-- `voice-gold.mp3` - "G is for Gold!"
-- `voice-girl.mp3` - "G is for Girl!"
-- `voice-grandpa.mp3` - "G is for Grandpa!"
-
-### Image Files Required
-Place these files in `assets/images/`:
-- `grape.png` - Grape illustration
-- `goat.png` - Goat illustration
-- `gold.png` - Gold illustration
-- `girl.png` - Girl illustration
-- `grandpa.png` - Grandpa illustration
+1. **Welcome screen** — tap/click *Start Game*.
+2. **Letter select** — pick any letter A–Z (adaptive difficulty applies).
+3. **Gameplay** — tap planets showing the target letter; correct hits launch a fiery asteroid + explosion + phoneme sound + "X is for [Word]!" voice.
+4. Complete the required hits to finish the level.
 
 ## Development
 
-### Adding New Letters
-1. Update the `handleLetterClick` method in `js/main.js`
-2. Create new gameplay logic for the letter
-3. Add corresponding audio and image assets
-4. Update CSS if needed for new animations
+### Adding a letter
+1. Add the word list to `PHONICS_FUN_LETTER_DATA` in `js/main.js`.
+2. Drop phoneme/voice audio into `public/sounds/` (generate via `npm run gen:audio`).
+3. Add art to `public/images/`.
+4. Run `npm test && npm run lint && npm run build`.
 
-### Customization
-- **Colors**: Modify CSS custom properties in `styles.css`
-- **Animations**: Adjust keyframes and timing in CSS
-- **Game Logic**: Update `GameState` class in `main.js`
-- **Audio**: Replace files in `assets/sounds/`
-- **Images**: Replace files in `assets/images/`
+### Audio assets
+Regenerate voices/effects with the Node helper:
+```bash
+npm run gen:audio     # phonemes + voice words + effects
+npm run gen:music     # background loop
+```
 
-## Testing
+## Testing & CI
 
-### Manual Testing Checklist
-- [ ] Welcome screen loads correctly
-- [ ] Start button works
-- [ ] Level select screen shows A-Z grid
-- [ ] Only G button is clickable
-- [ ] Other letters show "COMING SOON!" popup
-- [ ] G button shows loading screen
-- [ ] Gameplay screen loads after 5 seconds
-- [ ] Planets move and are clickable
-- [ ] Correct hits trigger effects
-- [ ] Incorrect hits show dull asteroids
-- [ ] Progress bar updates correctly
-- [ ] Level completes after 5 hits
-- [ ] Audio plays correctly
-- [ ] Responsive design works on mobile
-- [ ] Cross-browser compatibility
+- `npm test` — Vitest (jsdom). 105 passing / 4 skipped.
+- `npm run lint` — ESLint, **hard zero-warning gate** in CI.
+- GitHub Actions (`.github/workflows/ci.yml`): lint → test (with coverage) → build → `npm audit` → quality gate.
 
-### Browser Testing
-Test the game in:
-1. Chrome (latest)
-2. Safari (latest)
-3. Firefox (latest)
-4. Edge (latest)
-5. Mobile Safari (iOS)
-6. Chrome Mobile (Android)
+## Deployment
 
-## Troubleshooting
+- **Web:** Vercel auto-deploys `main`. `vercel.json` sets CSP/security headers and correct JS MIME types.
+- **Android:** Capacitor. `npx cap add android` then `npx cap sync && npx cap open android` (requires Android Studio for the final build/sign).
 
-### Common Issues
+## Documentation
 
-**Game doesn't load:**
-- Check browser console for JavaScript errors
-- Ensure all files are in correct directories
-- Try refreshing the page
-
-**Audio doesn't play:**
-- Check if audio files exist in `assets/sounds/`
-- Some browsers require user interaction before playing audio
-- Check browser console for audio errors
-
-**Images don't display:**
-- Verify image files exist in `assets/images/`
-- Check file extensions match code references
-- Ensure images are web-optimized (PNG, JPG, WebP)
-
-**Performance issues:**
-- Reduce image file sizes
-- Check for console errors
-- Close other browser tabs/applications
-
-**Touch events not working:**
-- Ensure device supports touch events
-- Check if other gestures are interfering
-- Try refreshing the page
-
-### Debug Mode
-Open browser developer tools (F12) and check the Console tab for debug messages and errors.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+All docs live under `docs/` (canonical hub). Start with `docs/ROADMAP.md`. Historical/retired material is in `docs/archive/`.
 
 ## License
 
-This project is created for educational purposes. Feel free to use and modify for learning and teaching.
-
-## Credits
-
-- **Game Design**: Educational phonics principles
-- **Development**: AI Assistant
-- **Target Audience**: Children learning phonics
-- **Educational Value**: Letter recognition and phoneme association
-
----
-
-**Teacher Evan's Phonics Fun** - Making learning letters fun and interactive! 🎮📚
+Educational use. Free to use and modify for learning and teaching.

@@ -1,5 +1,7 @@
 # Phonics-Fun Quick-Wins Implementation Plan
 
+**Status:** ✅ **Archived — Implemented & Verified** (June 2025). Note: the JS-track tasks were completed; the Java `app/` tasks reference the now-legacy Android Java project (superseded by Capacitor — see `docs/ROADMAP.md` and `docs/archive/android-migration-java.md`).
+
 > **For Hermes:** Use subagent-driven-development skill to implement this plan task-by-task.
 
 **Goal:** Fix critical issues and quick wins identified in the code review across JS web app and Android Java app.
