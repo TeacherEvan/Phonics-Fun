@@ -1611,6 +1611,15 @@ class GameState {
     }
 
     /**
+     * Check if a letter matches the current active level letter
+     * @param {string} letter - The letter to check
+     * @returns {boolean} True if the letter matches the active level
+     */
+    isCorrectLetter(letter) {
+        return letter === this.activeLetterLevel;
+    }
+
+    /**
      * Return the first A-Z letter not yet completed, or null when all done.
      * @returns {string|null}
      */
