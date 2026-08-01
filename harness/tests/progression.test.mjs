@@ -244,3 +244,32 @@ describe('letter progression pointer', () => {
     expect('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).toContain(gs.activeLetterLevel);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Task 4: three-state letter grid (done / current / available)
+// ---------------------------------------------------------------------------
+describe('letter grid three-state rendering', () => {
+  let gs;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupDOM();
+    gs = new window.GameState();
+  });
+
+  it('marks completed letters done, active letter current, others available', () => {
+    gs.completedLevels = ['A'];
+    gs.activeLetterLevel = 'B';
+    gs.renderLetterSelectionGrid();
+
+    const a = document.querySelector('[data-letter="A"]');
+    const b = document.querySelector('[data-letter="B"]');
+    const c = document.querySelector('[data-letter="C"]');
+
+    expect(a.className).toContain('done');
+    expect(b.className).toContain('current');
+    expect(c.className).toContain('available');
+    expect(a.getAttribute('aria-label')).toContain('completed');
+    expect(b.getAttribute('aria-label')).toContain('current level');
+    expect(c.getAttribute('aria-label')).toContain('available');
+  });
+});

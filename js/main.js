@@ -808,16 +808,28 @@ class GameState {
 
         alphabet.split('').forEach((letter) => {
             const letterButton = document.createElement('button');
-            const isLetterEnabled = this.enabledLetters.includes(letter);
+            const isDone = this.completedLevels.includes(letter);
+            const isCurrent = letter === this.activeLetterLevel && !isDone;
 
-            letterButton.className = isLetterEnabled
-                ? 'letter-button playable'
-                : 'letter-button disabled';
+            let stateClass;
+            let stateLabel;
+            if (isDone) {
+                stateClass = 'letter-button done';
+                stateLabel = ' - completed';
+            } else if (isCurrent) {
+                stateClass = 'letter-button current';
+                stateLabel = ' - current level';
+            } else {
+                stateClass = 'letter-button available';
+                stateLabel = ' - available';
+            }
+
+            letterButton.className = stateClass;
             letterButton.textContent = letter;
             letterButton.setAttribute('data-letter', letter);
             letterButton.setAttribute(
                 'aria-label',
-                `Letter ${letter}${isLetterEnabled ? ' - available' : ' - coming soon'}`
+                `Letter ${letter}${stateLabel}`
             );
 
             letterButton.addEventListener('click', () => {
