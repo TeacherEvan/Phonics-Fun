@@ -351,7 +351,7 @@ class GameState {
         const planets = document.querySelectorAll('.planet');
         const { width, height } = displayInfo.viewport;
         
-        planets.forEach((planet, index) => {
+        planets.forEach((planet, _index) => {
             // Recalculate position to keep planets visible
             const currentLeft = parseInt(planet.style.left, 10) || 0;
             const currentTop = parseInt(planet.style.top, 10) || 0;
@@ -438,7 +438,6 @@ class GameState {
         console.log('Asteroid collided with planet:', asteroid.id, planet.id);
 
         // Get the actual DOM elements
-        const asteroidElement = asteroid.element;
         const planetElement = planet.element;
 
         // Get the position for explosion
@@ -925,7 +924,6 @@ class GameState {
     processCorrectPlanetHit(planetElement, x, y) {
         console.log('✅ Correct hit!');
 
-        const planetIndex = planetElement.getAttribute('data-index');
         const asteroidId = `asteroid-fiery-${Date.now()}`;
         const asteroidElement = this.spawnAsteroid(x, y, 'fiery', asteroidId);
 

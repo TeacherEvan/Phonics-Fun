@@ -14,7 +14,7 @@ HTMLElement.prototype.getBoundingClientRect = vi.fn(() => mockRect(0, 0, 50, 50)
 global.requestAnimationFrame = vi.fn((cb) => setTimeout(cb, 16));
 global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 
-import '../js/collision-manager.js';
+import '../../js/collision-manager.js';
 
 describe('CollisionManager', () => {
   let collisionManager;

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 describe('PHONICS_FUN_LETTER_DATA', () => {
   beforeAll(async () => {
     // Load the global script that defines window.PHONICS_FUN_LETTER_DATA
-    await import('../js/main.js');
+    await import('../../js/main.js');
   });
 
   it('should expose A-Z keys', () => {

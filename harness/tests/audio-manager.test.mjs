@@ -73,7 +73,7 @@ global.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
   global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
 });
 
-import '../js/audio-manager.js';
+import '../../js/audio-manager.js';
 
 describe('AudioManager', () => {
   let audioManager;

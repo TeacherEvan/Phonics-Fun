@@ -17,7 +17,7 @@ global.IntersectionObserver = MockIntersectionObserver;
 global.requestIdleCallback = vi.fn((callback) => setTimeout(callback, 1));
 global.cancelIdleCallback = vi.fn((id) => clearTimeout(id));
 
-import '../js/performance-utils.js';
+import '../../js/performance-utils.js';
 
 describe('PerformanceUtils', () => {
   let perfUtils;

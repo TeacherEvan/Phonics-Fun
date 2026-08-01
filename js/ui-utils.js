@@ -350,7 +350,7 @@ class UIUtils {
     loadImageProgressive(src, container) {
         return new Promise((resolve, reject) => {
             // Show skeleton while loading
-            const skeleton = this.showSkeleton(container, {
+            this.showSkeleton(container, {
                 width: '100%',
                 height: '100%',
                 borderRadius: '8px'

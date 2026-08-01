@@ -135,12 +135,12 @@ function setupDOM() {
 }
 
 // Load dependencies first
-import '../js/event-bus.js';
-import '../js/event-manager.js';
-import '../js/audio-manager.js';
-import '../js/collision-manager.js';
-import '../js/performance-utils.js';
-import '../js/main.js';
+import '../../js/event-bus.js';
+import '../../js/event-manager.js';
+import '../../js/audio-manager.js';
+import '../../js/collision-manager.js';
+import '../../js/performance-utils.js';
+import '../../js/main.js';
 
 // Import the buildLetterVocabulary function
 // Since it's not exported, we'll redefine it here

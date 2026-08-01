@@ -170,7 +170,7 @@ class PerformanceUtils {
                     console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
                 });
                 lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
-            } catch (e) {
+            } catch {
                 console.log('LCP observation not supported');
             }
 
@@ -186,7 +186,7 @@ class PerformanceUtils {
                     });
                 });
                 fcpObserver.observe({ type: 'paint', buffered: true });
-            } catch (e) {
+            } catch {
                 console.log('FCP observation not supported');
             }
         }

@@ -195,7 +195,7 @@ class CollisionManager {
      * Update all registered objects and check for collisions
      * @param {number} deltaTime - Time since last update in milliseconds
      */
-    update(deltaTime) {
+    update(_deltaTime) {
         if (!this.enabled || this.objects.size === 0) return;
         
         // Performance optimization: if no asteroids are currently active,

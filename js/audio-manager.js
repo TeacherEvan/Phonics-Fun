@@ -261,7 +261,7 @@ class AudioManager {
                 if (sound.source) {
                     try {
                         sound.source.stop();
-                    } catch (e) {
+                    } catch {
                         // Ignore errors from already stopped sources
                     }
                 }
@@ -334,7 +334,7 @@ class AudioManager {
                 try {
                     sound.source.stop();
                     sound.source = null;
-                } catch (e) {
+                } catch {
                     // Ignore errors from already stopped sources
                 }
             }
@@ -365,12 +365,12 @@ class AudioManager {
     stopAll() {
         // Stop all Web Audio API sounds
         if (this.audioContext) {
-            this.sounds.forEach((sound, id) => {
+            this.sounds.forEach((sound, _id) => {
                 if (sound.source) {
                     try {
                         sound.source.stop();
                         sound.source = null;
-                    } catch (e) {
+                    } catch {
                         // Ignore errors from already stopped sources
                     }
                 }

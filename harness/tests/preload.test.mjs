@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import '../js/performance-utils.js';
+import '../../js/performance-utils.js';
 
 describe('PerformanceUtils preloadLetterImages', () => {
   let perfUtils;

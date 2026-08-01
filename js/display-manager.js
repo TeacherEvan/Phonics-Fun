@@ -83,7 +83,7 @@ class DisplayManager {
      * @returns {string} Display category
      */
     categorizeDisplay() {
-        const { width, devicePixelRatio } = this.viewport;
+        const { width } = this.viewport;
 
         if (width >= 1920) return 'ultra-large';
         if (width >= 1440) return 'large';

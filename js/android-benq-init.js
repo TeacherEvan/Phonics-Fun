@@ -30,7 +30,6 @@ class AndroidBenQInitializer {
 
     detectBenQBoard() {
         // Check for BenQ-specific characteristics
-        const screenRatio = screen.width / screen.height;
         const hasLargeScreen = screen.width >= 1920 || screen.height >= 1080;
         const hasSpecificResolution = (screen.width === 1920 && screen.height === 1080) || 
                                      (screen.width === 3840 && screen.height === 2160);
@@ -110,12 +109,12 @@ class AndroidBenQInitializer {
             let touchStartTime = 0;
             let touchMoved = false;
             
-            element.addEventListener('touchstart', (e) => {
+            element.addEventListener('touchstart', (_e) => {
                 touchStartTime = Date.now();
                 touchMoved = false;
             }, { passive: false });
             
-            element.addEventListener('touchmove', (e) => {
+            element.addEventListener('touchmove', (_e) => {
                 touchMoved = true;
             }, { passive: false });
             
