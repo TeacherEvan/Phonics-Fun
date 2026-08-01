@@ -127,8 +127,10 @@ function setupDOM() {
     setItem: vi.fn(),
     removeItem: vi.fn(),
   };
-  global.requestAnimationFrame = vi.fn((cb) => setTimeout(cb, 16));
-  global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
+  // Non-recursing rAF mock: records the callback but does NOT auto-schedule,
+  // so the GameState/CollisionManager render loop never leaks after teardown.
+  global.requestAnimationFrame = vi.fn(() => 1);
+  global.cancelAnimationFrame = vi.fn();
   class MockIntersectionObserver {
     constructor(callback) {
       this.callback = callback;
@@ -305,5 +307,32 @@ describe('per-letter adaptive difficulty', () => {
     const data = gs.exportTeacherData();
     expect(data.correctHits).toBe(4); // 3 + 1
     expect(data.incorrectHits).toBe(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Task 6: A-Z completeness gate (prevents silent G-centric regression)
+// ---------------------------------------------------------------------------
+describe('A-Z completeness gate', () => {
+  let gs;
+  let am;
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupDOM();
+    gs = new window.GameState();
+    am = new window.AudioManager();
+  });
+
+  it('every enabled letter is playable with a phoneme profile and word routing', () => {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    for (const letter of alphabet) {
+      // phoneme profile exists (no throw, returns a source)
+      expect(am.generatePhonemeSound(letter.toLowerCase())).toBeTruthy();
+      // word vocabulary present
+      const words = gs.letterVocabulary[letter].map((w) => w.word);
+      expect(words.length).toBeGreaterThan(0);
+      // ensureLetterAudio does not throw for any letter
+      expect(() => am.ensureLetterAudio(letter)).not.toThrow();
+    }
   });
 });

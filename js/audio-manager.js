@@ -657,10 +657,32 @@ class AudioManager {
         // Distinct base frequency per letter so each phoneme is recognizable
         // (vowels use clear formant tones; consonants use letter-keyed tones).
         const letterFreq = {
-            a: 220, e: 330, i: 440, o: 280, u: 190,
-            b: 180, c: 260, d: 200, f: 300, g: 220, h: 340, j: 250,
-            k: 270, l: 230, m: 210, n: 240, p: 190, q: 290, r: 250,
-            s: 320, t: 200, v: 260, w: 230, x: 310, y: 350, z: 240,
+            a: 220,
+            e: 330,
+            i: 440,
+            o: 280,
+            u: 190,
+            b: 180,
+            c: 260,
+            d: 200,
+            f: 300,
+            g: 220,
+            h: 340,
+            j: 250,
+            k: 270,
+            l: 230,
+            m: 210,
+            n: 240,
+            p: 190,
+            q: 290,
+            r: 250,
+            s: 320,
+            t: 200,
+            v: 260,
+            w: 230,
+            x: 310,
+            y: 350,
+            z: 240,
         };
         const frequency = letterFreq[phoneme.toLowerCase()] || 200;
 
