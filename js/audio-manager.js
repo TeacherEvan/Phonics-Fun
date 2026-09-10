@@ -656,33 +656,37 @@ class AudioManager {
 
         // Distinct base frequency per letter so each phoneme is recognizable
         // (vowels use clear formant tones; consonants use letter-keyed tones).
+        // Distinct base frequency per letter so every phoneme is uniquely
+        // recognizable. All 26 values are unique (no two letters share a
+        // frequency) — a shared value collapses two phonemes into one
+        // waveform and is the G-centric regression this map exists to avoid.
         const letterFreq = {
             a: 220,
+            b: 175,
+            c: 255,
+            d: 205,
             e: 330,
-            i: 440,
-            o: 280,
-            u: 190,
-            b: 180,
-            c: 260,
-            d: 200,
-            f: 300,
-            g: 220,
+            f: 295,
+            g: 225,
             h: 340,
+            i: 440,
             j: 250,
             k: 270,
             l: 230,
             m: 210,
             n: 240,
+            o: 280,
             p: 190,
             q: 290,
-            r: 250,
+            r: 248,
             s: 320,
             t: 200,
+            u: 195,
             v: 260,
-            w: 230,
+            w: 235,
             x: 310,
             y: 350,
-            z: 240,
+            z: 245,
         };
         const frequency = letterFreq[phoneme.toLowerCase()] || 200;
 

@@ -177,6 +177,23 @@ describe('generatePhonemeSound per-letter profiles', () => {
     expect(arraysEqual(bData, cData)).toBe(false);
   });
 
+  it('produces a pairwise-distinct waveform for every letter A-Z', () => {
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    const waveforms = {};
+    for (const letter of alphabet) {
+      am.generatePhonemeSound(letter);
+      waveforms[letter] = Float32Array.from(am.audioContext._lastData);
+    }
+    const seen = {};
+    for (const letter of alphabet) {
+      const key = Array.from(waveforms[letter]).join(',');
+      // Two letters sharing the same waveform means the per-letter map
+      // collapsed them to one frequency — the G-centric regression.
+      expect(seen[key]).toBeFalsy();
+      seen[key] = letter;
+    }
+  });
+
   it('returns an audible source for every letter A-Z', () => {
     for (const l of 'abcdefghijklmnopqrstuvwxyz') {
       const src = am.generatePhonemeSound(l);
