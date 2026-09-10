@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "repo": "Phonics-Fun",
+    "group": "GAMES",
+    "generated": "2026-08-15 18:55",
+    "branch": "main",
+    "commits": "67",
+    "lang": "Node/JS",
+    "status": "proposed"
+  },
+  "items": [
+    {
+      "area": "A-Z",
+      "action": "Ship docs/plans/2026-08-01-az-progression (full A-Z adaptive curriculum)."
+    },
+    {
+      "area": "Audio",
+      "action": "Regenerate voice templates (american/british m+f) via generate-voices*.ps1; keep Web Audio + speech fallback."
+    },
+    {
+      "area": "PWA",
+      "action": "Verify service worker + manifest offline + Capacitor Android build."
+    }
+  ],
+  "instructions": "Phonics-Fun (GAMES): proposed workstreams. Agent reads HERMES_PLAN.html ticks: approve(a)=implement, change(c)=revisit/clarify, skip=ignore. Compact form below.",
+  "compact": [
+    {
+      "a": "A",
+      "summary": "Ship docs/plans/2026-08-01-az-progression (full A-Z adaptive curriculum)."
+    },
+    {
+      "a": "A",
+      "summary": "Regenerate voice templates (american/british m+f) via generate-voices*.ps1; keep Web Audio + speech fallback."
+    },
+    {
+      "a": "P",
+      "summary": "Verify service worker + manifest offline + Capacitor Android build."
+    }
+  ]
+}
