@@ -13,3 +13,4 @@ local.properties
 .prettierrc
 vitest.config.mjs.timestamp-*
 *.tsbuildinfo
+docs/.scratch-audit/
