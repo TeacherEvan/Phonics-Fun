@@ -1,0 +1,12 @@
+{
+  "plan": "2026-09-11-bigfile-Phonics-Fun-AudioManager.java.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**Language mismatch** \u2014 file is Java/Android (`AudioManager.java`), but objectives reference `.ts` files, `knip`, `ts-prune`, `pnpm`, \"render blocks\", and \"sub-components\" (React/TS terminology). The plan applies a TypeScript refactoring template to a Java file.",
+    "**Generic filler objectives** \u2014 OBJ-005 through OBJ-012 are identical \"Hardening pass N\" entries with no specific, file-derived targets. The plan claims \"file-aware\" objectives but these are template padding.",
+    "**Truncated / unparseable** \u2014 plan cuts off mid-sentence at OBJ-012; structural check reports `objectives=0`, `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None`. The header and objectives present in the text were not captured by the structural analyzer, indicating a parsing or generation failure.",
+    "**Invalid validation commands** \u2014 OBJ-001's `rg -F '<literal>'` uses an unescaped literal containing single quotes and parentheses; OBJ-002's `knip`/`ts-prune` cannot analyze a `.java` file."
+  ],
+  "reviewed_at": "2026-09-11T02:40:21.198223+07:00"
+}

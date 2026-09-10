@@ -142,3 +142,16 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-11T02:40:21.197513+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Language mismatch** — file is Java/Android (`AudioManager.java`), but objectives reference `.ts` files, `knip`, `ts-prune`, `pnpm`, "render blocks", and "sub-components" (React/TS terminology). The plan applies a TypeScript refactoring template to a Java file.
+2. **Generic filler objectives** — OBJ-005 through OBJ-012 are identical "Hardening pass N" entries with no specific, file-derived targets. The plan claims "file-aware" objectives but these are template padding.
+3. **Truncated / unparseable** — plan cuts off mid-sentence at OBJ-012; structural check reports `objectives=0`, `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None`. The header and objectives present in the text were not captured by the structural analyzer, indicating a parsing or generation failure.
+4. **Invalid validation commands** — OBJ-001's `rg -F '<literal>'` uses an unescaped literal containing single quotes and parentheses; OBJ-002's `knip`/`ts-prune` cannot analyze a `.java` file.
