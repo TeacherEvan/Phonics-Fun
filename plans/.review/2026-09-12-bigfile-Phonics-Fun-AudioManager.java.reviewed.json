@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-12-bigfile-Phonics-Fun-AudioManager.java.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**Language mismatch**: File is Java (`AudioManager.java`), but all 12 objectives prescribe TypeScript tooling (`constants.ts`, `index.ts` barrels, `pnpm dlx knip`, `pnpm run build`). None of these apply to a Java/Android source file. The plan was not actually derived from the file's structural analysis.",
+    "**Structural check contradicts plan**: The check reports `objectives=0` (zero objectives found), yet the plan lists 12. The \"file-aware v2\" claim is false \u2014 the objectives are template filler, not line/symbol-anchored extractions.",
+    "**OBJ-005\u2013OBJ-012 are 8 identical \"Hardening pass N\" entries** with verbatim text and no distinct target, acceptance, or evidence. This is padding, not a plan. A real refactor plan would have at most 2\u20133 hardening passes with concrete, differing scope."
+  ],
+  "reviewed_at": "2026-09-12T03:36:45.613328+07:00"
+}

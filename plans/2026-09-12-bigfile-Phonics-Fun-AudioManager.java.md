@@ -142,3 +142,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-12T03:36:45.612426+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Language mismatch**: File is Java (`AudioManager.java`), but all 12 objectives prescribe TypeScript tooling (`constants.ts`, `index.ts` barrels, `pnpm dlx knip`, `pnpm run build`). None of these apply to a Java/Android source file. The plan was not actually derived from the file's structural analysis.
+2. **Structural check contradicts plan**: The check reports `objectives=0` (zero objectives found), yet the plan lists 12. The "file-aware v2" claim is false — the objectives are template filler, not line/symbol-anchored extractions.
+3. **OBJ-005–OBJ-012 are 8 identical "Hardening pass N" entries** with verbatim text and no distinct target, acceptance, or evidence. This is padding, not a plan. A real refactor plan would have at most 2–3 hardening passes with concrete, differing scope.
