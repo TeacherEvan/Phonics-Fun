@@ -142,3 +142,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-13T04:00:13.564800+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Language/tooling mismatch.** The target is a Java file (`AudioManager.java`) but every objective references TypeScript tooling: `.ts` files, `knip`/`ts-prune`, `index.ts` barrels, `pnpm`. None of these apply to Java. The structural analysis extracted Java literals (`) || word.equalsIgnoreCase(`) but then prescribed TypeScript-specific extractions. The entire objective set is invalid for the file type.
+2. **Boilerplate filler objectives.** OBJ-005 through OBJ-012 are eight identical "Hardening pass N" entries with no differentiated targets, no line/symbol anchors, and no concrete acceptance criteria beyond "type-check." These are template-filler, not derived from structural analysis — exactly what the v2 generator claims to avoid.
+3. **Missing required plan fields.** Structural check reports `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None`. The plan lacks a proper header block, import cross-reference analysis, definition of done, and security section — all required by the G&L Auditor V2 standard. The "Why this file matters" section is a single generic sentence with no file-specific rationale.
