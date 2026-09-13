@@ -142,3 +142,16 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-14T04:19:38.812785+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Language mismatch — fatal.** The file is `AudioManager.java` (Java/Android), but the plan targets `./constants.ts`, `index.ts` barrels, `pnpm dlx knip`/`ts-prune`, and React "prop drilling." None of these exist in a Java/Android project. The entire objective set is built for the wrong ecosystem.
+2. **OBJ-005–OBJ-012 are 8 copy-pasted "Hardening pass" fillers** with identical text, no differentiated targets, and no measurable acceptance beyond "type-check" (which for Java means Gradle/javac, not the implied TS tooling). These are template noise, not real objectives.
+3. **No Definition of Done.** Structural check shows `has_dod=None`. There's no DoD section, no security consideration (`has_security=None`), and no `has_why` beyond a single sentence that doesn't connect the file's actual Android responsibilities (AudioAttributes, SoundPool, TextToSpeech, MediaPlayer) to any objective.
+4. **OBJ-002/OBJ-003 are inapplicable.** `knip`/`ts-prune` and `index.ts` barrel audits have no meaning for a `.java` file in an Android source set. These objectives will fail on arrival or are simply nonsense.
