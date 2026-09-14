@@ -142,3 +142,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-15T04:40:05.458478+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Objectives are filler, not file-derived.** 8 of 12 (OBJ-005–OBJ-012) are byte-identical "Hardening pass N" entries with zero differentiation. The structural analysis found only 2 repeated-literal signals (one ×6, one ×3) — it cannot support 12 distinct objectives. The `objectives=0` structural check confirms this mismatch.
+2. **Type-system mismatch.** The target is a Java/Android file (`AudioManager.java`, imports `android.content.Context`, `android.media.MediaPlayer`, etc.), but every objective references TypeScript tooling and patterns: `./constants.ts`, `index.ts` barrels, `pnpm dlx knip`, `ts-prune`, `export` barrels. None of these exist in a Java source tree. The plan is applying a TS refactor template to the wrong language.
+3. **Critical structural fields are all None.** `has_header=None`, `has_imports=None`, `has_why=None`, `has_dod=None`, `has_security=None`. The "Why this file matters" section is generic boilerplate ("largest source file under standard source roots") that lists TS directories (`convex`, `components`, `pages`, `src-tauri/src`) irrelevant to a Java/Android module. No DOD, no security considerations, no header.
