@@ -161,8 +161,10 @@ describe('AudioManager', () => {
   describe('voice template management', () => {
     it('should return available voice templates', () => {
       const templates = audioManager.getAvailableVoiceTemplates();
-      expect(templates).toHaveLength(2);
-      expect(templates.map(t => t.id)).toEqual(['american-female', 'british-female']);
+      expect(templates).toHaveLength(4);
+      expect(templates.map(t => t.id)).toEqual(
+        ['american-male', 'american-female', 'british-female', 'british-male']
+      );
     });
 
     it('should return current voice template', () => {

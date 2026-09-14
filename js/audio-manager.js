@@ -41,6 +41,11 @@ class AudioManager {
         this.currentVoiceTemplate = 'british-female'; // Default - use the clearest phonics voice
         this.availableVoiceTemplates = [
             {
+                id: 'american-male',
+                name: 'American Male',
+                description: 'Clear American male voice',
+            },
+            {
                 id: 'american-female',
                 name: 'American Female',
                 description: 'Clear American female voice',
@@ -49,6 +54,11 @@ class AudioManager {
                 id: 'british-female',
                 name: 'British Female',
                 description: 'Clear British female voice',
+            },
+            {
+                id: 'british-male',
+                name: 'British Male',
+                description: 'Clear British male voice',
             },
         ];
 
@@ -859,8 +869,12 @@ class AudioManager {
             .toLowerCase()
             .replace(/_/g, '-');
         const aliasMap = {
+            americanmale: 'american-male',
+            'american-male': 'american-male',
             americanfemale: 'american-female',
             'american-female': 'american-female',
+            britishmale: 'british-male',
+            'british-male': 'british-male',
             britishfemale: 'british-female',
             'british-female': 'british-female',
         };

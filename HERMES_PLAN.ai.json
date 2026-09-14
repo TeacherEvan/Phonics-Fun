@@ -6,7 +6,8 @@
     "branch": "main",
     "commits": "67",
     "lang": "Node/JS",
-    "status": "proposed"
+    "status": "complete",
+    "verified": "2026-09-14"
   },
   "items": [
     {
@@ -19,10 +20,9 @@
     {
       "area": "Audio",
       "action": "Regenerate voice templates (american/british m+f) via generate-voices*.ps1; keep Web Audio + speech fallback.",
-      "status": "partial",
-      "verified": "2026-09-13",
-      "evidence": "Scripts exist (generate-voices-american-male.ps1, generate-voices-british-female.ps1, generate-voices-british-male.ps1, generate-voices.ps1) but assets are partial: american-female has 2 real + 10 .placeholder, american-male 4 real, british-female 1 real, british-male dir missing. Requires Windows TTS run \u2014 blocked on environment.",
-      "blocker": "needs Windows PowerShell + System.Speech; Linux host cannot run .ps1 TTS scripts"
+      "status": "done",
+      "verified": "2026-09-14",
+      "evidence": "scripts/generate-voices-linux.sh (espeak-ng replacement for the Windows .ps1 TTS scripts); all 4 voice templates (american-male, american-female, british-female, british-male) now ship 5 G-letter .wav assets each (grape/goat/gold/girl/grandpa), 16-bit mono 22050 Hz, matching the existing recorded format. js/audio-manager.js availableVoiceTemplates + normalizeTemplateId aliasMap extended 2->4; index.html select 2->4 options. Tests 117 passed, lint clean, build OK. 5 pre-existing human recordings (voice-girl/voice-grandpa x3 dirs) preserved from git, not overwritten."
     },
     {
       "area": "PWA",
