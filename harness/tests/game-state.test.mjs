@@ -48,6 +48,9 @@ function setupDOM() {
     <span id="hits-counter"></span>
     <span id="ready-letter-display"></span>
     <span id="level-complete-letter"></span>
+    <div class="word-background"></div>
+    <div class="asteroids-container"></div>
+    <div class="explosions-container"></div>
   `;
   
   // Mock AudioContext
@@ -118,8 +121,9 @@ function setupDOM() {
     setItem: vi.fn(),
     removeItem: vi.fn()
   };
-  global.requestAnimationFrame = vi.fn((cb) => setTimeout(cb, 16));
-  global.cancelAnimationFrame = vi.fn((id) => clearTimeout(id));
+  // Non-recursing rAF mock: records callback but does not recurse into setTimeout
+  global.requestAnimationFrame = vi.fn(() => 1);
+  global.cancelAnimationFrame = vi.fn();
   // Mock IntersectionObserver as a constructor
   class MockIntersectionObserver {
     constructor(callback) {
@@ -173,9 +177,16 @@ describe('GameState pure functions', () => {
     }
   });
 
-  it.skip('should instantiate without throwing', () => {
-    // Skipped: requires complex DOM setup (.word-background element)
+  it('should instantiate without throwing', () => {
     expect(gameState).toBeDefined();
+    expect(gameState.currentScreen).toBe('welcome');
+    expect(gameState.correctHitsCount).toBe(0);
+  });
+
+  it('should execute completeLevelSuccessfully and updateProgressDisplay without crashing', () => {
+    expect(() => gameState.updateProgressDisplay()).not.toThrow();
+    expect(() => gameState.completeLevelSuccessfully()).not.toThrow();
+    expect(gameState.isGameplayActive).toBe(false);
   });
 });
 

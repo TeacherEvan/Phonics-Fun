@@ -164,6 +164,16 @@ class DisplayManager {
         root.style.setProperty('--planet-scale', planetScale);
         root.style.setProperty('--button-scale', buttonScale);
 
+        // Strip stale display and orientation classes before adding current ones
+        const classesToRemove = Array.from(document.body.classList).filter(
+            (c) =>
+                c.startsWith('display-') ||
+                c.startsWith('orientation-') ||
+                c.startsWith('device-') ||
+                c.startsWith('performance-')
+        );
+        classesToRemove.forEach((c) => document.body.classList.remove(c));
+
         // Apply device-specific classes
         document.body.classList.add(`device-${this.deviceType}`);
         document.body.classList.add(`display-${this.displayCategory}`);

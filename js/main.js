@@ -300,11 +300,12 @@ class GameState {
             });
 
         // Export progress data for teachers
-        document
-            .getElementById('export-data-btn')
-            .addEventListener('click', () => {
+        const exportDataBtn = document.getElementById('export-data-btn');
+        if (exportDataBtn) {
+            exportDataBtn.addEventListener('click', () => {
                 this.exportTeacherData();
             });
+        }
 
         // Level complete popup actions
         document
@@ -371,35 +372,9 @@ class GameState {
      * Setup touch event handlers for mobile optimization
      */
     setupTouchEventHandlers() {
-        // Prevent default touch behaviors in game area
-        document.addEventListener(
-            'touchstart',
-            (e) => {
-                if (
-                    e.target.closest('.game-area') ||
-                    e.target.closest('.planet')
-                ) {
-                    e.preventDefault();
-                }
-            },
-            { passive: false }
-        );
-
+        // Prevent scrolling while interacting with game area
         document.addEventListener(
             'touchmove',
-            (e) => {
-                if (
-                    e.target.closest('.game-area') ||
-                    e.target.closest('.planet')
-                ) {
-                    e.preventDefault();
-                }
-            },
-            { passive: false }
-        );
-
-        document.addEventListener(
-            'touchend',
             (e) => {
                 if (
                     e.target.closest('.game-area') ||
@@ -501,7 +476,7 @@ class GameState {
         });
 
         this.eventManager.subscribe('level:complete', () => {
-            this.completeLevel();
+            this.completeLevelSuccessfully();
         });
 
         // Set up collision handlers
@@ -566,7 +541,14 @@ class GameState {
             `phoneme-${this.activeLetterLevel.toLowerCase()}`
         );
 
-        // Remove planet and asteroid from collision manager
+        // Remove planet and asteroid from collision manager and DOM
+        const asteroidObj = this.collisionManager.getObject(asteroidId);
+        if (asteroidObj && asteroidObj.element) {
+            if (asteroidObj.element.trailInterval) {
+                clearInterval(asteroidObj.element.trailInterval);
+            }
+            asteroidObj.element.remove();
+        }
         this.collisionManager.unregisterObject(asteroidId);
         this.collisionManager.unregisterObject(planetId);
 
@@ -580,8 +562,8 @@ class GameState {
 
         // Voice message and word image
         setTimeout(() => {
-            this.playVoiceMessage();
-            this.showWordImage();
+            this.playVocabularyAudio();
+            this.displayWordImage();
         }, 500);
 
         // Update progress
@@ -591,7 +573,7 @@ class GameState {
         this.cumTotal++;
         this.updateAdaptiveDifficulty();
         this.saveStatsToLocalStorage();
-        this.updateProgress();
+        this.updateProgressDisplay();
 
         // Announce correct hit to screen readers
         this.announceToScreenReader(
@@ -609,7 +591,14 @@ class GameState {
     handleIncorrectCollision(planet, x, y, asteroidId) {
         console.log('Incorrect collision');
 
-        // Remove asteroid from collision manager
+        // Remove asteroid from collision manager and DOM
+        const asteroidObj = this.collisionManager.getObject(asteroidId);
+        if (asteroidObj && asteroidObj.element) {
+            if (asteroidObj.element.trailInterval) {
+                clearInterval(asteroidObj.element.trailInterval);
+            }
+            asteroidObj.element.remove();
+        }
         this.collisionManager.unregisterObject(asteroidId);
 
         // Track stats for adaptive difficulty
@@ -906,6 +895,7 @@ class GameState {
      */
     startGameplaySession() {
         console.log('🎯 Initializing gameplay session...');
+        this.resetGameplayState();
         this.isGameplayActive = true;
         this.correctHitsCount = 0;
         this.incorrectHitsCount = 0;
@@ -1096,6 +1086,7 @@ class GameState {
                     clearInterval(trailInterval);
                 }
             }, 50);
+            asteroidElement.trailInterval = trailInterval;
         }
     }
 
@@ -1314,7 +1305,7 @@ class GameState {
                 letter,
                 word
             );
-            if (cachedImage && cachedImage.complete) {
+            if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0) {
                 wordBackground.style.backgroundImage = `url('${imagePath}')`;
                 wordBackground.classList.remove('loading');
                 wordBackground.classList.add('visible');
@@ -1546,6 +1537,7 @@ class GameState {
     displayPopup(popupId) {
         console.log(`💬 Showing popup: ${popupId}`);
         const popup = document.getElementById(popupId);
+        if (!popup) return;
         popup.classList.remove('hidden');
 
         // Animate popup content entrance
@@ -1598,7 +1590,10 @@ class GameState {
 
         // Reset UI elements
         this.updateProgressDisplay();
-        document.querySelector('.word-background').classList.remove('visible');
+        const wordBg = document.querySelector('.word-background');
+        if (wordBg) {
+            wordBg.classList.remove('visible');
+        }
     }
 
     /**
@@ -1678,6 +1673,9 @@ class GameState {
                 this.correctHitsCount = parsed.correctHitsCount || 0;
                 this.incorrectHitsCount = parsed.incorrectHitsCount || 0;
                 this.totalAnswersCount = parsed.totalAnswersCount || 0;
+                this.cumCorrect = parsed.cumCorrect || 0;
+                this.cumIncorrect = parsed.cumIncorrect || 0;
+                this.cumTotal = parsed.cumTotal || 0;
                 this.updateAdaptiveDifficulty();
             }
         } catch (e) {

@@ -56,8 +56,12 @@ public class SymbolGameActivity extends Activity {
         Canvas canvas = getCanvasFromView(); // Your implementation
         RectF bounds = new RectF(100, 100, 200, 200); // Symbol position and size
         
-        // ONE LINE OF CODE TO RENDER ANY SYMBOL!
-        symbolRenderer.renderSymbol(canvas, symbol, bounds, level);
+        if (canvas != null) {
+            // ONE LINE OF CODE TO RENDER ANY SYMBOL!
+            symbolRenderer.renderSymbol(canvas, symbol, bounds, level);
+        } else {
+            android.util.Log.w("SymbolGame", "Canvas not yet available for symbol: " + symbol);
+        }
         
         // Get associated words and sounds
         String[] words = symbolRenderer.getWordsForSymbol(symbol);

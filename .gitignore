@@ -14,3 +14,4 @@ local.properties
 vitest.config.mjs.timestamp-*
 *.tsbuildinfo
 docs/.scratch-audit/
+coverage/

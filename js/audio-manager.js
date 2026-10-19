@@ -295,8 +295,9 @@ class AudioManager {
 
         if (!this.hasLoadedSound(id)) {
             this.ensureSoundLoaded(id).finally(() => {
-                if (
-                    !this.hasLoadedSound(id) &&
+                if (this.hasLoadedSound(id)) {
+                    this.play(id);
+                } else if (
                     id.startsWith('voice-') &&
                     this.canUseSpeechSynthesis
                 ) {
@@ -304,10 +305,7 @@ class AudioManager {
                         pitch: 1.15,
                         rate: 0.88,
                     });
-                } else if (
-                    !this.hasLoadedSound(id) &&
-                    id.startsWith('phoneme-')
-                ) {
+                } else if (id.startsWith('phoneme-')) {
                     this.generatePhonemeSound(id.replace('phoneme-', ''));
                 }
             });
@@ -594,6 +592,34 @@ class AudioManager {
                         )
                 ) ||
                 matches((v) => lower(v.lang).startsWith('en-gb')) ||
+                list[0] ||
+                null
+            );
+        }
+
+        if (this.currentVoiceTemplate === 'british-male') {
+            return (
+                matches(
+                    (v) => lower(v.lang).startsWith('en-gb'),
+                    (v) =>
+                        /\b(male|man|boy|george|oliver|harry)\b/i.test(v.name) &&
+                        !/female|woman|girl/i.test(v.name)
+                ) ||
+                matches((v) => lower(v.lang).startsWith('en-gb')) ||
+                list[0] ||
+                null
+            );
+        }
+
+        if (this.currentVoiceTemplate === 'american-male') {
+            return (
+                matches(
+                    (v) => lower(v.lang).startsWith('en-us'),
+                    (v) =>
+                        /\b(male|man|boy|david|mark|guy|alex)\b/i.test(v.name) &&
+                        !/female|woman|girl/i.test(v.name)
+                ) ||
+                matches((v) => lower(v.lang).startsWith('en-us')) ||
                 list[0] ||
                 null
             );
@@ -1003,5 +1029,7 @@ if (typeof window !== 'undefined') {
     window.AudioManager = AudioManager;
 }
 
-// Global instance for easy access
-window.audioManager = new AudioManager();
+// Global instance for easy access if not already present
+if (typeof window !== 'undefined' && !window.audioManager) {
+    window.audioManager = new AudioManager();
+}

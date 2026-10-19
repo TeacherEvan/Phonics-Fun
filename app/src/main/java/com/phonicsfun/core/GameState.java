@@ -126,8 +126,11 @@ public class GameState {
         }
         
         // Create planets based on the words
+        if (!letterWords.isEmpty()) {
+            this.totalHits = letterWords.size();
+        }
         planetsCreated = true;
-        Log.d(TAG, "Created planets for letter " + letter + " with " + letterWords.size() + " words");
+        Log.d(TAG, "Created planets for letter " + letter + " with " + letterWords.size() + " words (totalHits: " + this.totalHits + ")");
     }
     
     public void registerHit(boolean isCorrect) {

@@ -12,6 +12,7 @@ class ParticleSystem {
         this.animationId = null;
         this.isActive = false;
         this.elementPool = []; // DOM element pool for particles
+        this.activeTimeouts = [];
 
         this.init();
     }
@@ -199,7 +200,8 @@ class ParticleSystem {
         if (!this.isActive) return;
 
         const currentTime = Date.now();
-        const deltaTime = (currentTime - (this.lastTime || currentTime)) / 1000;
+        const rawDelta = (currentTime - (this.lastTime || currentTime)) / 1000;
+        const deltaTime = Math.min(rawDelta, 0.05);
         this.lastTime = currentTime;
 
         // Update all particles
@@ -400,7 +402,7 @@ class ParticleSystem {
         const centerY = window.innerHeight / 2;
 
         for (let i = 0; i < 100; i++) {
-            setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 this.createParticle(centerX, centerY, 'explosion', {
                     size: Math.random() * 8 + 4,
                     color: [
@@ -418,6 +420,7 @@ class ParticleSystem {
                     gravity: 0.02,
                 });
             }, i * 50);
+            this.activeTimeouts.push(timeoutId);
         }
     }
 
@@ -426,6 +429,10 @@ class ParticleSystem {
         this.isActive = false;
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
+        }
+        if (this.activeTimeouts) {
+            this.activeTimeouts.forEach((id) => clearTimeout(id));
+            this.activeTimeouts = [];
         }
         if (this.container && this.container.parentNode) {
             this.container.parentNode.removeChild(this.container);

@@ -312,16 +312,17 @@ class PerformanceUtils {
                         const img = new Image();
                         img.onload = () => {
                             console.log(`✅ Preloaded: ${letter}-${word}`);
+                            self.resourceCache.set(`${letter}-${word}`, img);
                             checkComplete();
                         };
                         img.onerror = () => {
                             console.log(
                                 `⚠️ Failed to preload: ${letter}-${word}`
                             );
+                            self.resourceCache.delete(`${letter}-${word}`);
                             checkComplete();
                         };
                         img.src = `${imagePath}${word}.png`;
-                        self.resourceCache.set(`${letter}-${word}`, img);
                     }, index * 100); // Stagger by 100ms
                 });
             });

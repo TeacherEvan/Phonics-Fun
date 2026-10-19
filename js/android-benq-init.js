@@ -32,14 +32,10 @@ class AndroidBenQInitializer {
     }
 
     detectBenQBoard() {
-        // Check for BenQ-specific characteristics
+        // BenQ boards require BenQ userAgent signature in addition to large display
+        const isBenQUserAgent = /BenQ/i.test(navigator.userAgent);
         const hasLargeScreen = screen.width >= 1920 || screen.height >= 1080;
-        const hasSpecificResolution =
-            (screen.width === 1920 && screen.height === 1080) ||
-            (screen.width === 3840 && screen.height === 2160);
-
-        // BenQ boards often have specific screen characteristics
-        return hasLargeScreen && hasSpecificResolution;
+        return isBenQUserAgent && hasLargeScreen;
     }
 
     applyAndroidFixes() {
@@ -283,13 +279,16 @@ class AndroidBenQInitializer {
             audio.preload = 'auto';
             audio.volume = 0.8; // Slightly lower volume for board speakers
 
-            // Add error handling specific to BenQ boards
+            // Add error handling specific to BenQ boards (max 1 retry)
+            let reloadAttempts = 0;
             audio.addEventListener('error', (e) => {
                 console.error('BenQ audio error:', e);
-                // Try to reload the audio
-                setTimeout(() => {
-                    audio.load();
-                }, 1000);
+                if (reloadAttempts < 1) {
+                    reloadAttempts++;
+                    setTimeout(() => {
+                        audio.load();
+                    }, 1000);
+                }
             });
         });
     }
@@ -416,7 +415,7 @@ class AndroidBenQInitializer {
             console.error('Android compatibility error:', event.error);
 
             // Handle specific Android errors
-            if (event.error.message.includes('Audio')) {
+            if (event.error?.message?.includes('Audio')) {
                 console.log('Audio error detected, attempting to recover...');
                 this.recoverAudio();
             }
@@ -427,9 +426,10 @@ class AndroidBenQInitializer {
             console.error('Unhandled promise rejection:', event.reason);
 
             // Don't let audio playback failures crash the game
+            const reasonStr = String(event.reason ?? '');
             if (
-                event.reason.toString().includes('play') ||
-                event.reason.toString().includes('audio')
+                reasonStr.includes('play') ||
+                reasonStr.includes('audio')
             ) {
                 event.preventDefault();
                 console.log('Audio playback error handled gracefully');
@@ -475,10 +475,11 @@ class AndroidBenQInitializer {
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.androidBenQInitializer = new AndroidBenQInitializer();
-
-    // Run compatibility test
-    window.androidBenQInitializer.runCompatibilityTest();
+    if (!window.androidBenQInitializer) {
+        window.androidBenQInitializer = new AndroidBenQInitializer();
+        // Run compatibility test
+        window.androidBenQInitializer.runCompatibilityTest();
+    }
 });
 
 // Export for global use

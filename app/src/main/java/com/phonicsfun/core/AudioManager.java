@@ -62,17 +62,26 @@ public class AudioManager {
         voiceMap = new HashMap<>();
     }
     
+    private void loadDefaultSoundIfPresent(String key, String rawName) {
+        int resId = getResId(rawName, "raw");
+        if (resId != 0 && soundPool != null) {
+            soundMap.put(key, soundPool.load(context, resId, 1));
+        } else {
+            Log.w(TAG, "Optional raw sound resource not bundled: " + rawName);
+        }
+    }
+
     private void loadDefaultSounds() {
         Log.d(TAG, "Loading default sound effects...");
         
         // Load sound effects
         try {
-            soundMap.put("celebration", soundPool.load(context, getResId("celebration", "raw"), 1));
-            soundMap.put("explosion", soundPool.load(context, getResId("explosion", "raw"), 1));
-            soundMap.put("phoneme_g", soundPool.load(context, getResId("phoneme_g", "raw"), 1));
+            loadDefaultSoundIfPresent("celebration", "celebration");
+            loadDefaultSoundIfPresent("explosion", "explosion");
+            loadDefaultSoundIfPresent("phoneme_g", "phoneme_g");
 
-            Log.d(TAG, "Default sounds loaded successfully");
-        } catch (IllegalStateException | IllegalArgumentException e) {
+            Log.d(TAG, "Default sounds checked/loaded successfully");
+        } catch (RuntimeException e) {
             Log.e(TAG, "Error loading default sounds: " + e.getMessage());
         }
         
@@ -82,13 +91,18 @@ public class AudioManager {
     
     private void initializeBackgroundMusic() {
         try {
-            backgroundMusicPlayer = MediaPlayer.create(context, getResId("background_music", "raw"));
-            if (backgroundMusicPlayer != null) {
-                backgroundMusicPlayer.setLooping(true);
-                backgroundMusicPlayer.setVolume(musicVolume, musicVolume);
-                Log.d(TAG, "Background music initialized");
+            int resId = getResId("background_music", "raw");
+            if (resId != 0) {
+                backgroundMusicPlayer = MediaPlayer.create(context, resId);
+                if (backgroundMusicPlayer != null) {
+                    backgroundMusicPlayer.setLooping(true);
+                    backgroundMusicPlayer.setVolume(musicVolume, musicVolume);
+                    Log.d(TAG, "Background music initialized");
+                }
+            } else {
+                Log.w(TAG, "Optional raw background_music resource not bundled");
             }
-        } catch (IllegalStateException | IllegalArgumentException | SecurityException e) {
+        } catch (RuntimeException e) {
             Log.e(TAG, "Error initializing background music: " + e.getMessage());
         }
     }

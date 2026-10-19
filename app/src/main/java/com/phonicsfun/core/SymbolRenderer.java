@@ -7,6 +7,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * SymbolRenderer - Reusable component for rendering any symbol
@@ -117,6 +118,9 @@ public class SymbolRenderer {
      * This is what your frontend will call!
      */
     public void renderSymbol(Canvas canvas, char symbol, RectF bounds, int level) {
+        if (canvas == null || bounds == null) {
+            return;
+        }
         SymbolConfig config = symbolConfigs.get(symbol);
         if (config == null) {
             // Create default config for unknown symbols
@@ -213,6 +217,12 @@ public class SymbolRenderer {
      * Get all supported symbols
      */
     public char[] getSupportedSymbols() {
-        return symbolConfigs.keySet().toString().toCharArray();
+        Set<Character> keys = symbolConfigs.keySet();
+        char[] result = new char[keys.size()];
+        int i = 0;
+        for (Character c : keys) {
+            result[i++] = c;
+        }
+        return result;
     }
 }

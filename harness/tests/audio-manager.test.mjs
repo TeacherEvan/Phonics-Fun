@@ -255,20 +255,58 @@ describe('AudioManager', () => {
       const utterance = audioManager.speak('test');
       expect(utterance.voice).toBeDefined();
     });
+    it('should select male voice when template is american-male or british-male', () => {
+      global.speechSynthesis.getVoices.mockReturnValue([
+        { name: 'Google UK English Female', lang: 'en-GB' },
+        { name: 'Google UK English Male', lang: 'en-GB' },
+        { name: 'Microsoft David', lang: 'en-US' },
+        { name: 'Microsoft Zira', lang: 'en-US' }
+      ]);
+      
+      audioManager.currentVoiceTemplate = 'american-male';
+      const usMaleUtterance = audioManager.speak('hello');
+      expect(usMaleUtterance.voice?.name).toBe('Microsoft David');
+
+      audioManager.currentVoiceTemplate = 'british-male';
+      const ukMaleUtterance = audioManager.speak('hello');
+      expect(ukMaleUtterance.voice?.name).toBe('Google UK English Male');
+    });
   });
 
   describe('play/stop', () => {
     it('should stop all sounds', () => {
+      const mockSource = { stop: vi.fn() };
+      audioManager.sounds.set('active-sound', { buffer: {}, source: mockSource });
+      audioManager.backgroundMusic = { pause: vi.fn(), currentTime: 10 };
+
       audioManager.stopAll();
-      // Should not throw
-      expect(true).toBe(true);
+
+      expect(mockSource.stop).toHaveBeenCalled();
+      expect(audioManager.sounds.get('active-sound').source).toBeNull();
+      expect(audioManager.backgroundMusic.pause).toHaveBeenCalled();
+      expect(audioManager.backgroundMusic.currentTime).toBe(0);
     });
 
     it('should handle missing audio context gracefully', () => {
       audioManager.audioContext = null;
-      audioManager.play('test-sound');
-      // Should not throw
-      expect(true).toBe(true);
+      expect(() => audioManager.play('test-sound')).not.toThrow();
+    });
+
+    it('should automatically play sound after ensureSoundLoaded settles', async () => {
+      const playSpy = vi.spyOn(audioManager, 'play');
+      // Simulate sound not yet loaded
+      audioManager.ensureSoundLoaded = vi.fn(() => {
+        // Mock loadSound success by adding buffer to sounds map
+        audioManager.sounds.set('async-sound', { buffer: {}, source: null });
+        return Promise.resolve();
+      });
+
+      audioManager.play('async-sound');
+      await Promise.resolve(); // Allow finally() microtask to settle
+
+      // Verify play was recursively called once the sound buffer was loaded
+      expect(playSpy).toHaveBeenCalledTimes(2);
+      expect(playSpy).toHaveBeenLastCalledWith('async-sound');
     });
   });
 });

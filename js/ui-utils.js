@@ -399,10 +399,16 @@ class UIUtils {
             info: 'ℹ',
         };
 
-        toast.innerHTML = `
-            <span class="toast-icon">${icons[type] || icons.info}</span>
-            <span class="toast-message">${message}</span>
-        `;
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'toast-icon';
+        iconSpan.textContent = icons[type] || icons.info;
+
+        const messageSpan = document.createElement('span');
+        messageSpan.className = 'toast-message';
+        messageSpan.textContent = message;
+
+        toast.appendChild(iconSpan);
+        toast.appendChild(messageSpan);
 
         container.appendChild(toast);
 
@@ -423,14 +429,20 @@ class UIUtils {
     createLoadingIndicator(text = 'Loading') {
         const indicator = document.createElement('div');
         indicator.className = 'loading-indicator';
-        indicator.innerHTML = `
-            <span>${text}</span>
-            <div class="loading-dots">
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
-                <div class="loading-dot"></div>
-            </div>
-        `;
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        indicator.appendChild(textSpan);
+
+        const dotsContainer = document.createElement('div');
+        dotsContainer.className = 'loading-dots';
+        for (let i = 0; i < 3; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'loading-dot';
+            dotsContainer.appendChild(dot);
+        }
+        indicator.appendChild(dotsContainer);
+
         return indicator;
     }
 
@@ -500,6 +512,7 @@ class UIUtils {
      * @param {string} animation - Animation type (fadeIn, slideUp, scaleIn)
      */
     animateEntrance(element, animation = 'fadeIn') {
+        if (!element) return;
         const animations = {
             fadeIn: 'opacity 0.3s ease',
             slideUp:

@@ -67,7 +67,13 @@ public class CollisionManager {
         }
         
         public boolean intersects(CollisionObject other) {
-            return bounds.intersect(other.bounds);
+            if (other == null || this.bounds == null || other.bounds == null) {
+                return false;
+            }
+            return this.bounds.left < other.bounds.right &&
+                   this.bounds.right > other.bounds.left &&
+                   this.bounds.top < other.bounds.bottom &&
+                   this.bounds.bottom > other.bounds.top;
         }
         
         public boolean contains(float x, float y) {

@@ -83,7 +83,11 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Offline fallback can be added here if needed
+        // Safe offline fallback: return 503 so respondWith does not reject with TypeError
+        return new Response('', {
+          status: 503,
+          statusText: 'Service Unavailable (Offline)',
+        });
       });
     })
   );
