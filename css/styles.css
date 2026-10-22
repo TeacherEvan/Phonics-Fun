@@ -3089,19 +3089,31 @@ h3,
         inset 0 0 0 2px rgba(255, 248, 214, 0.55),
         0 12px 0 rgba(117, 56, 6, 0.5),
         0 22px 30px rgba(4, 10, 26, 0.3);
-    /* The pulse animates the INDEPENDENT `scale` property, so it composes
-       with the tile's `rotate(var(--tile-tilt))` transform instead of
-       replacing it. */
+}
+
+/* The pulse lives on a pseudo-element, not on the tile itself. Animating the
+   tile's own `scale` changed its bounding box on every frame, which made the
+   letter grid visibly jitter and left the element permanently "unstable" to
+   automation. A transformed pseudo-element leaves the parent's box alone. */
+.letter-button.current::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    border: 2px solid rgba(255, 209, 92, 0.55);
+    pointer-events: none;
     animation: ps-mission-pulse 2.4s var(--ps-ease-out) infinite;
 }
 
 @keyframes ps-mission-pulse {
     0%,
     100% {
+        opacity: 0.25;
         scale: 1;
     }
     50% {
-        scale: 1.045;
+        opacity: 0.7;
+        scale: 1.06;
     }
 }
 
