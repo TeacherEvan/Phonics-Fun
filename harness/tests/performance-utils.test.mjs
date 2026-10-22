@@ -30,6 +30,10 @@ describe('PerformanceUtils', () => {
   });
 
   afterEach(() => {
+    // Clear pending timers before switching back to real timers: the preload
+    // path schedules staggered image loads that would otherwise fire after
+    // the test ended.
+    vi.clearAllTimers();
     vi.useRealTimers();
     perfUtils.destroy();
     // Ensure IntersectionObserver is restored
@@ -242,26 +246,21 @@ describe('PerformanceUtils', () => {
     });
 
     it('should resolve immediately when no images to preload', async () => {
-      // Mock PHONICS_FUN_LETTER_DATA to have no data for X
-      window.PHONICS_FUN_LETTER_DATA = { X: [] };
-      
-      const result = perfUtils.preloadLetterImages('X');
+      // No words to preload for this letter.
+      const result = perfUtils.preloadLetterImages('X', []);
       await expect(result).resolves.toBeUndefined();
     });
 
     it('should handle preload timeout', async () => {
       vi.useFakeTimers();
-      
-      // Mock PHONICS_FUN_LETTER_DATA with some words
-      window.PHONICS_FUN_LETTER_DATA = { G: ['grape', 'goat'] };
-      
-      const result = perfUtils.preloadLetterImages('G');
-      
+
+      const result = perfUtils.preloadLetterImages('G', ['grape', 'goat']);
+
       // Advance past the 5000ms timeout
       vi.advanceTimersByTime(5000);
-      
+
       await expect(result).resolves.toBeUndefined();
-      
+
       vi.useRealTimers();
     });
   });
