@@ -91,6 +91,12 @@ public class GameplayActivity extends Activity {
         scoreValueText = findViewById(R.id.score_value);
         gameStatusText = findViewById(R.id.game_status);
         gameCanvas = findViewById(R.id.game_canvas);
+
+        // Attach the rendering view. The layout has an empty FrameLayout with
+        // the comment "Custom Game View (will be added programmatically)", and
+        // the view was never added: the native gameplay screen rendered no
+        // letter at all.
+        gameCanvas.addView(new GameView(this));
     }
     
     /**

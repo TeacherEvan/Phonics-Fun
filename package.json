@@ -20,7 +20,8 @@
     "gen:audio": "node generate-audio.cjs",
     "gen:music": "node generate-music.cjs",
     "gen:cards": "node scripts/generate-word-cards.mjs",
-    "prebuild": "npm run gen:cards"
+    "prebuild": "npm run gen:cards && npm run gen:catalog",
+    "gen:catalog": "node scripts/generate-java-catalog.mjs"
   },
   "repository": {
     "type": "git",

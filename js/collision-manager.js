@@ -127,10 +127,12 @@ class CollisionManager {
     unregisterObject(id) {
         this.objects.delete(id);
 
-        // Remove any collision pairs involving this object
-        this.collisionPairs.forEach((_, key) => {
-            const [id1, id2] = key.split('_');
-            if (id1 === id || id2 === id) {
+        // Remove any collision pairs involving this object. The pair record
+        // already carries both ids, so there is no need to split the key:
+        // the ids are built from user-visible names, and splitting on '_'
+        // broke the moment an id contained an underscore.
+        this.collisionPairs.forEach((pair, key) => {
+            if (pair.id1 === id || pair.id2 === id) {
                 this.collisionPairs.delete(key);
             }
         });

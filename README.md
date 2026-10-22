@@ -21,7 +21,7 @@ Live demo: **https://phonics-fun-theta.vercel.app** (deployed from `main` via Ve
 ```bash
 npm ci            # install dev dependencies (Node 22+)
 npm run dev       # local dev server (Vite)
-npm test          # run the Vitest suite (105 tests)
+npm test          # run the Vitest suite (156 tests)
 npm run lint      # ESLint on js/
 npm run build     # production build -> dist/
 npm run preview   # serve the production build locally

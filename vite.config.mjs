@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
 import fs from 'node:fs';
 import path from 'node:path';
+import { criticalCssPlugin } from './scripts/critical-css.mjs';
 
 /**
  * Stamp a per-build identifier into the service worker.
@@ -105,6 +106,10 @@ export default defineConfig({
       additionalLegacyPolyfills: ['regenerator-runtime/runtime']
     }),
     serviceWorkerBuildId(BUILD_ID),
+    // The critical CSS is EXTRACTED from css/styles.css at build time and
+    // injected into index.html. It used to be copied by hand, which is how
+    // the inline copy drifted from the stylesheet.
+    criticalCssPlugin({ root: '.' }),
   ],
   server: {
     port: 8080,

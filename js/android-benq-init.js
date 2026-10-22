@@ -164,10 +164,14 @@ class AndroidBenQInitializer {
         // Handle orientation changes properly
         const handleOrientationChange = () => {
             setTimeout(() => {
-                // Force a repaint
-                document.body.style.display = 'none';
-                document.body.offsetHeight; // Trigger reflow
-                document.body.style.display = '';
+                // Force a repaint. The previous implementation toggled
+                // `display` and read `offsetHeight`, which forces a
+                // synchronous layout flush in the middle of the frame. A
+                // class toggle lets the browser schedule the work itself.
+                document.body.classList.add('is-recalculating');
+                requestAnimationFrame(() => {
+                    document.body.classList.remove('is-recalculating');
+                });
 
                 // Dispatch custom event
                 window.dispatchEvent(new CustomEvent('orientationFixed'));

@@ -487,12 +487,19 @@ class DisplayManager {
         document.body.classList.remove(`orientation-${previousOrientation}`);
         document.body.classList.add(`orientation-${this.orientation}`);
 
-        // Force layout recalculation
+        // Force a layout recalculation.
+        // The previous implementation toggled `display` and read
+        // `offsetHeight` to force a synchronous reflow. Reading a layout
+        // property after a mutation is the classic layout-thrash pattern:
+        // it forces the browser to flush the layout it was about to do
+        // anyway, in the middle of a frame. A class toggle lets the browser
+        // schedule the work itself.
         const gameArea = document.querySelector('.game-area');
         if (gameArea) {
-            gameArea.style.display = 'none';
-            void gameArea.offsetHeight; // Trigger reflow
-            gameArea.style.display = '';
+            gameArea.classList.add('is-recalculating');
+            requestAnimationFrame(() => {
+                gameArea.classList.remove('is-recalculating');
+            });
         }
     }
 

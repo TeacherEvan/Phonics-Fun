@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -100,8 +101,12 @@ public class SymbolRenderer {
             0xFF2196F3, // Blue
             0xFF1565C0, // Dark blue background
             48f,
-            new String[]{"ball", "bat", "bird", "boat", "bear"},
-            new String[]{"voice-ball", "voice-bat", "voice-bird", "voice-boat", "voice-bear"}
+            // The words come from the generated catalogue. This table used to
+            // carry "bird", which is not in the curriculum and has no
+            // recording, so the native app asked the child to match a word it
+            // could not pronounce.
+            wordsFor('B'),
+            soundKeysFor('B')
         ));
         
         // Special symbols
@@ -182,6 +187,32 @@ public class SymbolRenderer {
         symbolConfigs.put(symbol, config);
     }
     
+    /**
+     * The picture words for a letter, from the generated catalogue.
+     *
+     * @param letter the letter
+     * @return the words, never null
+     */
+    private static String[] wordsFor(char letter) {
+        List<String> words = LetterCatalog.wordsForLetter(String.valueOf(letter));
+        return words.toArray(new String[0]);
+    }
+
+    /**
+     * The sound keys for a letter, derived from its words.
+     *
+     * @param letter the letter
+     * @return the sound keys, never null
+     */
+    private static String[] soundKeysFor(char letter) {
+        String[] words = wordsFor(letter);
+        String[] keys = new String[words.length];
+        for (int i = 0; i < words.length; i++) {
+            keys[i] = "voice-" + words[i];
+        }
+        return keys;
+    }
+
     /**
      * Create default configuration for unknown symbols
      */

@@ -146,18 +146,18 @@ public class AudioManager {
         return getResId(voiceKey, "raw");
     }
     
+    /**
+     * The picture words for a letter.
+     *
+     * The vocabulary comes from {@link LetterCatalog}, which is generated
+     * from the canonical JavaScript table. This method previously carried
+     * its own, smaller copy (only "apple" and "ant" for letter A, and a
+     * "bird" that has no recording at all), so the native app loaded fewer
+     * recordings than the curriculum defines and taught a word it could not
+     * pronounce.
+     */
     private String[] getAnimateWordsForLetter(String letter) {
-        // Load every in-game word so pronunciation is available for gameplay and previews
-        switch (letter.toUpperCase()) {
-            case "G":
-                return new String[]{"grape", "goat", "gold", "girl", "grandpa"};
-            case "A":
-                return new String[]{"apple", "ant"};
-            case "B":
-                return new String[]{"ball", "bat"};
-            default:
-                return new String[]{};
-        }
+        return LetterCatalog.wordsForLetter(letter).toArray(new String[0]);
     }
     
     public void playEffect(String soundKey) {

@@ -3534,3 +3534,15 @@ h3,
     outline: 3px solid var(--solar-gold);
     outline-offset: 3px;
 }
+/* --------------------------------------------------------------------------
+   13b. FORCED RECALCULATION
+
+   The orientation handlers used to toggle `display: none` and read
+   `offsetHeight` to force a synchronous layout flush — the classic
+   layout-thrash pattern, which stalls the frame it happens in. A class
+   toggle lets the browser schedule the work itself.
+   -------------------------------------------------------------------------- */
+.is-recalculating {
+    display: none !important;
+}
+
