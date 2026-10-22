@@ -37,7 +37,7 @@ class DisplayManager {
     init() {
         console.log('📱 Initializing Display Manager...');
         console.log(
-            `📐 Viewport: ${this.viewport.width}x${this.viewport.height}`
+            `📐 Viewport: ${this.viewport.width}x${this.viewport.height}`,
         );
         console.log(`🖥️ Device Type: ${this.deviceType}`);
         console.log(`📊 Display Category: ${this.displayCategory}`);
@@ -63,7 +63,7 @@ class DisplayManager {
         // Check for specific device types
         if (
             /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
-                userAgent
+                userAgent,
             )
         ) {
             if (
@@ -146,11 +146,11 @@ class DisplayManager {
         root.style.setProperty('--viewport-width', `${this.viewport.width}px`);
         root.style.setProperty(
             '--viewport-height',
-            `${this.viewport.height}px`
+            `${this.viewport.height}px`,
         );
         root.style.setProperty(
             '--device-pixel-ratio',
-            this.viewport.devicePixelRatio
+            this.viewport.devicePixelRatio,
         );
 
         // Calculate and apply dynamic font scaling
@@ -170,7 +170,7 @@ class DisplayManager {
                 c.startsWith('display-') ||
                 c.startsWith('orientation-') ||
                 c.startsWith('device-') ||
-                c.startsWith('performance-')
+                c.startsWith('performance-'),
         );
         classesToRemove.forEach((c) => document.body.classList.remove(c));
 
@@ -227,7 +227,7 @@ class DisplayManager {
         const config = scales[elementType] || scales.button;
         const scale = Math.min(
             config.max,
-            Math.max(config.min, minDimension / config.referenceSize)
+            Math.max(config.min, minDimension / config.referenceSize),
         );
 
         return scale.toFixed(3);
@@ -367,24 +367,40 @@ class DisplayManager {
      * Optimize performance based on device profile
      */
     optimizeForPerformance() {
+        // The particle system is created later in the game lifecycle, so the
+        // profile is applied again via `applyPerformanceProfile()` once it
+        // exists. Applying the body classes here keeps the CSS correct even
+        // before gameplay starts.
         if (this.performanceProfile === 'low') {
             console.log('⚡ Applying low-end device optimizations...');
-
-            // Disable expensive animations
             document.body.classList.add('low-memory');
+        } else if (this.performanceProfile === 'high') {
+            console.log('🚀 Enabling high-performance features...');
+            document.body.classList.add('high-performance');
+        }
+    }
 
-            // Reduce particle effects if particle system exists
-            if (
-                window.game &&
-                window.game.particleSystem &&
-                window.game.particleSystem.maxParticles
-            ) {
-                window.game.particleSystem.maxParticles = 20;
+    /**
+     * Apply the device performance profile to the particle system.
+     *
+     * Called explicitly by the game controller once the particle system
+     * exists. The previous implementation read `window.game` during
+     * construction, which is not assigned until the GameState constructor
+     * returns, so the low-end particle cap never applied.
+     *
+     * @param {ParticleSystem|null} particleSystem
+     */
+    applyPerformanceProfile(particleSystem) {
+        if (!particleSystem) return;
+
+        if (this.performanceProfile === 'low') {
+            console.log('⚡ Applying low-end device optimizations...');
+            document.body.classList.add('low-memory');
+            if (particleSystem.maxParticles) {
+                particleSystem.maxParticles = 20;
             }
         } else if (this.performanceProfile === 'high') {
             console.log('🚀 Enabling high-performance features...');
-
-            // Enable enhanced visual effects
             document.body.classList.add('high-performance');
         }
     }
@@ -409,14 +425,10 @@ class DisplayManager {
             }, 100);
         });
 
-        // Visibility change handler (mobile browser optimization)
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.pauseExpensiveOperations();
-            } else {
-                this.resumeExpensiveOperations();
-            }
-        });
+        // NOTE: visibility handling is owned by the GameState controller
+        // (`handleVisibilityChange`), which is the single place that decides
+        // how audio and animation respond to a hidden tab. A second listener
+        // here previously competed with it.
     }
 
     /**
@@ -453,7 +465,7 @@ class DisplayManager {
                         deviceType: this.deviceType,
                         displayCategory: this.displayCategory,
                     },
-                })
+                }),
             );
         }
     }

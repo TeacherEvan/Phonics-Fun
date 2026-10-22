@@ -9,10 +9,17 @@ class CollisionManager {
         this.objects = new Map();
         this.collisionPairs = new Map();
         this.collisionHandlers = new Map();
+        // Type-level handlers are tracked separately so the all-pairs scan can
+        // be skipped entirely when no type handler is registered.
+        this.typeCollisionHandlers = new Map();
+        // Pairs that are currently overlapping, for type-level handlers that
+        // have no explicit pair registration.
+        this.activeTypePairs = new Set();
         this.enabled = true;
 
         // Bind the update method for animation frame
         this.update = this.update.bind(this);
+        this.animate = this.animate.bind(this);
 
         // Start the collision detection loop
         this.lastTime = 0;
@@ -24,6 +31,9 @@ class CollisionManager {
      */
     start() {
         this.enabled = true;
+        // Guard against a second animation chain when start() is called while
+        // the loop is already running.
+        if (this.animationId) return;
         this.animate(0);
     }
 
@@ -50,7 +60,7 @@ class CollisionManager {
 
         this.update(deltaTime);
 
-        this.animationId = requestAnimationFrame(this.animate.bind(this));
+        this.animationId = requestAnimationFrame(this.animate);
     }
 
     /**
@@ -63,7 +73,7 @@ class CollisionManager {
     registerObject(id, element, type, options = {}) {
         if (!element) {
             console.error(
-                `Cannot register object ${id}: element is null or undefined`
+                `Cannot register object ${id}: element is null or undefined`,
             );
             return;
         }
@@ -124,6 +134,13 @@ class CollisionManager {
                 this.collisionPairs.delete(key);
             }
         });
+
+        // Drop any latched type-pair state that referenced this object.
+        for (const key of Array.from(this.activeTypePairs)) {
+            if (key.startsWith(`${id}|`) || key.includes(`|${id}`)) {
+                this.activeTypePairs.delete(key);
+            }
+        }
     }
 
     /**
@@ -153,25 +170,26 @@ class CollisionManager {
     registerTypeCollision(type1, type2, handler) {
         const typeKey = `${type1}_${type2}`;
         this.collisionHandlers.set(typeKey, handler);
+        this.typeCollisionHandlers.set(typeKey, handler);
     }
 
     /**
      * Check if two objects are colliding
+     *
+     * Uses a squared distance comparison: a square root per pair is wasted
+     * work in the inner loop of an all-pairs scan.
+     *
      * @param {Object} obj1 - First object
      * @param {Object} obj2 - Second object
      * @returns {boolean} - Whether the objects are colliding
      */
     checkCollision(obj1, obj2) {
-        // Distance between centers
         const dx = obj2.x - obj1.x;
         const dy = obj2.y - obj1.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Sum of radii
         const minDistance = obj1.radius + obj2.radius;
 
         // Collision occurs when distance is less than sum of radii
-        return distance < minDistance;
+        return dx * dx + dy * dy < minDistance * minDistance;
     }
 
     /**
@@ -281,56 +299,56 @@ class CollisionManager {
             }
         });
 
-        // Check for type-based collisions not in registered pairs
-        if (this.collisionHandlers.size > 0) {
-            const checkedPairs = new Set();
+        // Check for type-based collisions not covered by a registered pair.
+        //
+        // This is an all-pairs scan, so it is only run when a type handler is
+        // actually registered, and it visits each unordered pair once (upper
+        // triangle) instead of twice. Each pair is latched so the handler
+        // fires on the rising edge only — previously it fired on EVERY frame
+        // the two objects overlapped, which could score one word twice.
+        if (this.typeCollisionHandlers.size > 0) {
+            const objects = Array.from(this.objects.values());
 
-            this.objects.forEach((obj1, id1) => {
-                this.objects.forEach((obj2, id2) => {
-                    if (id1 === id2) return; // Skip self
+            for (let i = 0; i < objects.length; i++) {
+                for (let j = i + 1; j < objects.length; j++) {
+                    const obj1 = objects[i];
+                    const obj2 = objects[j];
 
-                    // Create a unique key for this pair (order doesn't matter for checking)
-                    const pairKey =
-                        id1 < id2 ? `${id1}_${id2}` : `${id2}_${id1}`;
-
-                    // Skip if we've already checked this pair or it's a registered pair
+                    // Skip pairs that already have an explicit registration.
                     if (
-                        checkedPairs.has(pairKey) ||
-                        this.collisionPairs.has(`${id1}_${id2}`) ||
-                        this.collisionPairs.has(`${id2}_${id1}`)
+                        this.collisionPairs.has(`${obj1.id}_${obj2.id}`) ||
+                        this.collisionPairs.has(`${obj2.id}_${obj1.id}`)
                     ) {
-                        return;
+                        continue;
                     }
 
-                    checkedPairs.add(pairKey);
-
-                    // Check for type-based handlers
                     const typeKey1 = `${obj1.type}_${obj2.type}`;
                     const typeKey2 = `${obj2.type}_${obj1.type}`;
+                    const handler1 = this.typeCollisionHandlers.get(typeKey1);
+                    const handler2 = this.typeCollisionHandlers.get(typeKey2);
+                    if (!handler1 && !handler2) continue;
 
-                    if (
-                        this.collisionHandlers.has(typeKey1) ||
-                        this.collisionHandlers.has(typeKey2)
-                    ) {
-                        const isColliding = this.checkCollision(obj1, obj2);
+                    const pairKey = `${obj1.id}|${obj2.id}`;
+                    const isColliding = this.checkCollision(obj1, obj2);
+                    const wasColliding = this.activeTypePairs.has(pairKey);
 
-                        if (isColliding) {
-                            // Call appropriate type handlers
-                            const handler1 =
-                                this.collisionHandlers.get(typeKey1);
-                            if (handler1) {
-                                handler1(obj1, obj2, 'start');
-                            }
+                    if (isColliding === wasColliding) continue;
 
-                            const handler2 =
-                                this.collisionHandlers.get(typeKey2);
-                            if (handler2 && typeKey1 !== typeKey2) {
-                                handler2(obj2, obj1, 'start');
-                            }
+                    if (isColliding) {
+                        this.activeTypePairs.add(pairKey);
+                        if (handler1) handler1(obj1, obj2, 'start');
+                        if (handler2 && typeKey1 !== typeKey2) {
+                            handler2(obj2, obj1, 'start');
+                        }
+                    } else {
+                        this.activeTypePairs.delete(pairKey);
+                        if (handler1) handler1(obj1, obj2, 'end');
+                        if (handler2 && typeKey1 !== typeKey2) {
+                            handler2(obj2, obj1, 'end');
                         }
                     }
-                });
-            });
+                }
+            }
         }
     }
 
@@ -364,6 +382,7 @@ class CollisionManager {
     clear() {
         this.objects.clear();
         this.collisionPairs.clear();
+        this.activeTypePairs.clear();
     }
 }
 

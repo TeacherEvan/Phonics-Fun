@@ -86,7 +86,14 @@ class EventManager {
         const subscribers = this.events.get(eventName);
         const subscribersToRemove = [];
 
-        for (const subscription of subscribers) {
+        // Iterate a snapshot of the subscriber list. Iterating the live array
+        // meant that a handler which unsubscribed a later sibling shifted
+        // that sibling into the current slot, so it was silently skipped, and
+        // a handler which subscribed was invoked by the same emit.
+        for (const subscription of subscribers.slice()) {
+            // The subscription may have been removed during this emit.
+            if (!subscribers.includes(subscription)) continue;
+
             try {
                 subscription.callback(data);
 
@@ -97,7 +104,7 @@ class EventManager {
             } catch (error) {
                 console.error(
                     `Error in event handler for "${eventName}":`,
-                    error
+                    error,
                 );
             }
         }
@@ -122,26 +129,31 @@ class EventManager {
     }
 
     /**
-     * Process events in the queue sequentially
+     * Process events in the queue sequentially.
+     *
+     * Iterative rather than recursive: the previous version called itself at
+     * the end of every event, so a queue of N events built N nested async
+     * frames and there was no way to cancel it.
      */
     async processEventQueue() {
-        if (this.eventQueue.length === 0 || this.isProcessingQueue) {
+        if (this.isProcessingQueue) {
             return;
         }
 
         this.isProcessingQueue = true;
 
-        const { eventName, data } = this.eventQueue.shift();
+        try {
+            while (this.eventQueue.length > 0) {
+                const { eventName, data } = this.eventQueue.shift();
 
-        // Add a small delay to ensure events don't process too quickly
-        await new Promise((resolve) => setTimeout(resolve, 10));
+                // Add a small delay to ensure events don't process too quickly
+                await new Promise((resolve) => setTimeout(resolve, 10));
 
-        // Emit the event
-        this.emit(eventName, data);
-
-        // Continue processing the queue
-        this.isProcessingQueue = false;
-        this.processEventQueue();
+                this.emit(eventName, data);
+            }
+        } finally {
+            this.isProcessingQueue = false;
+        }
     }
 
     /**

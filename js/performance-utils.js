@@ -4,6 +4,10 @@
  * Author: Phonics Fun Development Team
  */
 
+import { getWords } from './letter-data.js';
+import { imageDirFor } from './asset-paths.js';
+import { debounce as sharedDebounce } from './utils.js';
+
 class PerformanceUtils {
     constructor() {
         this.imageObserver = null;
@@ -45,15 +49,15 @@ class PerformanceUtils {
                         }
                     });
                 },
-                observerOptions
+                observerOptions,
             );
 
             console.log(
-                '✅ Lazy loading initialized with Intersection Observer'
+                '✅ Lazy loading initialized with Intersection Observer',
             );
         } else {
             console.log(
-                '⚠️ Intersection Observer not supported, using fallback'
+                '⚠️ Intersection Observer not supported, using fallback',
             );
             this.loadAllLazyImages();
         }
@@ -173,6 +177,7 @@ class PerformanceUtils {
                 const lcpObserver = new PerformanceObserver((entryList) => {
                     const entries = entryList.getEntries();
                     const lastEntry = entries[entries.length - 1];
+                    if (!lastEntry) return;
                     this.performanceMetrics.largestContentfulPaint =
                         lastEntry.startTime;
                     console.log(`📊 LCP: ${lastEntry.startTime.toFixed(2)}ms`);
@@ -194,7 +199,7 @@ class PerformanceUtils {
                             this.performanceMetrics.firstContentfulPaint =
                                 entry.startTime;
                             console.log(
-                                `📊 FCP: ${entry.startTime.toFixed(2)}ms`
+                                `📊 FCP: ${entry.startTime.toFixed(2)}ms`,
                             );
                         }
                     });
@@ -223,20 +228,17 @@ class PerformanceUtils {
 
     /**
      * Debounce function for performance-sensitive handlers
+     *
+     * Delegates to the shared implementation in `js/utils.js`. A second,
+     * subtly different copy lived here and the game probed for one of the two
+     * at runtime, so which debounce ran depended on load order.
+     *
      * @param {Function} func - Function to debounce
      * @param {number} wait - Wait time in milliseconds
      * @returns {Function} Debounced function
      */
     static debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func.apply(this, args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+        return sharedDebounce(func, wait);
     }
 
     /**
@@ -272,16 +274,21 @@ class PerformanceUtils {
 
     /**
      * Preload images for a specific letter level
+     *
      * @param {string} letter - The letter to preload images for
+     * @param {string[]} [words] - Word list override. Defaults to the
+     *   canonical vocabulary; injectable so the preload behaviour can be
+     *   tested without reaching into a global.
      * @returns {Promise<void>} Resolves when all images are loaded or timeout
      */
-    preloadLetterImages(letter) {
+    preloadLetterImages(letter, words = getWords(letter)) {
         return new Promise((resolve) => {
-            const letterLower = letter.toLowerCase();
-            const imagePath = `Assets/images/${letter}-${letterLower}/Images/`;
-            const letterImages = window.PHONICS_FUN_LETTER_DATA || {};
+            // Vite serves `public/` from the deploy root, so the asset lives
+            // under `/images/...`. The previous `Assets/images/...` path only
+            // resolved on the dev server and 404'd in production.
+            const imagePath = imageDirFor(letter);
 
-            const images = (letterImages[letter] || []).filter((word) => {
+            const images = (words || []).filter((word) => {
                 return !this.resourceCache.has(`${letter}-${word}`);
             });
             const self = this;
@@ -298,7 +305,7 @@ class PerformanceUtils {
                 loadedCount++;
                 if (loadedCount >= totalImages) {
                     console.log(
-                        `📦 Finished preloading images for letter: ${letter}`
+                        `📦 Finished preloading images for letter: ${letter}`,
                     );
                     resolve();
                 }
@@ -317,7 +324,7 @@ class PerformanceUtils {
                         };
                         img.onerror = () => {
                             console.log(
-                                `⚠️ Failed to preload: ${letter}-${word}`
+                                `⚠️ Failed to preload: ${letter}-${word}`,
                             );
                             self.resourceCache.delete(`${letter}-${word}`);
                             checkComplete();

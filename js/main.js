@@ -17,36 +17,14 @@ import UIUtils from './ui-utils.js';
 import DisplayManager from './display-manager.js';
 import AndroidBenQInitializer from './android-benq-init.js';
 import { debounce } from './utils.js';
+import {
+    PHONICS_FUN_LETTER_DATA,
+    getVocabulary,
+    getEnabledLetters,
+} from './letter-data.js';
+import { imagePathCandidates } from './asset-paths.js';
 
-const PHONICS_FUN_LETTER_DATA = Object.freeze({
-    A: ['apple', 'ant', 'airplane', 'alligator', 'arrow'],
-    B: ['ball', 'bat', 'bear', 'boat', 'butterfly'],
-    C: ['cat', 'car', 'cake', 'cloud', 'crab'],
-    D: ['dog', 'duck', 'drum', 'dinosaur', 'door'],
-    E: ['elephant', 'egg', 'engine', 'elbow', 'earth'],
-    F: ['fish', 'frog', 'flower', 'feather', 'firetruck'],
-    G: ['grape', 'goat', 'gold', 'girl', 'grandpa'],
-    H: ['hat', 'hen', 'house', 'helicopter', 'hippo'],
-    I: ['igloo', 'insect', 'icecream', 'island', 'ink'],
-    J: ['jellyfish', 'jam', 'jet', 'jacket', 'jungle'],
-    K: ['kite', 'kangaroo', 'key', 'kitten', 'kettle'],
-    L: ['lion', 'lamp', 'leaf', 'ladder', 'lemon'],
-    M: ['moon', 'monkey', 'milk', 'mountain', 'mouse'],
-    N: ['nest', 'nose', 'net', 'night', 'noodles'],
-    O: ['octopus', 'orange', 'owl', 'ocean', 'oven'],
-    P: ['pig', 'pen', 'pizza', 'planet', 'pumpkin'],
-    Q: ['queen', 'quilt', 'quail', 'quarter', 'question'],
-    R: ['rabbit', 'rainbow', 'robot', 'rocket', 'rose'],
-    S: ['sun', 'snake', 'star', 'sock', 'sandwich'],
-    T: ['tiger', 'train', 'tree', 'turtle', 'toothbrush'],
-    U: ['umbrella', 'unicorn', 'up', 'urn', 'ukulele'],
-    V: ['van', 'vase', 'vegetable', 'violin', 'volcano'],
-    W: ['whale', 'window', 'watermelon', 'wagon', 'worm'],
-    X: ['xylophone', 'xray', 'xerus', 'xmas', 'xenops'],
-    Y: ['yacht', 'yak', 'yo-yo', 'yellow', 'yogurt'],
-    Z: ['zebra', 'zipper', 'zoo', 'zero', 'zigzag'],
-});
-
+// Re-exported so existing importers keep working.
 export { PHONICS_FUN_LETTER_DATA };
 
 // Also attach to window for backward compatibility with tests
@@ -54,18 +32,12 @@ if (typeof window !== 'undefined') {
     window.PHONICS_FUN_LETTER_DATA = PHONICS_FUN_LETTER_DATA;
 }
 
-function buildLetterVocabulary(letterData) {
-    return Object.fromEntries(
-        Object.entries(letterData).map(([letter, words]) => [
-            letter,
-            words.map((word) => ({
-                letter,
-                word,
-                audioKey: `voice-${word}`,
-            })),
-        ])
-    );
-}
+/** Layout size of an asteroid element (must match the `.asteroid` CSS rule). */
+const ASTEROID_SIZE = 20;
+/** Asteroid flight speed in CSS pixels per second. */
+const ASTEROID_SPEED_PX_PER_SEC = 1000;
+/** Hard cap on a single asteroid flight, in seconds. */
+const MAX_ASTEROID_FLIGHT_SECONDS = 2.5;
 
 /**
  * GameState - Main game state management class
@@ -75,6 +47,9 @@ class GameState {
     constructor() {
         // Screen management
         this.currentScreen = 'welcome';
+        // True once the "entered screen" side effects have run for the
+        // current screen.
+        this.hasAppliedScreen = false;
 
         // Gameplay state
         this.correctHitsCount = 0;
@@ -91,10 +66,19 @@ class GameState {
         this.sessionId = Math.random().toString(36).substring(2, 9);
         this.isGameplayActive = false;
         this.arePlanetsRendered = false;
+        // Monotonic counter for asteroid identifiers (Date.now() collided).
+        this.asteroidSequence = 0;
+        // The asteroid that is currently in flight, if any.
+        this.pendingAsteroidId = null;
 
         // Letter configuration
-        this.letterVocabulary = buildLetterVocabulary(PHONICS_FUN_LETTER_DATA);
-        this.enabledLetters = Object.keys(this.letterVocabulary);
+        this.letterVocabulary = Object.fromEntries(
+            getEnabledLetters().map((letter) => [
+                letter,
+                getVocabulary(letter),
+            ]),
+        );
+        this.enabledLetters = getEnabledLetters();
         this.activeLetterLevel = 'A';
 
         // Active vocabulary for current level
@@ -243,7 +227,7 @@ class GameState {
                 this.backgroundMusicVolume = e.target.value / 100;
                 this.audioManager.setVolume(
                     'music',
-                    this.backgroundMusicVolume
+                    this.backgroundMusicVolume,
                 );
                 document.getElementById('music-volume-display').textContent =
                     e.target.value + '%';
@@ -341,13 +325,13 @@ class GameState {
             this.handleDisplayChange(e.detail);
         });
 
-        // Handle page visibility changes (critical for mobile browsers)
+        // Handle page visibility changes (critical for mobile browsers).
+        // This is the ONLY visibilitychange listener in the app: it owns the
+        // audio suspend/resume policy and the animation pausing. Previously
+        // three listeners competed, so the background music was stopped and
+        // restarted from zero on every tab switch.
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                this.audioManager.pauseAll();
-            } else {
-                this.audioManager.resumeAll();
-            }
+            this.handleVisibilityChange();
         });
 
         // Debounced resize handler for performance
@@ -359,13 +343,39 @@ class GameState {
             }
         };
 
-        // Use PerformanceUtils debounce if available, otherwise use local debounce
-        const debouncedResize =
-            window.PerformanceUtils && PerformanceUtils.debounce
-                ? PerformanceUtils.debounce(resizeHandler, 250)
-                : debounce(resizeHandler, 250);
+        // Debounced resize handler. A single shared implementation is used;
+        // the previous runtime probe picked between two subtly different
+        // copies depending on load order.
+        const debouncedResize = debounce(resizeHandler, 250);
 
         window.addEventListener('resize', debouncedResize);
+    }
+
+    /**
+     * Single owner of the app's visibility policy.
+     *
+     * Pausing the Web Audio context matters: the background music is a
+     * looping AudioBufferSource, which the HTML `<audio>` based `pauseAll()`
+     * cannot pause, so the music kept playing for a hidden tab.
+     */
+    handleVisibilityChange() {
+        const hidden = document.hidden;
+
+        if (hidden) {
+            this.audioManager.pauseAll();
+            this.audioManager.suspendIfRunning();
+        } else {
+            this.audioManager.resumeIfSuspended();
+            this.audioManager.resumeAll();
+        }
+
+        if (this.displayManager) {
+            if (hidden) {
+                this.displayManager.pauseExpensiveOperations();
+            } else {
+                this.displayManager.resumeExpensiveOperations();
+            }
+        }
     }
 
     /**
@@ -383,7 +393,7 @@ class GameState {
                     e.preventDefault();
                 }
             },
-            { passive: false }
+            { passive: false },
         );
 
         // Disable context menu only in game area for better touch experience
@@ -441,7 +451,7 @@ class GameState {
     updateUIScaling(displayInfo) {
         // UI scaling is handled by DisplayManager CSS variables
         console.log(
-            `🎨 UI scaled for ${displayInfo.deviceType} in ${displayInfo.orientation} orientation`
+            `🎨 UI scaled for ${displayInfo.deviceType} in ${displayInfo.orientation} orientation`,
         );
     }
 
@@ -470,7 +480,9 @@ class GameState {
     }
 
     setupEventSubscriptions() {
-        // Subscribe to collision events
+        // Subscribe to collision events. The collision manager raises this only
+        // for the asteroid/planet pair that was explicitly registered, so a
+        // tap can no longer be scored against an unrelated planet.
         this.eventManager.subscribe('collision:asteroid_planet', (data) => {
             this.handleAsteroidPlanetCollision(data.asteroid, data.planet);
         });
@@ -478,20 +490,6 @@ class GameState {
         this.eventManager.subscribe('level:complete', () => {
             this.completeLevelSuccessfully();
         });
-
-        // Set up collision handlers
-        this.collisionManager.registerTypeCollision(
-            'asteroid',
-            'planet',
-            (asteroid, planet, type) => {
-                if (type === 'start') {
-                    this.eventManager.emit('collision:asteroid_planet', {
-                        asteroid: asteroid,
-                        planet: planet,
-                    });
-                }
-            }
-        );
 
         // Centralized reaction to collisions - runs once at start-up
         if (window.EventBus) {
@@ -511,9 +509,24 @@ class GameState {
         // Get the actual DOM elements
         const planetElement = planet.element;
 
-        // Get the position for explosion
-        const x = asteroid.x;
-        const y = asteroid.y;
+        // Collision point, expressed in the explosion container's coordinates.
+        const explosionsContainer = document.querySelector(
+            '.explosions-container',
+        );
+        const containerRect = explosionsContainer
+            ? explosionsContainer.getBoundingClientRect()
+            : { left: 0, top: 0 };
+        // The planet's live rect is used rather than the collision manager's
+        // cached position, which can be a frame stale.
+        const impactRect = planetElement
+            ? planetElement.getBoundingClientRect()
+            : null;
+        const x = impactRect
+            ? impactRect.left + impactRect.width / 2 - containerRect.left
+            : asteroid.x - containerRect.left;
+        const y = impactRect
+            ? impactRect.top + impactRect.height / 2 - containerRect.top
+            : asteroid.y - containerRect.top;
 
         // Check if it's a G planet
         if (this.isCorrectLetter(planet.data.letter)) {
@@ -522,7 +535,7 @@ class GameState {
                 x,
                 y,
                 asteroid.id,
-                planet.id
+                planet.id,
             );
         } else {
             this.handleIncorrectCollision(planetElement, x, y, asteroid.id);
@@ -538,19 +551,20 @@ class GameState {
         // Play sound effects
         this.audioManager.play('explosion');
         this.audioManager.play(
-            `phoneme-${this.activeLetterLevel.toLowerCase()}`
+            `phoneme-${this.activeLetterLevel.toLowerCase()}`,
         );
 
         // Remove planet and asteroid from collision manager and DOM
         const asteroidObj = this.collisionManager.getObject(asteroidId);
         if (asteroidObj && asteroidObj.element) {
-            if (asteroidObj.element.trailInterval) {
-                clearInterval(asteroidObj.element.trailInterval);
-            }
+            this.disposeAsteroid(asteroidObj.element);
             asteroidObj.element.remove();
         }
         this.collisionManager.unregisterObject(asteroidId);
         this.collisionManager.unregisterObject(planetId);
+        if (this.pendingAsteroidId === asteroidId) {
+            this.pendingAsteroidId = null;
+        }
 
         // Remove planet from DOM
         planet.remove();
@@ -577,7 +591,7 @@ class GameState {
 
         // Announce correct hit to screen readers
         this.announceToScreenReader(
-            `Correct! You matched the letter ${this.activeLetterLevel}.`
+            `Correct! You matched the letter ${this.activeLetterLevel}.`,
         );
 
         // Check if level complete
@@ -594,12 +608,13 @@ class GameState {
         // Remove asteroid from collision manager and DOM
         const asteroidObj = this.collisionManager.getObject(asteroidId);
         if (asteroidObj && asteroidObj.element) {
-            if (asteroidObj.element.trailInterval) {
-                clearInterval(asteroidObj.element.trailInterval);
-            }
+            this.disposeAsteroid(asteroidObj.element);
             asteroidObj.element.remove();
         }
         this.collisionManager.unregisterObject(asteroidId);
+        if (this.pendingAsteroidId === asteroidId) {
+            this.pendingAsteroidId = null;
+        }
 
         // Track stats for adaptive difficulty
         this.incorrectHitsCount++;
@@ -632,7 +647,7 @@ class GameState {
             this.uiUtils.showToast(
                 this.isAudioMuted ? 'Audio muted' : 'Audio enabled',
                 'info',
-                2000
+                2000,
             );
         }
     }
@@ -779,11 +794,11 @@ class GameState {
             const distance = 50;
             sparkle.style.setProperty(
                 '--dx',
-                `${Math.cos(angle) * distance}px`
+                `${Math.cos(angle) * distance}px`,
             );
             sparkle.style.setProperty(
                 '--dy',
-                `${Math.sin(angle) * distance}px`
+                `${Math.sin(angle) * distance}px`,
             );
 
             document.body.appendChild(sparkle);
@@ -827,7 +842,7 @@ class GameState {
             letterButton.setAttribute('data-letter', letter);
             letterButton.setAttribute(
                 'aria-label',
-                `Letter ${letter}${stateLabel}`
+                `Letter ${letter}${stateLabel}`,
             );
 
             letterButton.addEventListener('click', () => {
@@ -869,7 +884,7 @@ class GameState {
             this.uiUtils.showToast(
                 `Loading letter ${letter} level...`,
                 'info',
-                2000
+                2000,
             );
         }
 
@@ -902,10 +917,15 @@ class GameState {
         this.totalAnswersCount = 0;
         this.vocabularyIndex = 0;
         this.updateProgressDisplay();
+        // Collision detection is only needed while playing.
+        if (this.collisionManager) {
+            this.collisionManager.start();
+        }
         // Initialize particle system for visual effects
-        if (window.ParticleSystem) {
-            this.particleSystem = new ParticleSystem();
-            this.particleSystem.createStarfield();
+        this.particleSystem = new ParticleSystem();
+        this.particleSystem.createStarfield();
+        if (this.displayManager) {
+            this.displayManager.applyPerformanceProfile(this.particleSystem);
         }
 
         // Create planets if not already rendered
@@ -921,7 +941,7 @@ class GameState {
      */
     renderGameplayPlanets() {
         console.log(
-            `🪐 Creating planets (Speed Multiplier: ${this.difficultySpeedMultiplier}, Distractors: ${this.difficultyPlanetCount})...`
+            `🪐 Creating planets (Speed Multiplier: ${this.difficultySpeedMultiplier}, Distractors: ${this.difficultyPlanetCount})...`,
         );
         const planetsContainer = document.querySelector('.planets-container');
         planetsContainer.innerHTML = '';
@@ -938,9 +958,12 @@ class GameState {
             targetPlanet.textContent = this.activeLetterLevel;
             targetPlanet.setAttribute('data-letter', this.activeLetterLevel);
             targetPlanet.setAttribute('data-index', i);
+            // Expose the collision id so an asteroid can be bound to exactly
+            // this planet instead of colliding with whichever planet it clips.
+            targetPlanet.dataset.collisionId = `planet-${letterLower}-${i}`;
             targetPlanet.setAttribute(
                 'aria-label',
-                `Target planet with letter ${this.activeLetterLevel}`
+                `Target planet with letter ${this.activeLetterLevel}`,
             );
 
             // Random position within game area
@@ -957,7 +980,7 @@ class GameState {
                 console.log(`🎯 ${this.activeLetterLevel} planet ${i} clicked`);
                 this.handlePlanetInteraction(
                     targetPlanet,
-                    this.activeLetterLevel
+                    this.activeLetterLevel,
                 );
             });
 
@@ -971,15 +994,15 @@ class GameState {
                 {
                     isStatic: false,
                     data: { letter: this.activeLetterLevel, index: i },
-                }
+                },
             );
         }
 
         // Create distractor planets based on adaptive difficulty count
         const distractorLetters = this.shuffleLetters(
             this.enabledLetters.filter(
-                (letter) => letter !== this.activeLetterLevel
-            )
+                (letter) => letter !== this.activeLetterLevel,
+            ),
         ).slice(0, this.difficultyPlanetCount);
 
         const distractorSpeed = 12 / this.difficultySpeedMultiplier;
@@ -990,9 +1013,10 @@ class GameState {
 
             distractorPlanet.textContent = distractorLetter;
             distractorPlanet.setAttribute('data-letter', distractorLetter);
+            distractorPlanet.dataset.collisionId = `planet-other-${i}`;
             distractorPlanet.setAttribute(
                 'aria-label',
-                `Distractor planet with letter ${distractorLetter}`
+                `Distractor planet with letter ${distractorLetter}`,
             );
 
             // Random position
@@ -1009,7 +1033,7 @@ class GameState {
                 console.log(`❌ Non-target planet ${distractorLetter} clicked`);
                 this.handlePlanetInteraction(
                     distractorPlanet,
-                    distractorLetter
+                    distractorLetter,
                 );
             });
 
@@ -1023,9 +1047,32 @@ class GameState {
                 {
                     isStatic: false,
                     data: { letter: distractorLetter, index: i },
-                }
+                },
             );
         });
+    }
+
+    /**
+     * Release every timer and animation frame owned by an asteroid.
+     *
+     * The trail interval used to be cleared on one removal path only, so an
+     * asteroid orphaned by a level reset or by another asteroid consuming its
+     * planet kept emitting particles forever.
+     *
+     * @param {HTMLElement} asteroidElement
+     */
+    disposeAsteroid(asteroidElement) {
+        if (!asteroidElement) return;
+
+        if (asteroidElement.flightFrame) {
+            cancelAnimationFrame(asteroidElement.flightFrame);
+            asteroidElement.flightFrame = null;
+        }
+
+        if (asteroidElement.trailInterval) {
+            clearInterval(asteroidElement.trailInterval);
+            asteroidElement.trailInterval = null;
+        }
     }
 
     /**
@@ -1036,36 +1083,27 @@ class GameState {
     handlePlanetInteraction(planetElement, letter) {
         if (!this.isGameplayActive) return;
 
-        const rect = planetElement.getBoundingClientRect();
-        const planetCenterX = rect.left + rect.width / 2;
-        const planetCenterY = rect.top + rect.height / 2;
-
         if (this.isCorrectLetter(letter)) {
-            this.processCorrectPlanetHit(
-                planetElement,
-                planetCenterX,
-                planetCenterY
-            );
+            this.processCorrectPlanetHit(planetElement);
         } else {
-            this.processIncorrectPlanetHit(
-                planetElement,
-                planetCenterX,
-                planetCenterY
-            );
+            this.processIncorrectPlanetHit(planetElement);
         }
     }
 
     /**
      * Process a correct planet hit (target letter)
      * @param {HTMLElement} planetElement - The hit planet
-     * @param {number} x - X coordinate
-     * @param {number} y - Y coordinate
      */
-    processCorrectPlanetHit(planetElement, x, y) {
+    processCorrectPlanetHit(planetElement) {
         console.log('✅ Correct hit!');
 
-        const asteroidId = `asteroid-fiery-${Date.now()}`;
-        const asteroidElement = this.spawnAsteroid(x, y, 'fiery', asteroidId);
+        const asteroidId = this.nextAsteroidId('fiery');
+        const asteroidElement = this.spawnAsteroid(
+            planetElement,
+            'fiery',
+            asteroidId,
+        );
+        if (!asteroidElement) return;
 
         // Create particle trail following asteroid
         if (this.particleSystem) {
@@ -1080,10 +1118,11 @@ class GameState {
                     this.particleSystem.asteroidTrail(
                         asteroidX,
                         asteroidY,
-                        asteroidElement.velocity || { x: 2, y: 2 }
+                        asteroidElement.velocity || { x: 2, y: 2 },
                     );
                 } else {
                     clearInterval(trailInterval);
+                    asteroidElement.trailInterval = null;
                 }
             }, 50);
             asteroidElement.trailInterval = trailInterval;
@@ -1093,76 +1132,109 @@ class GameState {
     /**
      * Process an incorrect planet hit (distractor letter)
      * @param {HTMLElement} planetElement - The hit planet
-     * @param {number} x - X coordinate
-     * @param {number} y - Y coordinate
      */
-    processIncorrectPlanetHit(planetElement, x, y) {
+    processIncorrectPlanetHit(planetElement) {
         console.log('❌ Incorrect hit');
 
-        const asteroidId = `asteroid-dull-${Date.now()}`;
-        this.spawnAsteroid(x, y, 'dull', asteroidId);
+        const asteroidId = this.nextAsteroidId('dull');
+        this.spawnAsteroid(planetElement, 'dull', asteroidId);
     }
 
     /**
-     * Spawn an asteroid that flies toward a target position
-     * @param {number} targetX - Target X coordinate
-     * @param {number} targetY - Target Y coordinate
-     * @param {string} asteroidType - Type of asteroid ('fiery' or 'dull')
-     * @param {string} asteroidId - Unique identifier for the asteroid
-     * @returns {HTMLElement} The created asteroid element
+     * Produce a collision-free asteroid identifier.
+     *
+     * `Date.now()` was used, so two taps inside the same millisecond produced
+     * the same id: the second `registerObject` overwrote the first, leaving a
+     * duplicate DOM id and unregistering the wrong object on impact.
+     * @param {string} type
+     * @returns {string}
      */
-    spawnAsteroid(targetX, targetY, asteroidType, asteroidId) {
+    nextAsteroidId(type) {
+        this.asteroidSequence += 1;
+        return `asteroid-${type}-${this.asteroidSequence}`;
+    }
+
+    /**
+     * Spawn an asteroid that flies at a specific target planet.
+     *
+     * The asteroid is bound to the planet that was tapped: the collision
+     * manager registers an explicit pair for it, so the score can no longer be
+     * awarded for whichever unrelated planet the asteroid happened to clip.
+     *
+     * @param {HTMLElement} targetPlanetEl - the planet that was tapped
+     * @param {string} asteroidType - 'fiery' or 'dull'
+     * @param {string} asteroidId - unique identifier
+     * @returns {HTMLElement|null} the created asteroid element
+     */
+    spawnAsteroid(targetPlanetEl, asteroidType, asteroidId) {
+        const container = document.querySelector('.asteroids-container');
+        if (!container) {
+            console.error(
+                'Cannot spawn asteroid: .asteroids-container missing',
+            );
+            return null;
+        }
+
+        // One tap means one pending hit. A previously launched asteroid is
+        // cancelled, so a tap that happened several seconds earlier cannot
+        // land after the child has moved on and score a second time.
+        this.cancelPendingAsteroid();
+
+        const containerRect = container.getBoundingClientRect();
+
         const asteroidElement = document.createElement('div');
         asteroidElement.className = `asteroid ${asteroidType}`;
         asteroidElement.id = asteroidId;
 
-        // Calculate random starting position from screen edge
+        // Calculate random starting position from a screen edge, expressed in
+        // the container's coordinate space.
         const screenEdge = Math.floor(Math.random() * 4);
-        let startX, startY;
+        let startX;
+        let startY;
 
         switch (screenEdge) {
             case 0: // Top edge
-                startX = Math.random() * window.innerWidth;
-                startY = -20;
+                startX = Math.random() * containerRect.width;
+                startY = -ASTEROID_SIZE;
                 break;
             case 1: // Right edge
-                startX = window.innerWidth + 20;
-                startY = Math.random() * window.innerHeight;
+                startX = containerRect.width + ASTEROID_SIZE;
+                startY = Math.random() * containerRect.height;
                 break;
             case 2: // Bottom edge
-                startX = Math.random() * window.innerWidth;
-                startY = window.innerHeight + 20;
+                startX = Math.random() * containerRect.width;
+                startY = containerRect.height + ASTEROID_SIZE;
                 break;
-            case 3: // Left edge
-                startX = -20;
-                startY = Math.random() * window.innerHeight;
+            default: // Left edge
+                startX = -ASTEROID_SIZE;
+                startY = Math.random() * containerRect.height;
                 break;
         }
 
         asteroidElement.style.left = `${startX}px`;
         asteroidElement.style.top = `${startY}px`;
 
-        // Calculate trajectory vector
-        const deltaX = targetX - startX;
-        const deltaY = targetY - startY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        container.appendChild(asteroidElement);
 
-        // Store velocity for particle trail calculations
+        // Calculate the initial trajectory for the particle trail. Guard the
+        // division: a zero-length vector would poison the trail with NaN.
+        const targetCenter = this.getPlanetCenterInContainer(
+            targetPlanetEl,
+            containerRect,
+        );
+        const deltaX = targetCenter.x - (startX + ASTEROID_SIZE / 2);
+        const deltaY = targetCenter.y - (startY + ASTEROID_SIZE / 2);
+        const distanceSquared = deltaX * deltaX + deltaY * deltaY;
+        const inverseDistance =
+            distanceSquared > 1e-8 ? 1 / Math.sqrt(distanceSquared) : 0;
+
         const velocity = {
-            x: (deltaX / distance) * 10,
-            y: (deltaY / distance) * 10,
+            x: deltaX * inverseDistance * 10,
+            y: deltaY * inverseDistance * 10,
         };
         asteroidElement.velocity = velocity;
 
-        // Set animation duration based on type
-        const animationDuration = asteroidType === 'fiery' ? 1000 : 1500;
-        asteroidElement.style.transition = `all ${animationDuration}ms linear`;
-
-        document
-            .querySelector('.asteroids-container')
-            .appendChild(asteroidElement);
-
-        // Register with collision detection system
+        // Register with the collision detection system
         this.collisionManager.registerObject(
             asteroidId,
             asteroidElement,
@@ -1170,17 +1242,189 @@ class GameState {
             {
                 velocity: velocity,
                 isStatic: false,
-                data: { type: asteroidType },
-            }
+                data: {
+                    type: asteroidType,
+                    targetId: targetPlanetEl.dataset.collisionId || null,
+                },
+            },
         );
 
-        // Animate movement to target
-        setTimeout(() => {
-            asteroidElement.style.left = `${targetX}px`;
-            asteroidElement.style.top = `${targetY}px`;
-        }, 50);
+        // Bind the asteroid to the planet that was tapped.
+        const targetId = targetPlanetEl.dataset.collisionId;
+        if (targetId) {
+            this.collisionManager.registerCollisionPair(
+                asteroidId,
+                targetId,
+                (asteroid, planet, phase) => {
+                    if (phase !== 'start') return;
+                    this.eventManager.emit('collision:asteroid_planet', {
+                        asteroid: asteroid,
+                        planet: planet,
+                    });
+                },
+            );
+        }
+
+        // Launch the homing flight.
+        this.launchAsteroid(asteroidElement, targetPlanetEl, containerRect);
+        this.pendingAsteroidId = asteroidId;
 
         return asteroidElement;
+    }
+
+    /**
+     * Cancel an asteroid that is still in flight.
+     *
+     * Without this, a tap from several seconds ago could still land and
+     * register a second answer for a single interaction.
+     */
+    cancelPendingAsteroid() {
+        if (!this.pendingAsteroidId) return;
+
+        const asteroid = this.collisionManager.getObject(
+            this.pendingAsteroidId,
+        );
+        if (asteroid && asteroid.element) {
+            this.disposeAsteroid(asteroid.element);
+            asteroid.element.remove();
+        }
+        this.collisionManager.unregisterObject(this.pendingAsteroidId);
+        this.pendingAsteroidId = null;
+    }
+
+    /**
+     * The centre of a planet element, expressed in the container's coordinates.
+     * @param {HTMLElement} planetElement
+     * @param {DOMRect} containerRect
+     * @returns {{x: number, y: number}}
+     */
+    getPlanetCenterInContainer(planetElement, containerRect) {
+        const planetRect = planetElement.getBoundingClientRect();
+        return {
+            x: planetRect.left + planetRect.width / 2 - containerRect.left,
+            y: planetRect.top + planetRect.height / 2 - containerRect.top,
+        };
+    }
+
+    /**
+     * Resolve the hit between an asteroid and the planet it was aimed at.
+     *
+     * The collision manager's geometric check remains as a backstop, but the
+     * hit is registered here because the flight loop knows precisely when
+     * the asteroid reaches the planet — the geometric check only samples it,
+     * and a fast asteroid can cross the overlap between two samples.
+     *
+     * @param {HTMLElement} asteroidElement
+     * @param {HTMLElement} targetPlanetEl
+     */
+    resolveAsteroidHit(asteroidElement, targetPlanetEl) {
+        const asteroid = this.collisionManager.getObject(asteroidElement.id);
+        const planetId = targetPlanetEl.dataset.collisionId;
+        const planet = planetId
+            ? this.collisionManager.getObject(planetId)
+            : null;
+
+        if (!asteroid || !planet) return;
+
+        this.eventManager.emit('collision:asteroid_planet', {
+            asteroid: asteroid,
+            planet: planet,
+        });
+    }
+
+    /**
+     * Fly an asteroid toward a moving target planet.
+     *
+     * Planets are animated along a 200px orbit by the `planetOrbit` keyframes,
+     * so a destination sampled at click time is stale by the time a fixed
+     * duration flight arrives: the asteroid parked beside the planet, the
+     * planet never came close enough to collide, and the score depended on a
+     * coincidental encounter with some other planet. The asteroid now re-aims
+     * at the planet's live position on every frame.
+     *
+     * @param {HTMLElement} asteroidElement
+     * @param {HTMLElement} targetPlanetEl
+     * @param {DOMRect} containerRect
+     */
+    launchAsteroid(asteroidElement, targetPlanetEl, containerRect) {
+        let posX = parseFloat(asteroidElement.style.left) || 0;
+        let posY = parseFloat(asteroidElement.style.top) || 0;
+        const startTime = performance.now();
+        let lastTime = startTime;
+        let locked = false;
+
+        const step = () => {
+            if (!asteroidElement.parentNode) {
+                asteroidElement.flightFrame = null;
+                return;
+            }
+
+            // The target planet may have been destroyed by another asteroid.
+            if (!targetPlanetEl.isConnected) {
+                asteroidElement.flightFrame = null;
+                return;
+            }
+
+            const now = performance.now();
+            // Clamp dt: a backgrounded tab produces multi-second gaps.
+            const dt = Math.min((now - lastTime) / 1000, 0.05);
+            lastTime = now;
+            // The flight deadline is measured in real time, not in clamped
+            // physics time, so a slow device does not stretch the wait.
+            const elapsed = (now - startTime) / 1000;
+
+            const target = this.getPlanetCenterInContainer(
+                targetPlanetEl,
+                containerRect,
+            );
+
+            const centerX = posX + ASTEROID_SIZE / 2;
+            const centerY = posY + ASTEROID_SIZE / 2;
+            const dx = target.x - centerX;
+            const dy = target.y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (locked) {
+                // Stay with the planet. Parking at a fixed coordinate was not
+                // enough: the planet keeps orbiting, so the asteroid drifted
+                // away from it again and the hit was never registered.
+                posX = target.x - ASTEROID_SIZE / 2;
+                posY = target.y - ASTEROID_SIZE / 2;
+            } else {
+                const stepDistance = ASTEROID_SPEED_PX_PER_SEC * dt;
+
+                if (
+                    distance <= Math.max(stepDistance, 1) ||
+                    elapsed >= MAX_ASTEROID_FLIGHT_SECONDS
+                ) {
+                    locked = true;
+                    posX = target.x - ASTEROID_SIZE / 2;
+                    posY = target.y - ASTEROID_SIZE / 2;
+
+                    // The asteroid has reached its target: resolve the hit
+                    // here. Leaving it to the collision manager meant the hit
+                    // depended on its sampling rate catching a fast moving
+                    // object between two frames.
+                    if (!asteroidElement.hitResolved) {
+                        asteroidElement.hitResolved = true;
+                        this.resolveAsteroidHit(
+                            asteroidElement,
+                            targetPlanetEl,
+                        );
+                    }
+                } else {
+                    posX += (dx / distance) * stepDistance;
+                    posY += (dy / distance) * stepDistance;
+                }
+            }
+
+            asteroidElement.style.left = `${posX}px`;
+            asteroidElement.style.top = `${posY}px`;
+
+            asteroidElement.flightFrame = requestAnimationFrame(step);
+        };
+
+        asteroidElement.flightFrame = requestAnimationFrame(step);
     }
 
     /**
@@ -1296,17 +1540,23 @@ class GameState {
         wordBackground.style.fontWeight = '';
         wordBackground.style.padding = '';
 
-        // Set background image with lazy loading path
-        const imagePath = `Assets/images/${letter}-${letter.toLowerCase()}/Images/${word}.png`;
+        // Candidate URLs, most canonical first. The previous code built
+        // `Assets/images/...`, which only resolves on the Vite dev server and
+        // 404s in every production build.
+        const candidates = imagePathCandidates(letter, word);
 
         // Check if image is cached
         if (this.performanceUtils && this.performanceUtils.getCachedImage) {
             const cachedImage = this.performanceUtils.getCachedImage(
                 letter,
-                word
+                word,
             );
-            if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0) {
-                wordBackground.style.backgroundImage = `url('${imagePath}')`;
+            if (
+                cachedImage &&
+                cachedImage.complete &&
+                cachedImage.naturalWidth > 0
+            ) {
+                wordBackground.style.backgroundImage = `url('${candidates[0]}')`;
                 wordBackground.classList.remove('loading');
                 wordBackground.classList.add('visible');
                 this.scheduleImageHide(wordBackground);
@@ -1314,34 +1564,53 @@ class GameState {
             }
         }
 
-        // Load image progressively with loading indicator
-        const img = new Image();
-        img.onload = () => {
-            wordBackground.textContent = '';
-            wordBackground.style.backgroundImage = `url('${imagePath}')`;
-            wordBackground.classList.remove('loading');
-            wordBackground.classList.add('visible');
-            this.scheduleImageHide(wordBackground);
+        // Load image progressively with loading indicator, trying each
+        // candidate URL in turn.
+        const tryNextCandidate = (index) => {
+            if (index >= candidates.length) {
+                this.showWordTextFallback(wordBackground, letter, word);
+                return;
+            }
+
+            const imagePath = candidates[index];
+            const img = new Image();
+            img.onload = () => {
+                wordBackground.textContent = '';
+                wordBackground.style.backgroundImage = `url('${imagePath}')`;
+                wordBackground.classList.remove('loading');
+                wordBackground.classList.add('visible');
+                this.scheduleImageHide(wordBackground);
+            };
+            img.onerror = () => {
+                console.warn(`Failed to load image: ${imagePath}`);
+                tryNextCandidate(index + 1);
+            };
+            img.src = imagePath;
         };
 
-        img.onerror = () => {
-            console.warn(`Failed to load image: ${imagePath}`);
-            wordBackground.style.backgroundImage = 'none';
-            wordBackground.textContent = `${letter} is for ${word}`;
-            wordBackground.style.display = 'flex';
-            wordBackground.style.alignItems = 'center';
-            wordBackground.style.justifyContent = 'center';
-            wordBackground.style.textAlign = 'center';
-            wordBackground.style.color = '#ffffff';
-            wordBackground.style.fontSize = 'clamp(1.8rem, 4vw, 3.25rem)';
-            wordBackground.style.fontWeight = '700';
-            wordBackground.style.padding = '1.5rem';
-            wordBackground.classList.remove('loading');
-            wordBackground.classList.add('visible');
-            this.scheduleImageHide(wordBackground);
-        };
+        tryNextCandidate(0);
+    }
 
-        img.src = imagePath;
+    /**
+     * Render the word as text when no picture asset is available.
+     * @param {HTMLElement} wordBackground
+     * @param {string} letter
+     * @param {string} word
+     */
+    showWordTextFallback(wordBackground, letter, word) {
+        wordBackground.style.backgroundImage = 'none';
+        wordBackground.textContent = `${letter} is for ${word}`;
+        wordBackground.style.display = 'flex';
+        wordBackground.style.alignItems = 'center';
+        wordBackground.style.justifyContent = 'center';
+        wordBackground.style.textAlign = 'center';
+        wordBackground.style.color = '#ffffff';
+        wordBackground.style.fontSize = 'clamp(1.8rem, 4vw, 3.25rem)';
+        wordBackground.style.fontWeight = '700';
+        wordBackground.style.padding = '1.5rem';
+        wordBackground.classList.remove('loading');
+        wordBackground.classList.add('visible');
+        this.scheduleImageHide(wordBackground);
     }
 
     /**
@@ -1381,19 +1650,32 @@ class GameState {
     }
 
     /**
-     * Sync active letter labels across gameplay HUD and popups
+     * Sync the active letter across the gameplay HUD.
+     *
+     * The level-complete popup is NOT touched here: it names the letter that
+     * was completed, which is a different value from the active letter once
+     * the progression pointer has moved on.
+     *
+     * @param {string} [completedLetter] - when given, also written to the
+     *   level-complete popup.
      */
-    syncLetterDisplays() {
-        [
-            'active-letter-display',
-            'ready-letter-display',
-            'level-complete-letter',
-        ].forEach((elementId) => {
+    syncLetterDisplays(completedLetter = null) {
+        const hudIds = ['active-letter-display', 'ready-letter-display'];
+        hudIds.forEach((elementId) => {
             const element = document.getElementById(elementId);
             if (element) {
                 element.textContent = this.activeLetterLevel;
             }
         });
+
+        if (completedLetter) {
+            const completionElement = document.getElementById(
+                'level-complete-letter',
+            );
+            if (completionElement) {
+                completionElement.textContent = completedLetter;
+            }
+        }
     }
 
     /**
@@ -1401,19 +1683,24 @@ class GameState {
      */
     completeLevelSuccessfully() {
         console.log('🎉 Level complete!');
+
+        // Capture the letter that was actually completed BEFORE advancing the
+        // progression pointer. Advancing first made the popup header and the
+        // screen-reader announcement name the NEXT letter.
+        const completedLetter = this.activeLetterLevel;
+
         this.isGameplayActive = false;
         this.audioManager.play('celebration');
 
         // Track completed level
-        if (!this.completedLevels.includes(this.activeLetterLevel)) {
-            this.completedLevels.push(this.activeLetterLevel);
+        if (!this.completedLevels.includes(completedLetter)) {
+            this.completedLevels.push(completedLetter);
         }
 
-        // Advance the progression pointer to the next uncompleted letter
-        // (no-op / stays put when all letters are complete → free practice).
-        this.advanceToNextLetter();
+        // Update the progress display using the completed letter.
         this.renderLetterSelectionGrid();
-        this.syncLetterDisplays();
+        this.syncLetterDisplays(completedLetter);
+        this.updateProgressDisplay();
 
         // Save state and update difficulty
         this.updateAdaptiveDifficulty();
@@ -1429,32 +1716,44 @@ class GameState {
             this.uiUtils.showToast(
                 'Level Complete! Great job!',
                 'success',
-                3000
+                3000,
             );
         }
 
         // Announce to screen readers
         this.announceToScreenReader(
-            `Fantastic! You completed the mission for letter ${this.activeLetterLevel}!`
+            `Fantastic! You completed the mission for letter ${completedLetter}!`,
         );
 
         this.displayPopup('level-complete-popup');
+
+        // Advance the progression pointer to the next uncompleted letter
+        // (no-op / stays put when all letters are complete → free practice).
+        this.advanceToNextLetter();
+        this.syncLetterDisplays();
     }
 
     navigateToScreen(screenId) {
         console.log(`🔄 Navigating to screen: ${screenId}`);
 
-        // Prevent navigating to the same screen
-        if (this.currentScreen === screenId) {
-            console.log(`Already on screen: ${screenId}, skipping navigation`);
-            return;
-        }
-
         // Get current and target screens
         const currentScreenElement = document.querySelector('.screen.active');
         const targetScreenElement = document.getElementById(
-            `${screenId}-screen`
+            `${screenId}-screen`,
         );
+
+        // Already on this screen and its side effects have run: do nothing.
+        // (The check on `hasAppliedScreen` matters for the initial route,
+        // where the model starts on 'welcome' but the "entered" side effects —
+        // background music and the gameplay reset — still have to run once.)
+        if (
+            this.currentScreen === screenId &&
+            this.hasAppliedScreen &&
+            currentScreenElement === targetScreenElement
+        ) {
+            console.log(`Already on screen: ${screenId}, skipping navigation`);
+            return;
+        }
 
         // Focus the new screen for accessibility (WCAG focus routing)
         if (targetScreenElement) {
@@ -1462,14 +1761,27 @@ class GameState {
             targetScreenElement.focus();
         }
 
+        // Commit the screen state together with the DOM. Setting
+        // `currentScreen` immediately made the model disagree with the DOM for
+        // the whole 600ms transition.
+        const commit = () => {
+            this.currentScreen = screenId;
+            this.hasAppliedScreen = true;
+            this.onScreenTransitionComplete(screenId);
+        };
+
+        const canTransition =
+            this.uiUtils &&
+            currentScreenElement &&
+            targetScreenElement &&
+            currentScreenElement !== targetScreenElement;
+
         // Use smooth transition if UI utilities available
-        if (this.uiUtils && currentScreenElement && targetScreenElement) {
+        if (canTransition) {
             this.uiUtils.transitionScreens(
                 currentScreenElement,
                 targetScreenElement,
-                () => {
-                    this.onScreenTransitionComplete(screenId);
-                }
+                commit,
             );
         } else {
             // Fallback to immediate transition
@@ -1479,10 +1791,8 @@ class GameState {
             if (targetScreenElement) {
                 targetScreenElement.classList.add('active');
             }
-            this.onScreenTransitionComplete(screenId);
+            commit();
         }
-
-        this.currentScreen = screenId;
     }
 
     /**
@@ -1497,9 +1807,19 @@ class GameState {
             this.audioManager.stop('background-music');
         }
 
+        // The collision loop only needs to run during gameplay. It used to
+        // run for the whole session, including on the welcome screen.
+        if (this.collisionManager) {
+            if (screenId === 'gameplay') {
+                this.collisionManager.start();
+            } else {
+                this.collisionManager.stop();
+            }
+        }
+
         // Announce screen change for screen readers
         this.announceToScreenReader(
-            `Space mission screen loaded: ${screenId}.`
+            `Space mission screen loaded: ${screenId}.`,
         );
     }
 
@@ -1516,7 +1836,7 @@ class GameState {
         if (this.uiUtils) {
             this.uiUtils.animateEntrance(
                 overlay.querySelector('.overlay-content'),
-                'scaleIn'
+                'scaleIn',
             );
         }
     }
@@ -1544,7 +1864,7 @@ class GameState {
         if (this.uiUtils) {
             this.uiUtils.animateEntrance(
                 popup.querySelector('.popup-content'),
-                'scaleIn'
+                'scaleIn',
             );
         }
     }
@@ -1585,7 +1905,16 @@ class GameState {
         ];
         containers.forEach((selector) => {
             const container = document.querySelector(selector);
-            if (container) container.innerHTML = '';
+            if (container) {
+                // Release timers/animation frames owned by any live asteroid
+                // before the DOM is wiped.
+                if (container.classList.contains('asteroids-container')) {
+                    container
+                        .querySelectorAll('.asteroid')
+                        .forEach((asteroid) => this.disposeAsteroid(asteroid));
+                }
+                container.innerHTML = '';
+            }
         });
 
         // Reset UI elements
@@ -1709,20 +2038,20 @@ class GameState {
 
         const accuracy = this.correctHitsCount / this.totalAnswersCount;
         console.log(
-            `📊 Accuracy is: ${(accuracy * 100).toFixed(1)}% (${this.correctHitsCount}/${this.totalAnswersCount})`
+            `📊 Accuracy is: ${(accuracy * 100).toFixed(1)}% (${this.correctHitsCount}/${this.totalAnswersCount})`,
         );
 
         if (accuracy >= 0.85) {
             this.difficultySpeedMultiplier = 1.25;
             this.difficultyPlanetCount = 4;
             console.log(
-                '⚡ Adaptive Difficulty: Hard (faster planets, more distractors)'
+                '⚡ Adaptive Difficulty: Hard (faster planets, more distractors)',
             );
         } else if (accuracy <= 0.6) {
             this.difficultySpeedMultiplier = 0.8;
             this.difficultyPlanetCount = 2;
             console.log(
-                '🐢 Adaptive Difficulty: Easy (slower planets, fewer distractors)'
+                '🐢 Adaptive Difficulty: Easy (slower planets, fewer distractors)',
             );
         } else {
             this.difficultySpeedMultiplier = 1.0;
@@ -1758,20 +2087,20 @@ class GameState {
             downloadAnchor.setAttribute('href', dataStr);
             downloadAnchor.setAttribute(
                 'download',
-                `phonics-fun-progress-${stats.sessionId}.json`
+                `phonics-fun-progress-${stats.sessionId}.json`,
             );
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
 
             this.announceToScreenReader(
-                'Progress report downloaded successfully.'
+                'Progress report downloaded successfully.',
             );
             if (this.uiUtils) {
                 this.uiUtils.showToast(
                     'Progress report downloaded!',
                     'success',
-                    3000
+                    3000,
                 );
             }
         } catch (e) {
@@ -1780,7 +2109,7 @@ class GameState {
                 this.uiUtils.showToast(
                     'Failed to export progress data',
                     'error',
-                    3000
+                    3000,
                 );
             }
         }
@@ -1802,21 +2131,21 @@ window.addEventListener('unhandledrejection', (event) => {
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('📄 DOM loaded, initializing Phonics Fun...');
-    window.game = new GameState();
-});
-
-// Handle visibility changes (for mobile/tablet devices)
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        console.log('⏸️ Game paused (tab hidden)');
-        if (window.game && window.game.audioManager) {
-            window.game.audioManager.stopAll();
+    try {
+        window.game = new GameState();
+    } catch (error) {
+        // A failure here used to leave a blank screen with no explanation.
+        console.error('🚨 Game failed to start:', error);
+        const announcer = document.getElementById('game-announcer');
+        if (announcer) {
+            announcer.textContent =
+                'The game could not start. Please reload the page.';
         }
-    } else {
-        console.log('▶️ Game resumed (tab visible)');
-        if (window.game && window.game.currentScreen === 'welcome') {
-            window.game.audioManager.play('background-music');
-        }
+        document.body.dataset.bootError = 'true';
     }
 });
 window.GameState = GameState;
+
+// Exported for tests and for any future module that needs the controller.
+// Previously the class was only reachable through the `window` global.
+export { GameState };
