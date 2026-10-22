@@ -4,6 +4,54 @@
  * Author: GitHub Copilot
  */
 
+import {
+    PHONICS_FUN_LETTER_DATA,
+    RECORDED_ASSET_LETTERS,
+} from './letter-data.js';
+import { soundPathFor } from './asset-paths.js';
+
+/**
+ * Read a localStorage key without letting a storage exception escape.
+ *
+ * WebViews with DOM storage disabled and Safari Private Browsing throw a
+ * `SecurityError` from `localStorage.getItem`. An unguarded read inside the
+ * `GameState` constructor aborts construction and the app never boots, so every
+ * access goes through here.
+ *
+ * @param {string} key
+ * @returns {string|null}
+ */
+function safeLocalStorageGet(key) {
+    try {
+        return window.localStorage.getItem(key);
+    } catch (error) {
+        console.warn(
+            `[AudioManager] localStorage.getItem("${key}") failed:`,
+            error,
+        );
+        return null;
+    }
+}
+
+/**
+ * Write a localStorage key without letting a storage exception escape.
+ * @param {string} key
+ * @param {string} value
+ * @returns {boolean} true when the write succeeded
+ */
+function safeLocalStorageSet(key, value) {
+    try {
+        window.localStorage.setItem(key, value);
+        return true;
+    } catch (error) {
+        console.warn(
+            `[AudioManager] localStorage.setItem("${key}") failed:`,
+            error,
+        );
+        return false;
+    }
+}
+
 class AudioManager {
     constructor() {
         this.sounds = new Map();
@@ -15,6 +63,9 @@ class AudioManager {
         this.musicGain = null;
         this.effectsGain = null;
         this.voiceGain = null;
+        // Sounds that already failed to load. Re-requesting them on every
+        // play() produced a 404 storm (25 of 26 phoneme assets do not exist).
+        this.failedSoundIds = new Set();
 
         // Settings
         this.isMuted = false;
@@ -35,7 +86,7 @@ class AudioManager {
         // Letters that have real prerecorded .wav voice assets bundled.
         // Only 'G' ships with voice-girl/voice-grandpa today; every other letter
         // is spoken via speechSynthesis at play() time (no network fetch).
-        this.hasRecordedAssets = new Set(['G']);
+        this.hasRecordedAssets = new Set(RECORDED_ASSET_LETTERS);
 
         // Voice template settings
         this.currentVoiceTemplate = 'british-female'; // Default - use the clearest phonics voice
@@ -90,6 +141,11 @@ class AudioManager {
             // Set initial volumes
             this.updateVolumes();
 
+            // A context created outside a user gesture starts 'suspended' and its
+            // clock never advances, so every source.start() is scheduled but
+            // inaudible. Resume it on the first real interaction.
+            this.armGestureResume();
+
             console.log('Web Audio API initialized successfully');
         } catch (error) {
             console.error('Web Audio API initialization failed:', error);
@@ -111,6 +167,79 @@ class AudioManager {
         this.loadAllSounds();
     }
 
+    /**
+     * Resume a suspended AudioContext on the first user interaction.
+     *
+     * Chrome, Safari and Android WebView create an AudioContext in the
+     * 'suspended' state when it is constructed outside a user gesture, and the
+     * clock does not advance until `resume()` is called. The context must be
+     * resumed on the *instance* — the codebase previously called
+     * `window.audioContext.resume()`, but `window.audioContext` is never
+     * assigned anywhere, so the resume path was unreachable and the whole
+     * game was silent on every autoplay-gated browser.
+     */
+    armGestureResume() {
+        if (!this.audioContext) return;
+
+        const resume = () => {
+            this.resumeIfSuspended();
+        };
+
+        for (const eventName of ['pointerdown', 'touchstart', 'keydown']) {
+            window.addEventListener(eventName, resume, {
+                once: true,
+                passive: true,
+            });
+        }
+    }
+
+    /**
+     * Resume the AudioContext if it is currently suspended.
+     * @returns {Promise<void>}
+     */
+    resumeIfSuspended() {
+        if (!this.audioContext || this.audioContext.state !== 'suspended') {
+            return Promise.resolve();
+        }
+        return this.audioContext
+            .resume()
+            .then(() => {
+                console.log('AudioContext resumed');
+            })
+            .catch((error) => {
+                console.warn('AudioContext resume failed:', error);
+            });
+    }
+
+    /**
+     * Suspend the AudioContext when it is running, to stop background audio
+     * while the tab is hidden. The background music is a looping
+     * AudioBufferSource, so the HTML `<audio>` based `pauseAll()` cannot
+     * silence it.
+     * @returns {Promise<void>}
+     */
+    suspendIfRunning() {
+        if (!this.audioContext || this.audioContext.state !== 'running') {
+            return Promise.resolve();
+        }
+        return this.audioContext
+            .suspend()
+            .then(() => {
+                console.log('AudioContext suspended');
+            })
+            .catch((error) => {
+                console.warn('AudioContext suspend failed:', error);
+            });
+    }
+
+    /**
+     * The live AudioContext state, for diagnostics and health checks.
+     * @returns {'running'|'suspended'|'closed'|'unavailable'}
+     */
+    getAudioContextState() {
+        return this.audioContext ? this.audioContext.state : 'unavailable';
+    }
+
     loadAllSounds() {
         if (this.audioPriority.lowPriority) {
             this.ensureSoundLoaded('background-music');
@@ -129,7 +258,7 @@ class AudioManager {
 
         this.clearVoiceCache();
         this.currentVoiceTemplate = normalizedTemplateId;
-        localStorage.setItem('voiceTemplate', normalizedTemplateId);
+        safeLocalStorageSet('voiceTemplate', normalizedTemplateId);
         this.ensureLetterAudio('G');
         console.log(`Voice template loaded: ${normalizedTemplateId}`);
     }
@@ -137,7 +266,7 @@ class AudioManager {
     setVoiceTemplate(templateId) {
         const normalizedTemplateId = this.normalizeTemplateId(templateId);
         const allowedTemplates = this.availableVoiceTemplates.map((t) =>
-            this.normalizeTemplateId(t.id)
+            this.normalizeTemplateId(t.id),
         );
 
         if (allowedTemplates.includes(normalizedTemplateId)) {
@@ -177,7 +306,7 @@ class AudioManager {
                     return response.arrayBuffer();
                 })
                 .then((arrayBuffer) =>
-                    this.audioContext.decodeAudioData(arrayBuffer)
+                    this.audioContext.decodeAudioData(arrayBuffer),
                 )
                 .then((audioBuffer) => {
                     this.sounds.set(id, {
@@ -195,6 +324,9 @@ class AudioManager {
                         error.message &&
                         error.message.startsWith('Failed to load sound:')
                     ) {
+                        // The asset is not bundled. Remember that so we do not
+                        // re-request it on every play() (404 storm).
+                        this.failedSoundIds.add(id);
                         return Promise.resolve();
                     }
 
@@ -207,7 +339,7 @@ class AudioManager {
         }
 
         const loadPromise = this.loadFallbackSound(id, url, type).finally(
-            finalizeLoad
+            finalizeLoad,
         );
         this.loadingSounds.set(id, loadPromise);
         return loadPromise;
@@ -232,7 +364,7 @@ class AudioManager {
                     console.log(`Fallback sound loaded successfully: ${id}`);
                     resolve();
                 },
-                { once: true }
+                { once: true },
             );
 
             audio.addEventListener(
@@ -241,7 +373,7 @@ class AudioManager {
                     console.error(`Error loading fallback sound ${id}:`, e);
                     reject(e);
                 },
-                { once: true }
+                { once: true },
             );
 
             audio.src = url;
@@ -270,7 +402,7 @@ class AudioManager {
         // Check priority before playing
         if (id === 'background-music' && !this.audioPriority.lowPriority) {
             console.log(
-                'Skipping background music (low priority sound disabled)'
+                'Skipping background music (low priority sound disabled)',
             );
             return;
         }
@@ -288,7 +420,7 @@ class AudioManager {
             (soundType === 'high' && !this.audioPriority.highPriority)
         ) {
             console.log(
-                `Skipping ${id} (${soundType} priority sound disabled)`
+                `Skipping ${id} (${soundType} priority sound disabled)`,
             );
             return;
         }
@@ -588,8 +720,8 @@ class AudioManager {
                     (v) => lower(v.lang).startsWith('en-gb'),
                     (v) =>
                         /female|woman|girl|susan|hazel|sophie|emma|victoria/i.test(
-                            v.name
-                        )
+                            v.name,
+                        ),
                 ) ||
                 matches((v) => lower(v.lang).startsWith('en-gb')) ||
                 list[0] ||
@@ -602,8 +734,9 @@ class AudioManager {
                 matches(
                     (v) => lower(v.lang).startsWith('en-gb'),
                     (v) =>
-                        /\b(male|man|boy|george|oliver|harry)\b/i.test(v.name) &&
-                        !/female|woman|girl/i.test(v.name)
+                        /\b(male|man|boy|george|oliver|harry)\b/i.test(
+                            v.name,
+                        ) && !/female|woman|girl/i.test(v.name),
                 ) ||
                 matches((v) => lower(v.lang).startsWith('en-gb')) ||
                 list[0] ||
@@ -616,8 +749,9 @@ class AudioManager {
                 matches(
                     (v) => lower(v.lang).startsWith('en-us'),
                     (v) =>
-                        /\b(male|man|boy|david|mark|guy|alex)\b/i.test(v.name) &&
-                        !/female|woman|girl/i.test(v.name)
+                        /\b(male|man|boy|david|mark|guy|alex)\b/i.test(
+                            v.name,
+                        ) && !/female|woman|girl/i.test(v.name),
                 ) ||
                 matches((v) => lower(v.lang).startsWith('en-us')) ||
                 list[0] ||
@@ -629,7 +763,9 @@ class AudioManager {
             matches(
                 (v) => lower(v.lang).startsWith('en-us'),
                 (v) =>
-                    /female|woman|girl|zira|jenny|aria|sarah|sara/i.test(v.name)
+                    /female|woman|girl|zira|jenny|aria|sarah|sara/i.test(
+                        v.name,
+                    ),
             ) ||
             matches((v) => /female|woman|girl/i.test(v.name)) ||
             list[0] ||
@@ -659,7 +795,7 @@ class AudioManager {
         const buffer = this.audioContext.createBuffer(
             1,
             duration * sampleRate,
-            sampleRate
+            sampleRate,
         );
         const data = buffer.getChannelData(0);
 
@@ -686,7 +822,7 @@ class AudioManager {
         const buffer = this.audioContext.createBuffer(
             1,
             duration * sampleRate,
-            sampleRate
+            sampleRate,
         );
         const data = buffer.getChannelData(0);
 
@@ -760,7 +896,7 @@ class AudioManager {
         }
 
         // Load voice template from localStorage or use default
-        const savedTemplate = localStorage.getItem('voiceTemplate');
+        const savedTemplate = safeLocalStorageGet('voiceTemplate');
         if (savedTemplate) {
             this.currentVoiceTemplate =
                 this.normalizeTemplateId(savedTemplate) ||
@@ -882,7 +1018,7 @@ class AudioManager {
     }
 
     getLetterData() {
-        return window.PHONICS_FUN_LETTER_DATA || {};
+        return PHONICS_FUN_LETTER_DATA;
     }
 
     normalizeTemplateId(templateId) {
@@ -935,27 +1071,7 @@ class AudioManager {
     }
 
     getSoundPath(id) {
-        if (id === 'background-music') {
-            return '/sounds/background-music.wav';
-        }
-
-        if (id === 'explosion') {
-            return '/sounds/explosion.wav';
-        }
-
-        if (id === 'celebration') {
-            return '/sounds/celebration.wav';
-        }
-
-        if (id.startsWith('phoneme-')) {
-            return `/sounds/${id}.wav`;
-        }
-
-        if (id.startsWith('voice-')) {
-            return `/sounds/voices/${this.currentVoiceTemplate}/${id}.wav`;
-        }
-
-        return null;
+        return soundPathFor(id, this.currentVoiceTemplate);
     }
 
     getSoundType(id) {
@@ -977,6 +1093,11 @@ class AudioManager {
             return Promise.resolve();
         }
 
+        // Already known to be missing — do not re-request it.
+        if (this.failedSoundIds.has(normalizedId)) {
+            return Promise.resolve();
+        }
+
         const soundPath = this.getSoundPath(normalizedId);
         if (!soundPath) {
             return Promise.resolve();
@@ -985,7 +1106,7 @@ class AudioManager {
         return this.loadSound(
             normalizedId,
             soundPath,
-            this.getSoundType(normalizedId)
+            this.getSoundType(normalizedId),
         );
     }
 
@@ -1014,6 +1135,7 @@ class AudioManager {
             .filter((id) => id.startsWith('voice-'))
             .forEach((id) => {
                 this.sounds.delete(id);
+                this.failedSoundIds.delete(id);
             });
 
         this.voices.clear();
@@ -1029,7 +1151,8 @@ if (typeof window !== 'undefined') {
     window.AudioManager = AudioManager;
 }
 
-// Global instance for easy access if not already present
-if (typeof window !== 'undefined' && !window.audioManager) {
-    window.audioManager = new AudioManager();
-}
+// NOTE: there is deliberately NO module-level `new AudioManager()` here.
+// Creating a second instance at import time allocated a second hardware
+// AudioContext (browsers cap concurrent contexts, especially on mobile) and
+// the extra instance was never closed. The owning GameState creates exactly
+// one and disposes of it.

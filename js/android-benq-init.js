@@ -15,7 +15,7 @@ class AndroidBenQInitializer {
     init() {
         if (this.isAndroid) {
             console.log(
-                '🤖 Android device detected, initializing compatibility fixes...'
+                '🤖 Android device detected, initializing compatibility fixes...',
             );
             this.applyAndroidFixes();
         }
@@ -25,7 +25,7 @@ class AndroidBenQInitializer {
             this.applyBenQFixes();
         }
 
-        this.setupAudioCompatibility();
+        this.setupWebkitAudioPolyfill();
         this.setupTouchOptimization();
         this.setupPerformanceOptimization();
         this.setupErrorHandling();
@@ -99,58 +99,14 @@ class AndroidBenQInitializer {
         }
 
         // Fix touch delay issues
-        this.fixTouchDelay();
-    }
-
-    fixTouchDelay() {
-        // Implement FastClick-like functionality for Android
-        const gameElements = document.querySelectorAll(
-            '.planet, .primary-button, .secondary-button'
-        );
-
-        gameElements.forEach((element) => {
-            let touchStartTime = 0;
-            let touchMoved = false;
-
-            element.addEventListener(
-                'touchstart',
-                (_e) => {
-                    touchStartTime = Date.now();
-                    touchMoved = false;
-                },
-                { passive: false }
-            );
-
-            element.addEventListener(
-                'touchmove',
-                (_e) => {
-                    touchMoved = true;
-                },
-                { passive: false }
-            );
-
-            element.addEventListener(
-                'touchend',
-                (e) => {
-                    const touchDuration = Date.now() - touchStartTime;
-
-                    if (!touchMoved && touchDuration < 300) {
-                        // Simulate a click event
-                        e.preventDefault();
-                        e.stopPropagation();
-
-                        const clickEvent = new MouseEvent('click', {
-                            bubbles: true,
-                            cancelable: true,
-                            view: window,
-                        });
-
-                        element.dispatchEvent(clickEvent);
-                    }
-                },
-                { passive: false }
-            );
-        });
+        // NOTE: the browser's own touch -> click synthesis is used (the game
+        // binds `click` listeners and main.js only suppresses touchmove
+        // scrolling). An earlier FastClick-style polyfill bound to the
+        // `.planet` elements that existed at startup — of which there were
+        // none, because planets are created per level — so it never applied.
+        // It has been removed rather than revived: re-adding it would risk
+        // dispatching a synthetic click on top of the native one, which would
+        // double-score every tap.
     }
 
     fixAudioAutoplay() {
@@ -182,7 +138,7 @@ class AndroidBenQInitializer {
                     .catch((error) => {
                         console.log(
                             `Audio ${audio.id} initialization failed:`,
-                            error
+                            error,
                         );
                     });
             });
@@ -190,7 +146,7 @@ class AndroidBenQInitializer {
             // Remove the event listeners after first interaction
             document.removeEventListener(
                 'touchstart',
-                enableAudioOnInteraction
+                enableAudioOnInteraction,
             );
             document.removeEventListener('click', enableAudioOnInteraction);
         };
@@ -228,7 +184,7 @@ class AndroidBenQInitializer {
             // Reduce animation complexity
             document.documentElement.style.setProperty(
                 '--animation-duration',
-                '0.2s'
+                '0.2s',
             );
 
             // Disable some visual effects on lower-end devices
@@ -318,32 +274,22 @@ class AndroidBenQInitializer {
         }
     }
 
-    setupAudioCompatibility() {
-        // Web Audio API compatibility
+    /**
+     * Provide the prefixed AudioContext constructor on legacy WebViews.
+     *
+     * The previous `setupAudioCompatibility()` also tried to resume a
+     * suspended context, but it referenced `window.audioContext` — a global
+     * this codebase never assigns (AudioManager keeps the context on the
+     * instance). The guard therefore always failed and the resume never
+     * happened, leaving the whole game silent on mobile. Resuming now happens
+     * in `AudioManager.armGestureResume()`, against the real instance.
+     */
+    setupWebkitAudioPolyfill() {
         if (
             typeof AudioContext === 'undefined' &&
             typeof webkitAudioContext !== 'undefined'
         ) {
             window.AudioContext = webkitAudioContext;
-        }
-
-        // Handle audio context suspension (common on mobile)
-        if (typeof AudioContext !== 'undefined') {
-            const resumeAudioContext = () => {
-                if (
-                    window.audioContext &&
-                    window.audioContext.state === 'suspended'
-                ) {
-                    window.audioContext.resume();
-                }
-            };
-
-            document.addEventListener('touchstart', resumeAudioContext, {
-                once: true,
-            });
-            document.addEventListener('click', resumeAudioContext, {
-                once: true,
-            });
         }
     }
 
@@ -361,7 +307,7 @@ class AndroidBenQInitializer {
                             e.preventDefault();
                         }
                     },
-                    { passive: false }
+                    { passive: false },
                 );
             }
         };
@@ -387,7 +333,20 @@ class AndroidBenQInitializer {
                 }
             };
 
-            setInterval(checkMemory, 30000); // Check every 30 seconds
+            // Keep the handle so destroy() can clear it. The interval was
+            // previously never cleared and, because the initializer was
+            // constructed twice, ran twice for the whole session.
+            this.memoryIntervalId = setInterval(checkMemory, 30000);
+        }
+    }
+
+    /**
+     * Release timers and listeners owned by this initializer.
+     */
+    destroy() {
+        if (this.memoryIntervalId) {
+            clearInterval(this.memoryIntervalId);
+            this.memoryIntervalId = null;
         }
     }
 
@@ -427,10 +386,7 @@ class AndroidBenQInitializer {
 
             // Don't let audio playback failures crash the game
             const reasonStr = String(event.reason ?? '');
-            if (
-                reasonStr.includes('play') ||
-                reasonStr.includes('audio')
-            ) {
+            if (reasonStr.includes('play') || reasonStr.includes('audio')) {
                 event.preventDefault();
                 console.log('Audio playback error handled gracefully');
             }
@@ -445,11 +401,16 @@ class AndroidBenQInitializer {
             audio.load();
         });
 
-        // Reinitialize audio manager if available
-        if (window.audioManager) {
-            setTimeout(() => {
-                window.audioManager.init();
-            }, 1000);
+        // Resume the real AudioContext if it is suspended. The previous
+        // implementation called `window.audioManager.init()`, which built a
+        // SECOND AudioContext without closing the first one and re-ran the
+        // whole gain graph — a leak, not a recovery.
+        const audioManager = window.game?.audioManager;
+        if (
+            audioManager &&
+            typeof audioManager.resumeIfSuspended === 'function'
+        ) {
+            audioManager.resumeIfSuspended();
         }
     }
 
@@ -473,15 +434,6 @@ class AndroidBenQInitializer {
     }
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    if (!window.androidBenQInitializer) {
-        window.androidBenQInitializer = new AndroidBenQInitializer();
-        // Run compatibility test
-        window.androidBenQInitializer.runCompatibilityTest();
-    }
-});
-
 // Export for global use
 export default AndroidBenQInitializer;
 
@@ -489,3 +441,9 @@ export default AndroidBenQInitializer;
 if (typeof window !== 'undefined') {
     window.AndroidBenQInitializer = AndroidBenQInitializer;
 }
+
+// NOTE: there is deliberately no module-level DOMContentLoaded bootstrap
+// here. The previous one created a second initializer (on top of the one the
+// GameState creates), which duplicated every global listener and started a
+// second uncleared 30-second memory timer. The owning GameState creates
+// exactly one instance and publishes it as `window.androidBenQInitializer`.
