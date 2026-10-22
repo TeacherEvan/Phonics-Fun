@@ -67,6 +67,10 @@ class GameState {
         this.sessionId = Math.random().toString(36).substring(2, 9);
         this.isGameplayActive = false;
         this.arePlanetsRendered = false;
+        // Gamification & Excitement stats
+        this.gameScore = 0;
+        this.currentStreak = 0;
+        this.highestStreak = 0;
         // Monotonic counter for asteroid identifiers (Date.now() collided).
         this.asteroidSequence = 0;
         // The asteroid that is currently in flight, if any.
@@ -575,6 +579,32 @@ class GameState {
             this.particleSystem.planetDestroyed(x, y);
         }
 
+        // Streak, Score & Multiplier calculation
+        this.currentStreak++;
+        if (this.currentStreak > this.highestStreak) {
+            this.highestStreak = this.currentStreak;
+        }
+        const streakMultiplier = Math.max(1, this.currentStreak);
+        const points = 100 * streakMultiplier;
+        this.gameScore += points;
+        this.updateScoreDisplay();
+        this.updateStreakUI();
+
+        // Audio chime with ascending pitch
+        if (this.audioManager && this.audioManager.playStreakChime) {
+            this.audioManager.playStreakChime(this.currentStreak);
+        }
+
+        // Floating points popup at impact point
+        const comboTag =
+            this.currentStreak > 1 ? ` 🔥 x${this.currentStreak}` : '';
+        this.showFloatingText(x, y, `+${points}${comboTag}`, 'score');
+
+        // Warp speed visual effect for stellar streaks
+        if (this.currentStreak >= 3) {
+            this.triggerHyperspaceWarp();
+        }
+
         // Voice message and word image
         setTimeout(() => {
             this.playVocabularyAudio();
@@ -624,6 +654,19 @@ class GameState {
         this.cumTotal++;
         this.updateAdaptiveDifficulty();
         this.saveStatsToLocalStorage();
+
+        // Streak reset with gentle feedback
+        if (this.currentStreak > 1) {
+            this.showFloatingText(x, y, 'COMBO RESET! 💫', 'miss');
+        } else {
+            this.showFloatingText(x, y, 'TRY AGAIN! 💫', 'miss');
+        }
+        this.currentStreak = 0;
+        this.updateStreakUI();
+
+        if (this.audioManager && this.audioManager.playIncorrectSound) {
+            this.audioManager.playIncorrectSound();
+        }
 
         // Create smaller explosion or visual feedback
         if (this.particleSystem) {
@@ -953,9 +996,12 @@ class GameState {
         const targetSpeed = 8 / this.difficultySpeedMultiplier;
 
         // Create target letter planets
+        const letterCode = this.activeLetterLevel.charCodeAt(0) - 65;
+        const themeNum = ((letterCode >= 0 ? letterCode : 0) % 6) + 1;
+
         for (let i = 0; i < this.activeVocabulary.length; i++) {
             const targetPlanet = document.createElement('div');
-            targetPlanet.className = `planet ${letterLower}-planet`;
+            targetPlanet.className = `planet target-planet planet-theme-${themeNum} ${letterLower}-planet`;
             targetPlanet.textContent = this.activeLetterLevel;
             targetPlanet.setAttribute('data-letter', this.activeLetterLevel);
             targetPlanet.setAttribute('data-index', i);
@@ -1708,6 +1754,25 @@ class GameState {
             this.particleSystem.levelComplete();
         }
 
+        // Calculate star rating (1 to 3 stars based on accuracy)
+        const total = this.correctHitsCount + this.incorrectHitsCount;
+        const accuracy = total > 0 ? this.correctHitsCount / total : 1;
+        const starCount = accuracy >= 0.8 ? 3 : accuracy >= 0.5 ? 2 : 1;
+
+        const starsContainer = document.getElementById('level-stars');
+        if (starsContainer) {
+            starsContainer.className = `level-stars stars-earned-${starCount}`;
+        }
+        const finalScoreEl = document.getElementById('final-score');
+        if (finalScoreEl) {
+            finalScoreEl.textContent = this.gameScore;
+        }
+
+        if (this.audioManager && this.audioManager.playVictoryFanfare) {
+            this.audioManager.playVictoryFanfare();
+        }
+        this.triggerHyperspaceWarp(2200);
+
         // Show success toast
         if (this.uiUtils) {
             this.uiUtils.showToast(
@@ -1915,11 +1980,100 @@ class GameState {
         });
 
         // Reset UI elements
+        this.currentStreak = 0;
+        this.updateStreakUI();
         this.updateProgressDisplay();
+        // The mission score is a per-level figure: it is shown next to the
+        // per-level hit counter and reported as the level's result in the
+        // completion popup. It was initialised once and only ever
+        // incremented, so a new letter started with the previous letter's
+        // score still on screen.
+        this.gameScore = 0;
+        this.updateScoreDisplay();
+        const floatingContainer = document.getElementById(
+            'floating-text-container',
+        );
+        if (floatingContainer) {
+            floatingContainer.innerHTML = '';
+        }
         const wordBg = document.querySelector('.word-background');
         if (wordBg) {
             wordBg.classList.remove('visible');
         }
+    }
+
+    /**
+     * Show floating animated feedback text at coordinate (x, y)
+     * @param {number} x
+     * @param {number} y
+     * @param {string} text
+     * @param {'score'|'miss'|'combo'} type
+     */
+    showFloatingText(x, y, text, type = 'score') {
+        const container =
+            document.getElementById('floating-text-container') ||
+            document.querySelector('.game-area');
+        if (!container) return;
+
+        const el = document.createElement('div');
+        el.className = `floating-text ${type}`;
+        el.textContent = text;
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        container.appendChild(el);
+
+        setTimeout(() => {
+            if (el.parentNode) {
+                el.parentNode.removeChild(el);
+            }
+        }, 1100);
+    }
+
+    /**
+     * Update streak badge with dynamic animations and hype labels
+     */
+    updateStreakUI() {
+        const streakBanner = document.getElementById('streak-banner');
+        if (!streakBanner) return;
+
+        if (this.currentStreak >= 2) {
+            let label = 'COMBO!';
+            if (this.currentStreak >= 5) label = 'GALACTIC!';
+            else if (this.currentStreak >= 4) label = 'MEGA!';
+            else if (this.currentStreak >= 3) label = 'SUPER!';
+
+            streakBanner.innerHTML = `🔥 <span id="streak-count">${this.currentStreak}x</span> ${label}`;
+            streakBanner.classList.remove('hidden');
+            streakBanner.classList.add('pulse');
+        } else {
+            streakBanner.classList.add('hidden');
+            streakBanner.classList.remove('pulse');
+        }
+    }
+
+    /**
+     * Update live mission score display with punchy bump effect
+     */
+    updateScoreDisplay() {
+        const scoreEl = document.getElementById('game-score');
+        if (scoreEl) {
+            scoreEl.textContent = this.gameScore;
+            scoreEl.classList.add('bump');
+            setTimeout(() => scoreEl.classList.remove('bump'), 250);
+        }
+    }
+
+    /**
+     * Trigger hyperspace warp speed star trail effect
+     * @param {number} duration ms
+     */
+    triggerHyperspaceWarp(duration = 1200) {
+        const bg = document.querySelector('.galaxy-background');
+        if (!bg) return;
+        bg.classList.add('warp-speed');
+        setTimeout(() => {
+            bg.classList.remove('warp-speed');
+        }, duration);
     }
 
     /**

@@ -394,6 +394,26 @@ class ParticleSystem {
     planetDestroyed(x, y) {
         this.createExplosion(x, y, 2);
         this.createDebris(x, y, 25);
+        this.createSparkleBurst(x, y, 16);
+    }
+
+    createSparkleBurst(x, y, count = 16) {
+        const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#a29bfe', '#ffffff'];
+        for (let i = 0; i < count; i++) {
+            const angle =
+                (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const speed = Math.random() * 90 + 60;
+            this.createParticle(x, y, 'spark', {
+                size: Math.random() * 5 + 3,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                maxLife: 0.9,
+                velocity: {
+                    x: Math.cos(angle) * speed,
+                    y: Math.sin(angle) * speed,
+                },
+                gravity: 0.01,
+            });
+        }
     }
 
     levelComplete() {

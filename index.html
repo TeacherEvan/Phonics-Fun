@@ -103,6 +103,7 @@
                     <div class="word-background">
                         <!-- Word images will be shown here -->
                     </div>
+                    <div class="floating-text-container" id="floating-text-container"></div>
                 </div>
                 <div class="game-ui">
                     <div class="hud-cluster">
@@ -120,11 +121,18 @@
                         </div>
                     </div>
                     <div class="score-display">
-                        <span class="score-label">Hits</span>
-                        <span class="score-value"
-                            style="font-variant-numeric: tabular-nums;"><span
-                                id="hits-counter">0</span>
-                            / 5</span>
+                        <div class="score-row">
+                            <span class="score-label">Hits</span>
+                            <span class="score-value"
+                                style="font-variant-numeric: tabular-nums;"><span
+                                    id="hits-counter">0</span>
+                                / 5</span>
+                        </div>
+                        <div class="score-row score-points-row">
+                            <span class="score-label">Score</span>
+                            <span class="score-value score-number" id="game-score">0</span>
+                        </div>
+                        <div id="streak-banner" class="streak-badge hidden">🔥 <span id="streak-count">1</span>x COMBO!</div>
                     </div>
                 </div>
             </div>
@@ -223,9 +231,15 @@
             <div class="popup-content celebration">
                 <p class="popup-kicker">Mission complete</p>
                 <h2>Level Complete!</h2>
+                <div class="level-stars" id="level-stars" aria-label="Stars Rating">
+                    <span class="star-icon star-1">⭐</span>
+                    <span class="star-icon star-2">⭐</span>
+                    <span class="star-icon star-3">⭐</span>
+                </div>
                 <p class="popup-message">You blasted through letter <span
                         id="level-complete-letter">G</span>. Choose your next
                     adventure.</p>
+                <p class="level-score-summary">Score: <span id="final-score">0</span></p>
                 <div class="popup-buttons">
                     <button id="next-level-btn" class="primary-button">Next
                         Level</button>
