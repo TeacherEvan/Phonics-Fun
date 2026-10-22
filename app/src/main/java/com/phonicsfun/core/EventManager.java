@@ -183,10 +183,15 @@ public class EventManager {
     
     /**
      * Cleanup all resources
+     *
+     * removeCallbacksAndMessages is called with `this` as the token so that
+     * ONLY this manager's pending callbacks are cancelled. Passing null would
+     * remove every message posted to the main looper, including work queued
+     * by the framework and by other components.
      */
     public void cleanup() {
         cancelAllEvents();
         eventListeners.clear();
-        mainHandler.removeCallbacksAndMessages(null);
+        mainHandler.removeCallbacksAndMessages(this);
     }
 }

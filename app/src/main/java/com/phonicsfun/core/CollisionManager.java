@@ -274,9 +274,19 @@ public class CollisionManager {
     
     /**
      * Remove all inactive objects
+     *
+     * Uses an explicit reverse index loop rather than Collection.removeIf:
+     * removeIf is a Java 8 default method that Android only provides from
+     * API 24, and this module declares minSdk 21. Core library desugaring is
+     * not enabled, so removeIf would throw NoSuchMethodError on Android 5.x
+     * and 6.0 devices.
      */
     public void cleanupInactiveObjects() {
-        collisionObjects.removeIf(obj -> !obj.isActive);
+        for (int i = collisionObjects.size() - 1; i >= 0; i--) {
+            if (!collisionObjects.get(i).isActive) {
+                collisionObjects.remove(i);
+            }
+        }
     }
     
     /**

@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.phonicsfun.R;
 import com.phonicsfun.core.AudioManager;
+import com.phonicsfun.core.GameState;
 
 /**
  * SettingsActivity - Game settings and preferences
@@ -24,6 +25,7 @@ public class SettingsActivity extends Activity {
     private static final String PREFS_NAME = "PhonicsGamePrefs";
     
     private AudioManager audioManager;
+    private boolean ownsAudioManager = false;
     private SharedPreferences sharedPreferences;
     
     // UI Components
@@ -43,8 +45,17 @@ public class SettingsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         
-        // Initialize components
-        audioManager = new AudioManager(this);
+        // Initialize components.
+        // Use the shared GameState AudioManager: constructing a private one
+        // meant the volume and mute changes made here were applied to an
+        // orphan instance and never reached the audio the game actually used.
+        GameState gameState = GameState.getInstance();
+        if (gameState != null) {
+            audioManager = gameState.getAudioManager();
+        } else {
+            audioManager = new AudioManager(this);
+            ownsAudioManager = true;
+        }
         sharedPreferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         
         // Initialize UI
@@ -282,6 +293,10 @@ public class SettingsActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        audioManager.release();
+        // Only release an AudioManager this activity created itself. The
+        // shared instance belongs to the GameState and outlives this screen.
+        if (ownsAudioManager && audioManager != null) {
+            audioManager.release();
+        }
     }
 }

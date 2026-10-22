@@ -146,19 +146,6 @@ public class AudioManager {
         return getResId(voiceKey, "raw");
     }
     
-    private String[] getWordsForLetter(String letter) {
-        switch (letter.toUpperCase()) {
-            case "G":
-                return new String[]{"grape", "goat", "gold", "girl", "grandpa"};
-            case "A":
-                return new String[]{"apple", "ant"};
-            case "B":
-                return new String[]{"ball", "bat"};
-            default:
-                return new String[]{};
-        }
-    }
-    
     private String[] getAnimateWordsForLetter(String letter) {
         // Load every in-game word so pronunciation is available for gameplay and previews
         switch (letter.toUpperCase()) {

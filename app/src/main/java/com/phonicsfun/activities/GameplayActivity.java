@@ -23,6 +23,7 @@ public class GameplayActivity extends Activity {
     
     private GameState gameState;
     private AudioManager audioManager;
+    private boolean ownsAudioManager = false;
     private SymbolRenderer symbolRenderer;
     
     private char currentLetter;
@@ -51,9 +52,16 @@ public class GameplayActivity extends Activity {
         Intent intent = getIntent();
         currentLetter = intent.getCharExtra("letter", 'G');
         
-        // Initialize core components
+        // Initialize core components.
+        // Share the GameState AudioManager so the volume and voice settings
+        // chosen in Settings apply to the audio used while playing.
         gameState = GameState.getInstance();
-        audioManager = new AudioManager(this);
+        if (gameState != null) {
+            audioManager = gameState.getAudioManager();
+        } else {
+            audioManager = new AudioManager(this);
+            ownsAudioManager = true;
+        }
         symbolRenderer = new SymbolRenderer(this);
         
         // Initialize UI
@@ -133,7 +141,15 @@ public class GameplayActivity extends Activity {
         currentWords = symbolRenderer.getWordsForSymbol(currentLetter);
         currentWordIndex = 0;
         score = 0;
-        
+
+        // Start the shared game session. This loads the letter's voice assets
+        // into the SoundPool and sets the hit target. It was never called
+        // before, so the bundled recordings were never loaded and the scoring
+        // path never became active.
+        if (gameState != null) {
+            gameState.startGame(String.valueOf(currentLetter));
+        }
+
         // Play phoneme sound for the letter
         audioManager.playPhoneme(currentLetter);
     }
@@ -184,23 +200,35 @@ public class GameplayActivity extends Activity {
     
     /**
      * Move to next word
+     *
+     * This screen is a word-reveal drill: it shows the word and its picture
+     * and advances on demand. There is no answer to validate here, so the
+     * advance is recorded as a completed word through the shared GameState
+     * rather than through a private score counter, which meant the adaptive
+     * difficulty, the completion detection and the teacher statistics never
+     * received any data.
      */
     private void nextWord() {
         if (currentWordIndex < currentWords.length - 1) {
             currentWordIndex++;
             score += 10; // Add points for completing word
             updateGameDisplay();
-            
+
+            // Record the completed word in the shared game state.
+            if (gameState != null) {
+                gameState.registerHit(true);
+            }
+
             // Play audio for new word
             playCurrentWordAudio();
         } else {
             // Game completed for this letter
             gameState.markLetterCompleted(currentLetter);
             audioManager.playCelebration();
-            
+
             // Show completion message
             gameStatusText.setText(getString(R.string.game_completed));
-            
+
             // Disable next word button
             nextWordButton.setEnabled(false);
         }
@@ -244,7 +272,10 @@ public class GameplayActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Clean up resources
-        audioManager.release();
+        // Only release an AudioManager this activity created itself; the
+        // shared one belongs to the GameState.
+        if (ownsAudioManager && audioManager != null) {
+            audioManager.release();
+        }
     }
 }

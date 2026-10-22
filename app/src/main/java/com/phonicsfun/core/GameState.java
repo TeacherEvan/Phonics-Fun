@@ -34,13 +34,11 @@ public class GameState {
     private float musicVolume;
     private float effectsVolume;
     private String currentLetter;
-    
-    // Adaptive difficulty states
-    private int correctAnswersCount;
-    private int totalAnswersCount;
-    private float difficultySpeedMultiplier;
-    private int difficultyPlanetCount;
-    
+
+    // Adaptive difficulty states. The rules live in GameProgression so they
+    // can be unit tested without an Android Context.
+    private GameProgression progression;
+
     // Game components
     private AudioManager audioManager;
     private EventManager eventManager;
@@ -48,7 +46,10 @@ public class GameState {
     private Context context;
     
     public GameState(Context context) {
-        this.context = context;
+        // Hold the application context, not the Activity context. This object
+        // is published into a static field, so retaining the Activity would
+        // leak it for the lifetime of the process.
+        this.context = context.getApplicationContext();
         this.currentScreen = Screen.WELCOME;
         this.gameStatus = GameStatus.INACTIVE;
         this.correctHits = 0;
@@ -59,12 +60,9 @@ public class GameState {
         this.musicVolume = 0.5f;
         this.effectsVolume = 0.7f;
         this.currentLetter = "G";
-        
-        this.correctAnswersCount = 0;
-        this.totalAnswersCount = 0;
-        this.difficultySpeedMultiplier = 1.0f;
-        this.difficultyPlanetCount = 3;
-        
+
+        this.progression = new GameProgression();
+
         initializeData();
         initializeComponents();
         instance = this;
@@ -128,6 +126,7 @@ public class GameState {
         // Create planets based on the words
         if (!letterWords.isEmpty()) {
             this.totalHits = letterWords.size();
+            progression.setHitsTarget(totalHits);
         }
         planetsCreated = true;
         Log.d(TAG, "Created planets for letter " + letter + " with " + letterWords.size() + " words (totalHits: " + this.totalHits + ")");
@@ -135,22 +134,18 @@ public class GameState {
     
     public void registerHit(boolean isCorrect) {
         if (gameStatus != GameStatus.ACTIVE) return;
-        
-        totalAnswersCount++;
-        if (isCorrect) {
-            correctAnswersCount++;
-            correctHits++;
-            Log.d(TAG, "Correct hit! Total: " + correctHits + "/" + totalHits);
-            
-            if (correctHits >= totalHits) {
-                completeGame();
-            }
+
+        boolean levelComplete = progression.recordAnswer(isCorrect);
+        correctHits = progression.getCorrectHits();
+
+        if (levelComplete) {
+            completeGame();
         }
-        
-        updateAdaptiveDifficulty();
-        
-        // Play appropriate sound
-        audioManager.playEffect(isCorrect ? "celebration" : "explosion");
+
+        // Play appropriate sound. The completion sting is reserved for
+        // completeGame(); playing "celebration" on every hit made the level
+        // sound like it ended on each answer.
+        audioManager.playEffect("explosion");
     }
     
     private void completeGame() {
@@ -170,6 +165,10 @@ public class GameState {
         currentWordIndex = 0;
         gameStatus = GameStatus.INACTIVE;
         planetsCreated = false;
+        // Reset the adaptive difficulty counters with the rest of the session
+        // state. They used to accumulate across levels, so the difficulty was
+        // computed from every answer ever given instead of the current level.
+        progression.reset();
     }
     
     public void pauseGame() {
@@ -253,6 +252,7 @@ public class GameState {
             completedStr += letterStr;
             prefs.edit().putString("completed_letters", completedStr).apply();
         }
+        progression.markLetterCompleted(letterStr);
     }
 
     public int getCompletedLettersCount() {
@@ -281,25 +281,14 @@ public class GameState {
     }
 
     private void updateAdaptiveDifficulty() {
-        if (totalAnswersCount == 0) {
-            difficultySpeedMultiplier = 1.0f;
-            difficultyPlanetCount = 3;
-            return;
-        }
-        
-        float accuracy = (float) correctAnswersCount / totalAnswersCount;
-        if (accuracy >= 0.85f) {
-            difficultySpeedMultiplier = 1.25f;
-            difficultyPlanetCount = 4;
-        } else if (accuracy <= 0.60f) {
-            difficultySpeedMultiplier = 0.8f;
-            difficultyPlanetCount = 2;
-        } else {
-            difficultySpeedMultiplier = 1.0f;
-            difficultyPlanetCount = 3;
-        }
+        progression.updateAdaptiveDifficulty();
     }
 
-    public float getDifficultySpeedMultiplier() { return difficultySpeedMultiplier; }
-    public int getDifficultyPlanetCount() { return difficultyPlanetCount; }
+    public float getDifficultySpeedMultiplier() {
+        return progression.getDifficultySpeedMultiplier();
+    }
+
+    public int getDifficultyPlanetCount() {
+        return progression.getDifficultyPlanetCount();
+    }
 }

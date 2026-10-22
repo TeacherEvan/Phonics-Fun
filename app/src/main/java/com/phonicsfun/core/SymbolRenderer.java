@@ -19,6 +19,7 @@ public class SymbolRenderer {
     private Context context;
     private Paint paint;
     private Paint backgroundPaint;
+    private Paint glowPaint;
     private Map<Character, SymbolConfig> symbolConfigs;
     
     public SymbolRenderer(Context context) {
@@ -62,6 +63,14 @@ public class SymbolRenderer {
         
         backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         backgroundPaint.setStyle(Paint.Style.FILL);
+
+        // Reused across frames. Creating a Paint inside addGlowEffect() threw
+        // away a new object on every draw call, which is a per-frame heap
+        // allocation in a rendering loop.
+        glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        glowPaint.setStyle(Paint.Style.STROKE);
+        glowPaint.setStrokeWidth(4f);
+        glowPaint.setAlpha(100);
     }
     
     /**
@@ -197,12 +206,8 @@ public class SymbolRenderer {
      * Add glow effect around symbol
      */
     private void addGlowEffect(Canvas canvas, float centerX, float centerY, float radius, int color) {
-        Paint glowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        glowPaint.setStyle(Paint.Style.STROKE);
         glowPaint.setColor(color);
-        glowPaint.setStrokeWidth(4f);
-        glowPaint.setAlpha(100);
-        
+
         canvas.drawCircle(centerX, centerY, radius + 5, glowPaint);
     }
     

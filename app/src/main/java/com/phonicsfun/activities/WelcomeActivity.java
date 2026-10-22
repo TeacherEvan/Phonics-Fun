@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
@@ -160,31 +161,36 @@ public class WelcomeActivity extends Activity {
     
     private void createTwinklingStars() {
         // Create random twinkling effects across the screen
+        ViewGroup container = (ViewGroup) findViewById(R.id.welcome_container);
+        if (container == null) {
+            return;
+        }
+
         for (int i = 0; i < 3; i++) {
             final ImageView star = new ImageView(this);
             star.setImageResource(R.drawable.star);
             star.setAlpha(0.0f);
-            
+
             // Random position
             float x = random.nextFloat() * getResources().getDisplayMetrics().widthPixels;
             float y = random.nextFloat() * getResources().getDisplayMetrics().heightPixels;
-            
+
             star.setX(x);
             star.setY(y);
-            
+
             // Add to layout
-            ((android.view.ViewGroup) findViewById(R.id.welcome_container)).addView(star);
-            
+            container.addView(star);
+
             // Animate star
             ObjectAnimator starTwinkle = ObjectAnimator.ofFloat(star, "alpha", 0.0f, 1.0f, 0.0f);
             starTwinkle.setDuration(1000);
             starTwinkle.start();
-            
+
             // Remove star after animation
             animationHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    ((android.view.ViewGroup) findViewById(R.id.welcome_container)).removeView(star);
+                    ((ViewGroup) findViewById(R.id.welcome_container)).removeView(star);
                 }
             }, 1000);
         }
@@ -274,7 +280,10 @@ public class WelcomeActivity extends Activity {
         if (welcomeAnimations != null && welcomeAnimations.isRunning()) {
             welcomeAnimations.cancel();
         }
-        animationHandler.removeCallbacksAndMessages(null);
+        // Cancel only this handler's pending callbacks. Passing null would
+        // clear the entire main looper queue, cancelling unrelated framework
+        // and library work.
+        animationHandler.removeCallbacksAndMessages(this);
     }
     
     @Override
@@ -298,8 +307,12 @@ public class WelcomeActivity extends Activity {
         super.onDestroy();
         stopAnimations();
         if (gameState != null) {
-            gameState.getEventManager().cleanup();
-            gameState.getAudioManager().cleanup();
+            // The EventManager and the AudioManager are shared with the other
+            // activities. Releasing the AudioManager here silenced the whole
+            // game whenever the Welcome screen was reclaimed (for example
+            // with "don't keep activities" enabled) while gameplay was still
+            // running. Only cancel this manager's own pending events.
+            gameState.getEventManager().cancelAllEvents();
         }
     }
 }
