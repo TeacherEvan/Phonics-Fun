@@ -10,7 +10,11 @@ app/.gradle/
 local.properties
 *.class
 *.jar
-.prettierrc
+# The Gradle wrapper jar is part of the build: without it ./gradlew cannot
+# run at all.
+!gradle/wrapper/gradle-wrapper.jar
+# .prettierrc IS tracked: the CI format:check job depends on it, and without
+# it Prettier falls back to defaults that reject the whole codebase.
 vitest.config.mjs.timestamp-*
 *.tsbuildinfo
 docs/.scratch-audit/
