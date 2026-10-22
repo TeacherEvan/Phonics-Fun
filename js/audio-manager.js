@@ -788,7 +788,13 @@ class AudioManager {
 
     // Generate dynamic sound effects using Web Audio API
     generateExplosionSound() {
-        if (this.isMuted || !this.audioContext) return;
+        if (
+            this.isMuted ||
+            !this.audioContext ||
+            typeof this.audioContext.createBuffer !== 'function'
+        ) {
+            return;
+        }
 
         const duration = 1.0;
         const sampleRate = this.audioContext.sampleRate;
@@ -814,8 +820,150 @@ class AudioManager {
         return source;
     }
 
+    /**
+     * Play a crystal-bright ascending musical chime for streak bonuses.
+     * @param {number} streak - current consecutive hit count (1, 2, 3...)
+     */
+    playStreakChime(streak = 1) {
+        if (
+            this.isMuted ||
+            !this.audioContext ||
+            typeof this.audioContext.createBuffer !== 'function'
+        ) {
+            return null;
+        }
+
+        const notes = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5]; // C5, D5, E5, G5, A5, C6
+        const baseIndex = Math.min(Math.max(0, streak - 1), notes.length - 2);
+        const f1 = notes[baseIndex];
+        const f2 = notes[Math.min(notes.length - 1, baseIndex + 1)];
+
+        const sampleRate = this.audioContext.sampleRate || 44100;
+        const duration = 0.45;
+        const buffer = this.audioContext.createBuffer(
+            1,
+            Math.floor(duration * sampleRate),
+            sampleRate,
+        );
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < buffer.length; i++) {
+            const t = i / sampleRate;
+            const currentFreq = t < 0.15 ? f1 : f2;
+            const env = Math.exp(-t * 7);
+            const bell =
+                Math.sin(t * 2 * Math.PI * currentFreq) +
+                0.4 * Math.sin(t * 2 * Math.PI * currentFreq * 2.01) +
+                0.15 * Math.sin(t * 2 * Math.PI * currentFreq * 3.02);
+            data[i] = bell * env * 0.25;
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        if (this.effectsGain && source.connect) {
+            source.connect(this.effectsGain);
+        }
+        if (source.start) source.start();
+
+        return source;
+    }
+
+    /**
+     * Play a gentle, encouraging bounce boing sound on misses.
+     */
+    playIncorrectSound() {
+        if (
+            this.isMuted ||
+            !this.audioContext ||
+            typeof this.audioContext.createBuffer !== 'function'
+        ) {
+            return null;
+        }
+
+        const sampleRate = this.audioContext.sampleRate || 44100;
+        const duration = 0.35;
+        const buffer = this.audioContext.createBuffer(
+            1,
+            Math.floor(duration * sampleRate),
+            sampleRate,
+        );
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < buffer.length; i++) {
+            const t = i / sampleRate;
+            const freq = 180 * Math.max(0.3, 1 - t * 2.2);
+            const env = Math.exp(-t * 6);
+            data[i] = Math.sin(t * 2 * Math.PI * freq) * env * 0.2;
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        if (this.effectsGain && source.connect) {
+            source.connect(this.effectsGain);
+        }
+        if (source.start) source.start();
+
+        return source;
+    }
+
+    /**
+     * Play celebratory multi-chord victory fanfare.
+     */
+    playVictoryFanfare() {
+        if (
+            this.isMuted ||
+            !this.audioContext ||
+            typeof this.audioContext.createBuffer !== 'function'
+        ) {
+            return null;
+        }
+
+        const chords = [
+            [523.25, 659.25, 783.99], // C major
+            [587.33, 739.99, 880.0], // D major
+            [659.25, 830.61, 987.77], // E major
+            [1046.5, 1318.51, 1567.98], // High C triumph
+        ];
+
+        const sampleRate = this.audioContext.sampleRate || 44100;
+        const duration = 1.4;
+        const buffer = this.audioContext.createBuffer(
+            1,
+            Math.floor(duration * sampleRate),
+            sampleRate,
+        );
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < buffer.length; i++) {
+            const t = i / sampleRate;
+            const step = Math.min(3, Math.floor(t / 0.35));
+            const chord = chords[step];
+            const env = Math.exp(-(t % 0.35) * 4);
+            let val = 0;
+            for (const f of chord) {
+                val += Math.sin(t * 2 * Math.PI * f);
+            }
+            data[i] = (val / chord.length) * env * 0.22;
+        }
+
+        const source = this.audioContext.createBufferSource();
+        source.buffer = buffer;
+        if (this.effectsGain && source.connect) {
+            source.connect(this.effectsGain);
+        }
+        if (source.start) source.start();
+
+        return source;
+    }
+
     generatePhonemeSound(phoneme) {
-        if (this.isMuted || !this.audioContext) return;
+        if (
+            this.isMuted ||
+            !this.audioContext ||
+            typeof this.audioContext.createBuffer !== 'function'
+        ) {
+            return;
+        }
 
         const duration = 0.5;
         const sampleRate = this.audioContext.sampleRate;
