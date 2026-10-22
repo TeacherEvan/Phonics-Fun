@@ -134,8 +134,10 @@
         .progress-fill {
             height: 100%;
             background: #4CAF50;
-            width: 0%;
-            transition: width 0.5s;
+            width: 100%;
+            transform: scaleX(var(--progress, 0));
+            transform-origin: left center;
+            transition: transform 0.5s;
         }
         .device-info {
             background: #e8eaf6;
@@ -446,7 +448,7 @@
             const progressPercent = testResults.total > 0 
                 ? (testResults.passed / testResults.total) * 100 
                 : 0;
-            document.getElementById('progress-fill').style.width = `${progressPercent}%`;
+            document.getElementById('progress-fill').style.setProperty('--progress', String(progressPercent / 100));
         }
         
         // Run all tests

@@ -154,7 +154,10 @@
             height: 100%;
             background: linear-gradient(90deg, #FF5252, #FFEB3B, #4CAF50);
             border-radius: 15px;
-            transition: width 1s ease-in-out;
+            width: 100%;
+            transform: scaleX(var(--progress, 0));
+            transform-origin: left center;
+            transition: transform 1s ease-in-out;
         }
 
         .category-scores {
@@ -362,8 +365,10 @@
         .progress-fill {
             height: 100%;
             background: linear-gradient(45deg, #4CAF50, #45a049);
-            width: 0%;
-            transition: width 0.3s ease;
+            width: 100%;
+            transform: scaleX(var(--progress, 0));
+            transform-origin: left center;
+            transition: transform 0.3s ease;
         }
     </style>
 </head>
@@ -467,7 +472,8 @@
             <div class="performance-grid">
                 <div class="performance-item">
                     <strong>Frame Rate:</strong>
-                    <div id="fps-display">0 FPS</div>
+                    <div id="fps-display"
+                        style="font-variant-numeric: tabular-nums;">0 FPS</div>
                 </div>
                 <div class="performance-item">
                     <strong>Memory Usage:</strong>
@@ -565,7 +571,7 @@
         let testResults = {};
         let audioContext = null;
         let performanceTest = null;
-        let fps = 0;
+        let fps = 0; // rendered with tabular-nums
         let lastTime = 0;
         let frameCount = 0;
 
@@ -771,7 +777,7 @@
             
             const interval = setInterval(() => {
                 progress += 10;
-                progressBar.style.width = progress + '%';
+                progressBar.style.setProperty('--progress', String(parseFloat(progress) / 100));
                 
                 if (progress >= 100) {
                     clearInterval(interval);
@@ -789,6 +795,8 @@
         }
 
         // FPS monitoring
+        // (the readout uses font-variant-numeric: tabular-nums so the digits
+        //  do not shift horizontally while the frame rate is live)
         function startFPSMonitoring() {
             function updateFPS(currentTime) {
                 if (lastTime) {

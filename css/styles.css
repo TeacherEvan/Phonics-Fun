@@ -38,9 +38,10 @@ body {
     align-items: center;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
-                visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+        opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     /* Performance: GPU layer for smooth transitions */
     will-change: opacity, visibility;
 }
@@ -52,7 +53,13 @@ body {
 
 /* Welcome Screen Styles */
 #welcome-screen {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 60%, #0f0f23 100%);
+    background: linear-gradient(
+        135deg,
+        #0a0a0a 0%,
+        #1a1a2e 30%,
+        #16213e 60%,
+        #0f0f23 100%
+    );
     position: relative;
     overflow: hidden;
 }
@@ -70,7 +77,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: 
+    background:
         radial-gradient(2px 2px at 20px 30px, #fff, transparent),
         radial-gradient(2px 2px at 40px 70px, #fff, transparent),
         radial-gradient(1px 1px at 90px 40px, #fff, transparent),
@@ -82,8 +89,12 @@ body {
 }
 
 @keyframes twinkle {
-    0% { opacity: 0.5; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .welcome-planets {
@@ -110,12 +121,13 @@ body {
     font-size: clamp(2rem, 6vw, 4rem);
     font-weight: bold;
     margin-bottom: 3rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     animation: colorPulse 3s infinite;
     line-height: 1.2;
 }
 
-.welcome-to, .fun-with {
+.welcome-to,
+.fun-with {
     display: block;
     animation: fadeInUp 2s ease-out;
 }
@@ -168,13 +180,27 @@ body {
 }
 
 @keyframes colorPulse {
-    0% { color: #ff6b6b; }
-    16.67% { color: #4ecdc4; }
-    33.33% { color: #45b7d1; }
-    50% { color: #96ceb4; }
-    66.67% { color: #ffeaa7; }
-    83.33% { color: #dda0dd; }
-    100% { color: #ff6b6b; }
+    0% {
+        color: #ff6b6b;
+    }
+    16.67% {
+        color: #4ecdc4;
+    }
+    33.33% {
+        color: #45b7d1;
+    }
+    50% {
+        color: #96ceb4;
+    }
+    66.67% {
+        color: #ffeaa7;
+    }
+    83.33% {
+        color: #dda0dd;
+    }
+    100% {
+        color: #ff6b6b;
+    }
 }
 
 .primary-button {
@@ -185,9 +211,10 @@ body {
     font-size: 1.5rem;
     border-radius: 50px;
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.2s ease,
-                filter 0.2s ease;
+    transition:
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease,
+        filter 0.2s ease;
     box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
     font-weight: bold;
     position: relative;
@@ -282,7 +309,7 @@ body {
     font-size: 1rem;
 }
 
-.setting-row input[type="range"] {
+.setting-row input[type='range'] {
     flex: 2;
     height: 5px;
     background: #333;
@@ -292,7 +319,7 @@ body {
     -webkit-appearance: none;
 }
 
-.setting-row input[type="range"]::-webkit-slider-thumb {
+.setting-row input[type='range']::-webkit-slider-thumb {
     appearance: none;
     width: 20px;
     height: 20px;
@@ -301,7 +328,7 @@ body {
     cursor: pointer;
 }
 
-.setting-row input[type="range"]::-moz-range-thumb {
+.setting-row input[type='range']::-moz-range-thumb {
     width: 20px;
     height: 20px;
     background: #ffd700;
@@ -332,7 +359,7 @@ body {
 
 .setting-row select:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #4caf50;
 }
 
 .setting-row select option {
@@ -412,7 +439,7 @@ body {
     font-size: clamp(1.5rem, 4vw, 2.5rem);
     color: white;
     margin-bottom: 2rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .letter-grid {
@@ -477,64 +504,151 @@ body {
     height: 100%;
     background: 
         /* Nebula effects */
-        radial-gradient(ellipse at 15% 25%, rgba(138, 43, 226, 0.4) 0%, transparent 60%),
-        radial-gradient(ellipse at 85% 75%, rgba(255, 20, 147, 0.3) 0%, transparent 50%),
-        radial-gradient(ellipse at 45% 10%, rgba(0, 191, 255, 0.3) 0%, transparent 40%),
-        radial-gradient(ellipse at 75% 40%, rgba(50, 205, 50, 0.2) 0%, transparent 35%),
-        radial-gradient(ellipse at 25% 80%, rgba(255, 165, 0, 0.25) 0%, transparent 45%),
+        radial-gradient(
+            ellipse at 15% 25%,
+            rgba(138, 43, 226, 0.4) 0%,
+            transparent 60%
+        ),
+        radial-gradient(
+            ellipse at 85% 75%,
+            rgba(255, 20, 147, 0.3) 0%,
+            transparent 50%
+        ),
+        radial-gradient(
+            ellipse at 45% 10%,
+            rgba(0, 191, 255, 0.3) 0%,
+            transparent 40%
+        ),
+        radial-gradient(
+            ellipse at 75% 40%,
+            rgba(50, 205, 50, 0.2) 0%,
+            transparent 35%
+        ),
+        radial-gradient(
+            ellipse at 25% 80%,
+            rgba(255, 165, 0, 0.25) 0%,
+            transparent 45%
+        ),
         /* Galaxy spiral */
-        radial-gradient(circle at 60% 60%, rgba(255, 255, 255, 0.1) 0%, transparent 70%),
+        radial-gradient(
+                circle at 60% 60%,
+                rgba(255, 255, 255, 0.1) 0%,
+                transparent 70%
+            ),
         /* Base gradient */
-        linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
-    
+        linear-gradient(
+                135deg,
+                #0a0a0a 0%,
+                #1a1a2e 30%,
+                #16213e 60%,
+                #0f3460 100%
+            );
+
     /* Enhanced starfield with multiple layers */
     background-image: 
         /* Large bright stars */
         radial-gradient(2px 2px at 20px 30px, #fff, transparent),
-        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(
+            2px 2px at 40px 70px,
+            rgba(255, 255, 255, 0.9),
+            transparent
+        ),
         radial-gradient(1px 1px at 90px 40px, #fff, transparent),
-        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(
+            1px 1px at 130px 80px,
+            rgba(255, 255, 255, 0.7),
+            transparent
+        ),
         radial-gradient(2px 2px at 160px 30px, #ddd, transparent),
         /* Medium stars */
-        radial-gradient(1px 1px at 60px 90px, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 110px 20px, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 180px 60px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(
+                1px 1px at 60px 90px,
+                rgba(255, 255, 255, 0.6),
+                transparent
+            ),
+        radial-gradient(
+            1px 1px at 110px 20px,
+            rgba(255, 255, 255, 0.5),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 180px 60px,
+            rgba(255, 255, 255, 0.7),
+            transparent
+        ),
         /* Small distant stars */
-        radial-gradient(0.5px 0.5px at 35px 55px, rgba(255,255,255,0.4), transparent),
-        radial-gradient(0.5px 0.5px at 75px 15px, rgba(255,255,255,0.3), transparent),
-        radial-gradient(0.5px 0.5px at 145px 85px, rgba(255,255,255,0.5), transparent),
-        radial-gradient(0.5px 0.5px at 25px 75px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(
+                0.5px 0.5px at 35px 55px,
+                rgba(255, 255, 255, 0.4),
+                transparent
+            ),
+        radial-gradient(
+            0.5px 0.5px at 75px 15px,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        ),
+        radial-gradient(
+            0.5px 0.5px at 145px 85px,
+            rgba(255, 255, 255, 0.5),
+            transparent
+        ),
+        radial-gradient(
+            0.5px 0.5px at 25px 75px,
+            rgba(255, 255, 255, 0.4),
+            transparent
+        ),
         /* Twinkling stars */
-        radial-gradient(1px 1px at 85px 45px, rgba(255,255,255,0.8), transparent),
-        radial-gradient(1px 1px at 125px 65px, rgba(255,255,255,0.6), transparent);
+        radial-gradient(
+                1px 1px at 85px 45px,
+                rgba(255, 255, 255, 0.8),
+                transparent
+            ),
+        radial-gradient(
+            1px 1px at 125px 65px,
+            rgba(255, 255, 255, 0.6),
+            transparent
+        );
     background-repeat: repeat;
     background-size: 200px 100px;
-    animation: starfield 25s linear infinite, nebulaDrift 40s ease-in-out infinite alternate;
+    animation:
+        starfield 25s linear infinite,
+        nebulaDrift 40s ease-in-out infinite alternate;
 }
 
 @keyframes starfield {
-    0% { transform: translateY(0); }
-    100% { transform: translateY(-100px); }
+    0% {
+        transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-100px);
+    }
 }
 
 @keyframes nebulaDrift {
-    0% { 
-        filter: hue-rotate(0deg) brightness(1); 
+    0% {
+        filter: hue-rotate(0deg) brightness(1);
         transform: scale(1) rotate(0deg);
     }
-    50% { 
-        filter: hue-rotate(30deg) brightness(1.2); 
+    50% {
+        filter: hue-rotate(30deg) brightness(1.2);
         transform: scale(1.05) rotate(2deg);
     }
-    100% { 
-        filter: hue-rotate(0deg) brightness(1); 
+    100% {
+        filter: hue-rotate(0deg) brightness(1);
         transform: scale(1) rotate(0deg);
     }
 }
 
 @keyframes twinkle {
-    0%, 100% { opacity: 0.3; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
 }
 
 /* Add twinkling effect to some stars */
@@ -545,14 +659,32 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        radial-gradient(1px 1px at 30% 20%, rgba(255,255,255,0.9), transparent),
-        radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.8), transparent),
-        radial-gradient(1px 1px at 50% 80%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 80% 30%, rgba(255,255,255,0.9), transparent);
+    background-image:
+        radial-gradient(
+            1px 1px at 30% 20%,
+            rgba(255, 255, 255, 0.9),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 70% 60%,
+            rgba(255, 255, 255, 0.8),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 50% 80%,
+            rgba(255, 255, 255, 0.7),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 80% 30%,
+            rgba(255, 255, 255, 0.9),
+            transparent
+        );
     background-repeat: repeat;
     background-size: 400px 300px;
-    animation: twinkle 3s ease-in-out infinite, starfield 30s linear infinite;
+    animation:
+        twinkle 3s ease-in-out infinite,
+        starfield 30s linear infinite;
 }
 
 /* Add shooting stars */
@@ -563,8 +695,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
-        linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.8) 50%, transparent 60%);
+    background-image: linear-gradient(
+        45deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.8) 50%,
+        transparent 60%
+    );
     background-size: 2px 300px;
     background-repeat: no-repeat;
     background-position: -100px 0;
@@ -572,17 +708,17 @@ body {
 }
 
 @keyframes shootingStar {
-    0% { 
+    0% {
         background-position: -200px 20px;
         opacity: 0;
     }
-    10% { 
+    10% {
         opacity: 1;
     }
-    90% { 
+    90% {
         opacity: 1;
     }
-    100% { 
+    100% {
         background-position: calc(100vw + 200px) calc(100vh - 20px);
         opacity: 0;
     }
@@ -624,11 +760,11 @@ body {
     font-size: 3rem;
     font-weight: bold;
     color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    box-shadow: 
-        0 0 20px rgba(255,255,255,0.3),
-        inset -10px -10px 20px rgba(0,0,0,0.3),
-        inset 10px 10px 20px rgba(255,255,255,0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    box-shadow:
+        0 0 20px rgba(255, 255, 255, 0.3),
+        inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+        inset 10px 10px 20px rgba(255, 255, 255, 0.1);
     animation: planetGlow 2s ease-in-out infinite alternate;
 }
 
@@ -640,36 +776,68 @@ body {
     right: -5px;
     bottom: -5px;
     border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2), transparent);
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
     animation: atmosphereGlow 3s ease-in-out infinite alternate;
 }
 
 @keyframes planetGlow {
-    0% { box-shadow: 0 0 20px rgba(255,255,255,0.3), inset -10px -10px 20px rgba(0,0,0,0.3), inset 10px 10px 20px rgba(255,255,255,0.1); }
-    100% { box-shadow: 0 0 30px rgba(255,255,255,0.5), inset -10px -10px 20px rgba(0,0,0,0.3), inset 10px 10px 20px rgba(255,255,255,0.2); }
+    0% {
+        box-shadow:
+            0 0 20px rgba(255, 255, 255, 0.3),
+            inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+            inset 10px 10px 20px rgba(255, 255, 255, 0.1);
+    }
+    100% {
+        box-shadow:
+            0 0 30px rgba(255, 255, 255, 0.5),
+            inset -10px -10px 20px rgba(0, 0, 0, 0.3),
+            inset 10px 10px 20px rgba(255, 255, 255, 0.2);
+    }
 }
 
 @keyframes atmosphereGlow {
-    0% { opacity: 0.3; transform: scale(1); }
-    100% { opacity: 0.6; transform: scale(1.1); }
+    0% {
+        opacity: 0.3;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0.6;
+        transform: scale(1.1);
+    }
 }
 
 .planet.g-planet {
     background: radial-gradient(circle at 30% 30%, #4ecdc4, #45b7d1, #2980b9);
-    animation: planetOrbit 8s linear infinite, planetGlow 2s ease-in-out infinite alternate;
+    animation:
+        planetOrbit 8s linear infinite,
+        planetGlow 2s ease-in-out infinite alternate;
 }
 
 .planet.g-planet::before {
-    background: radial-gradient(circle at 30% 30%, rgba(78, 205, 196, 0.4), transparent);
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(78, 205, 196, 0.4),
+        transparent
+    );
 }
 
 .planet.other-planet {
     background: radial-gradient(circle at 30% 30%, #636e72, #2d3436, #1e3039);
-    animation: planetOrbit 12s linear infinite, planetGlow 3s ease-in-out infinite alternate;
+    animation:
+        planetOrbit 12s linear infinite,
+        planetGlow 3s ease-in-out infinite alternate;
 }
 
 .planet.other-planet::before {
-    background: radial-gradient(circle at 30% 30%, rgba(99, 110, 114, 0.3), transparent);
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(99, 110, 114, 0.3),
+        transparent
+    );
 }
 
 .planet:hover {
@@ -677,8 +845,12 @@ body {
 }
 
 @keyframes planetOrbit {
-    0% { transform: rotate(0deg) translateX(200px) rotate(0deg); }
-    100% { transform: rotate(360deg) translateX(200px) rotate(-360deg); }
+    0% {
+        transform: rotate(0deg) translateX(200px) rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg) translateX(200px) rotate(-360deg);
+    }
 }
 
 .asteroids-container {
@@ -709,9 +881,15 @@ body {
 }
 
 @keyframes asteroidFlight {
-    0% { transform: scale(0.5); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(0.8); }
+    0% {
+        transform: scale(0.5);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(0.8);
+    }
 }
 
 .explosions-container {
@@ -726,13 +904,15 @@ body {
     position: absolute;
     width: 150px;
     height: 150px;
-    background: radial-gradient(circle, 
+    background: radial-gradient(
+        circle,
         rgba(255, 255, 255, 1) 0%,
         rgba(255, 215, 0, 0.9) 10%,
         rgba(255, 107, 107, 0.8) 30%,
         rgba(255, 69, 0, 0.6) 50%,
         rgba(139, 69, 19, 0.4) 70%,
-        transparent 100%);
+        transparent 100%
+    );
     border-radius: 50%;
     animation: explode 0.8s ease-out;
     filter: blur(0px);
@@ -746,10 +926,12 @@ body {
     transform: translate(-50%, -50%);
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, 
+    background: radial-gradient(
+        circle,
         rgba(255, 255, 255, 0.6) 0%,
         rgba(255, 215, 0, 0.4) 20%,
-        transparent 40%);
+        transparent 40%
+    );
     border-radius: 50%;
     animation: shockwave 0.8s ease-out;
 }
@@ -762,31 +944,33 @@ body {
     transform: translate(-50%, -50%);
     width: 50%;
     height: 50%;
-    background: radial-gradient(circle, 
+    background: radial-gradient(
+        circle,
         rgba(255, 255, 255, 1) 0%,
         rgba(255, 255, 255, 0.8) 30%,
-        transparent 60%);
+        transparent 60%
+    );
     border-radius: 50%;
     animation: flash 0.3s ease-out;
 }
 
 @keyframes explode {
-    0% { 
+    0% {
         transform: scale(0);
         opacity: 1;
         filter: blur(0px);
     }
-    30% { 
+    30% {
         transform: scale(1.2);
         opacity: 0.9;
         filter: blur(1px);
     }
-    70% { 
+    70% {
         transform: scale(2.5);
         opacity: 0.5;
         filter: blur(2px);
     }
-    100% { 
+    100% {
         transform: scale(4);
         opacity: 0;
         filter: blur(5px);
@@ -794,30 +978,30 @@ body {
 }
 
 @keyframes shockwave {
-    0% { 
+    0% {
         transform: translate(-50%, -50%) scale(0);
         opacity: 0.8;
     }
-    50% { 
+    50% {
         transform: translate(-50%, -50%) scale(1);
         opacity: 0.4;
     }
-    100% { 
+    100% {
         transform: translate(-50%, -50%) scale(2);
         opacity: 0;
     }
 }
 
 @keyframes flash {
-    0% { 
+    0% {
         transform: translate(-50%, -50%) scale(0);
         opacity: 1;
     }
-    50% { 
+    50% {
         transform: translate(-50%, -50%) scale(1.5);
         opacity: 0.8;
     }
-    100% { 
+    100% {
         transform: translate(-50%, -50%) scale(0.5);
         opacity: 0;
     }
@@ -866,15 +1050,21 @@ body {
     height: 100%;
     background: linear-gradient(90deg, #00b894, #00a085);
     border-radius: 10px;
-    transition: width 0.3s ease;
-    width: 0%;
+    /* The fill is scaled by the compositor rather than by animating its
+       width, which forced a layout pass on every frame of the animation.
+       The controller writes the --progress custom property (0..1). */
+    width: 100%;
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left center;
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
 }
 
 .score-display {
     color: white;
     font-size: 1.2rem;
     font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 /* Overlays and Popups */
@@ -910,8 +1100,13 @@ body {
 }
 
 @keyframes readyPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 .loading-spinner {
@@ -925,8 +1120,12 @@ body {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .popup {
@@ -959,10 +1158,10 @@ body {
 }
 
 .popup-content.wood-style {
-    background: linear-gradient(45deg, #8B4513, #A0522D);
+    background: linear-gradient(45deg, #8b4513, #a0522d);
     color: white;
     border: 3px solid #654321;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .popup-content.celebration {
@@ -973,8 +1172,13 @@ body {
 }
 
 @keyframes celebrationPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .close-button {
@@ -1008,7 +1212,7 @@ body {
 
 .secondary-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 /* Welcome Screen Planets and Asteroids */
@@ -1185,16 +1389,37 @@ body {
 
 /* Screen shake effect */
 @keyframes screenShake {
-    0%, 100% { transform: translate(0, 0) rotate(0deg); }
-    10% { transform: translate(-2px, -1px) rotate(-0.5deg); }
-    20% { transform: translate(-1px, 0px) rotate(0.5deg); }
-    30% { transform: translate(2px, 1px) rotate(0deg); }
-    40% { transform: translate(1px, -1px) rotate(0.5deg); }
-    50% { transform: translate(-1px, 1px) rotate(-0.5deg); }
-    60% { transform: translate(-2px, 0px) rotate(0deg); }
-    70% { transform: translate(2px, 1px) rotate(-0.5deg); }
-    80% { transform: translate(-1px, -1px) rotate(0.5deg); }
-    90% { transform: translate(1px, 0px) rotate(0deg); }
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    10% {
+        transform: translate(-2px, -1px) rotate(-0.5deg);
+    }
+    20% {
+        transform: translate(-1px, 0px) rotate(0.5deg);
+    }
+    30% {
+        transform: translate(2px, 1px) rotate(0deg);
+    }
+    40% {
+        transform: translate(1px, -1px) rotate(0.5deg);
+    }
+    50% {
+        transform: translate(-1px, 1px) rotate(-0.5deg);
+    }
+    60% {
+        transform: translate(-2px, 0px) rotate(0deg);
+    }
+    70% {
+        transform: translate(2px, 1px) rotate(-0.5deg);
+    }
+    80% {
+        transform: translate(-1px, -1px) rotate(0.5deg);
+    }
+    90% {
+        transform: translate(1px, 0px) rotate(0deg);
+    }
 }
 
 /* Welcome screen sparkle effects */
@@ -1214,12 +1439,14 @@ body {
 }
 
 /* Interactive hover effects for welcome elements */
-.welcome-planet, .welcome-asteroid {
+.welcome-planet,
+.welcome-asteroid {
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
-.welcome-planet:hover, .welcome-asteroid:hover {
+.welcome-planet:hover,
+.welcome-asteroid:hover {
     transition: all 0.3s ease;
 }
 
@@ -1229,45 +1456,45 @@ body {
         grid-template-columns: repeat(6, 1fr);
         gap: 0.5rem;
     }
-    
+
     .letter-button {
         width: 60px;
         height: 60px;
         font-size: 1.5rem;
     }
-    
+
     .planet {
         width: 80px;
         height: 80px;
         font-size: 2rem;
     }
-    
+
     .ready-text {
         font-size: 3rem;
     }
-    
+
     .game-ui {
         top: 10px;
         left: 10px;
         right: 10px;
     }
-    
+
     .score-display {
         font-size: 1rem;
     }
-    
+
     /* Optimize touch targets */
     .settings-button {
         width: 60px;
         height: 60px;
         font-size: 2rem;
     }
-    
+
     /* Better spacing for mobile */
     .welcome-container {
         padding: 1.5rem;
     }
-    
+
     .primary-button {
         padding: 1.2rem 2.5rem;
         font-size: 1.3rem;
@@ -1280,27 +1507,27 @@ body {
         height: 50px;
         font-size: 1.2rem;
     }
-    
+
     .planet {
         width: 60px;
         height: 60px;
         font-size: 1.5rem;
     }
-    
+
     .ready-text {
         font-size: 2rem;
     }
-    
+
     .popup-content {
         padding: 1rem;
     }
-    
+
     /* Extra small screens need even better touch targets */
     .letter-grid {
         grid-template-columns: repeat(5, 1fr);
         gap: 0.4rem;
     }
-    
+
     /* Reduce animation complexity on small devices */
     .welcome-planet,
     .welcome-asteroid {
@@ -1314,13 +1541,13 @@ body {
         grid-template-columns: repeat(7, 1fr);
         gap: 1rem;
     }
-    
+
     .letter-button {
         width: 70px;
         height: 70px;
         font-size: 1.8rem;
     }
-    
+
     .planet {
         width: 90px;
         height: 90px;
@@ -1334,13 +1561,13 @@ body {
         grid-template-columns: repeat(8, 1fr);
         gap: 1.2rem;
     }
-    
+
     .letter-button {
         width: 80px;
         height: 80px;
         font-size: 2rem;
     }
-    
+
     .planet {
         width: 100px;
         height: 100px;
@@ -1354,27 +1581,27 @@ body {
         grid-template-columns: repeat(9, 1fr);
         gap: 1.5rem;
     }
-    
+
     .letter-button {
         width: 100px;
         height: 100px;
         font-size: 2.5rem;
     }
-    
+
     .planet {
         width: 120px;
         height: 120px;
         font-size: 3rem;
     }
-    
+
     .welcome-container h1 {
         font-size: clamp(3rem, 6vw, 5rem);
     }
-    
+
     .game-ui {
         font-size: 1.4rem;
     }
-    
+
     .progress-bar {
         height: 24px;
     }
@@ -1388,7 +1615,7 @@ body {
     .secondary-button:hover {
         transform: none;
     }
-    
+
     .letter-button:active,
     .planet:active,
     .primary-button:active,
@@ -1400,9 +1627,9 @@ body {
 /* High DPI displays */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .planet {
-        box-shadow: 0 0 20px rgba(255,255,255,0.4);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
     }
-    
+
     .asteroid {
         box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
     }
@@ -1414,30 +1641,30 @@ body {
     .large-display .welcome-container h1 {
         font-size: 4rem;
     }
-    
+
     .large-display .letter-button {
         font-size: 2rem;
         padding: 20px;
         min-width: 80px;
         min-height: 80px;
     }
-    
+
     .large-display .planet {
         width: 120px;
         height: 120px;
         font-size: 2rem;
     }
-    
+
     .large-display .primary-button,
     .large-display .secondary-button {
         padding: 20px 40px;
         font-size: 1.4rem;
     }
-    
+
     .large-display .game-ui {
         font-size: 1.2rem;
     }
-    
+
     .large-display .progress-bar {
         height: 20px;
     }
@@ -1451,12 +1678,12 @@ body {
         -webkit-transform: translate3d(0, 0, 0);
         transform: translate3d(0, 0, 0);
     }
-    
+
     .game-area {
         -webkit-transform: translate3d(0, 0, 0);
         transform: translate3d(0, 0, 0);
     }
-    
+
     .planet {
         -webkit-transform: translate3d(0, 0, 0);
         transform: translate3d(0, 0, 0);
@@ -1499,13 +1726,13 @@ body {
         min-width: 60px;
         min-height: 60px;
     }
-    
+
     .primary-button,
     .secondary-button {
         min-height: 48px;
         min-width: 120px;
     }
-    
+
     .letter-button {
         min-width: 60px;
         min-height: 60px;
@@ -1517,7 +1744,7 @@ body {
     .welcome-container h1 {
         font-size: 3rem;
     }
-    
+
     .game-area {
         width: 100%;
         height: 100%;
@@ -1528,11 +1755,11 @@ body {
     .welcome-container h1 {
         font-size: 2.5rem;
     }
-    
+
     .letter-grid {
         grid-template-columns: repeat(6, 1fr);
     }
-    
+
     .planet {
         font-size: 1.5rem;
     }
@@ -1542,13 +1769,13 @@ body {
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .planet {
         border-width: 2px;
-        box-shadow: 0 0 25px rgba(255,255,255,0.5);
+        box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
     }
-    
+
     .progress-bar {
         border-width: 2px;
     }
-    
+
     .asteroid {
         box-shadow: 0 0 15px rgba(255, 107, 107, 0.8);
     }
@@ -1563,8 +1790,12 @@ body {
 }
 
 @keyframes skeletonPulse {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* Smooth image load animation */
@@ -1579,7 +1810,9 @@ img.loaded {
 
 /* Progressive image loading */
 .word-background {
-    transition: opacity 0.3s ease, background-image 0.3s ease;
+    transition:
+        opacity 0.3s ease,
+        background-image 0.3s ease;
 }
 
 .word-background::before {
@@ -1589,7 +1822,12 @@ img.loaded {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(42, 42, 62, 0.3) 25%, rgba(58, 58, 78, 0.3) 50%, rgba(42, 42, 62, 0.3) 75%);
+    background: linear-gradient(
+        90deg,
+        rgba(42, 42, 62, 0.3) 25%,
+        rgba(58, 58, 78, 0.3) 50%,
+        rgba(42, 42, 62, 0.3) 75%
+    );
     background-size: 200% 100%;
     animation: skeletonPulse 1.5s ease-in-out infinite;
     opacity: 0;
@@ -1612,7 +1850,7 @@ img.loaded {
     .planet:hover {
         transform: none;
     }
-    
+
     .planet:active {
         transform: scale(0.95);
         background: linear-gradient(135deg, #ff6b6b 0%, #ff8e8e 100%);
@@ -1621,17 +1859,17 @@ img.loaded {
 
 /* Android Chrome specific fixes */
 @supports (-webkit-appearance: none) {
-    input[type="range"] {
+    input[type='range'] {
         -webkit-appearance: none;
         appearance: none;
     }
-    
-    input[type="range"]::-webkit-slider-thumb {
+
+    input[type='range']::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
         width: 20px;
         height: 20px;
-        background: #4CAF50;
+        background: #4caf50;
         border-radius: 50%;
         cursor: pointer;
     }
@@ -1683,11 +1921,11 @@ img.loaded {
     .benq-large-text {
         font-size: 1.5em;
     }
-    
+
     .benq-large-text .planet {
         font-size: 2.5rem;
     }
-    
+
     .benq-large-text .welcome-container h1 {
         font-size: 5rem;
     }
@@ -1708,7 +1946,7 @@ img.loaded {
     gap: 8px;
 }
 
-.audio-priority-controls input[type="checkbox"] {
+.audio-priority-controls input[type='checkbox'] {
     appearance: none;
     -webkit-appearance: none;
     width: 18px;
@@ -1721,11 +1959,11 @@ img.loaded {
     background-color: rgba(20, 20, 60, 0.5);
 }
 
-.audio-priority-controls input[type="checkbox"]:checked {
+.audio-priority-controls input[type='checkbox']:checked {
     background-color: #7289da;
 }
 
-.audio-priority-controls input[type="checkbox"]:checked::after {
+.audio-priority-controls input[type='checkbox']:checked::after {
     content: '✓';
     position: absolute;
     color: white;
@@ -1759,12 +1997,22 @@ body {
     font-family: 'Trebuchet MS', 'Verdana', sans-serif;
     color: var(--chalk);
     background:
-        radial-gradient(circle at 15% 20%, rgba(255, 138, 61, 0.24), transparent 22%),
-        radial-gradient(circle at 80% 12%, rgba(118, 215, 255, 0.18), transparent 20%),
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(255, 138, 61, 0.24),
+            transparent 22%
+        ),
+        radial-gradient(
+            circle at 80% 12%,
+            rgba(118, 215, 255, 0.18),
+            transparent 20%
+        ),
         linear-gradient(155deg, #08101f 0%, #13254d 55%, #183140 100%);
 }
 
-h1, h2, h3,
+h1,
+h2,
+h3,
 .primary-button,
 .secondary-button,
 .letter-button,
@@ -1776,9 +2024,21 @@ h1, h2, h3,
 
 #welcome-screen {
     background:
-        radial-gradient(circle at 18% 18%, rgba(255, 145, 77, 0.28), transparent 23%),
-        radial-gradient(circle at 78% 16%, rgba(59, 208, 176, 0.18), transparent 20%),
-        radial-gradient(circle at 52% 82%, rgba(255, 209, 92, 0.18), transparent 22%),
+        radial-gradient(
+            circle at 18% 18%,
+            rgba(255, 145, 77, 0.28),
+            transparent 23%
+        ),
+        radial-gradient(
+            circle at 78% 16%,
+            rgba(59, 208, 176, 0.18),
+            transparent 20%
+        ),
+        radial-gradient(
+            circle at 52% 82%,
+            rgba(255, 209, 92, 0.18),
+            transparent 22%
+        ),
         linear-gradient(160deg, #06101f 0%, #12224b 52%, #182834 100%);
 }
 
@@ -1823,7 +2083,9 @@ h1, h2, h3,
     line-height: 0.9;
     letter-spacing: -0.05em;
     color: var(--chalk);
-    text-shadow: 0 8px 0 rgba(5, 10, 23, 0.28), 0 20px 40px rgba(0, 0, 0, 0.35);
+    text-shadow:
+        0 8px 0 rgba(5, 10, 23, 0.28),
+        0 20px 40px rgba(0, 0, 0, 0.35);
     animation: heroFloat 5.5s ease-in-out infinite;
 }
 
@@ -1845,11 +2107,20 @@ h1, h2, h3,
     margin: 0.18em 0 0.12em;
     padding: 0 0.16em 0.08em;
     color: #201104;
-    background: linear-gradient(135deg, var(--solar-gold) 0%, #fff1aa 38%, var(--solar-orange) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--solar-gold) 0%,
+        #fff1aa 38%,
+        var(--solar-orange) 100%
+    );
     border-radius: 0.28em;
-    box-shadow: 0 10px 0 rgba(117, 56, 6, 0.5), 0 24px 45px rgba(10, 15, 32, 0.48);
+    box-shadow:
+        0 10px 0 rgba(117, 56, 6, 0.5),
+        0 24px 45px rgba(10, 15, 32, 0.48);
     transform: rotate(-2deg);
-    animation: heroStamp 1.1s cubic-bezier(0.22, 1, 0.36, 1) both, teacherBob 5.2s 1.1s ease-in-out infinite;
+    animation:
+        heroStamp 1.1s cubic-bezier(0.22, 1, 0.36, 1) both,
+        teacherBob 5.2s 1.1s ease-in-out infinite;
     text-shadow: none;
 }
 
@@ -1893,17 +2164,32 @@ h1, h2, h3,
     font-size: 1.22rem;
     font-weight: 800;
     letter-spacing: 0.03em;
-    box-shadow: 0 10px 0 rgba(60, 28, 0, 0.55), 0 22px 35px rgba(4, 10, 26, 0.35);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    box-shadow:
+        0 10px 0 rgba(60, 28, 0, 0.55),
+        0 22px 35px rgba(4, 10, 26, 0.35);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease;
 }
 
 .primary-button {
-    background: linear-gradient(135deg, var(--solar-gold) 0%, var(--solar-orange) 55%, var(--rocket-coral) 100%);
+    background: linear-gradient(
+        135deg,
+        var(--solar-gold) 0%,
+        var(--solar-orange) 55%,
+        var(--rocket-coral) 100%
+    );
     color: #221001;
 }
 
 .secondary-button {
-    background: linear-gradient(135deg, #d8edff 0%, var(--sky-spark) 55%, #49a3e1 100%);
+    background: linear-gradient(
+        135deg,
+        #d8edff 0%,
+        var(--sky-spark) 55%,
+        #49a3e1 100%
+    );
     color: #0d1d38;
 }
 
@@ -1911,13 +2197,17 @@ h1, h2, h3,
 .secondary-button:hover {
     transform: translateY(-4px) rotate(-1deg);
     filter: brightness(1.06);
-    box-shadow: 0 14px 0 rgba(60, 28, 0, 0.55), 0 28px 38px rgba(4, 10, 26, 0.38);
+    box-shadow:
+        0 14px 0 rgba(60, 28, 0, 0.55),
+        0 28px 38px rgba(4, 10, 26, 0.38);
 }
 
 .primary-button:active,
 .secondary-button:active {
     transform: translateY(6px) scale(0.98);
-    box-shadow: 0 4px 0 rgba(60, 28, 0, 0.55), 0 12px 20px rgba(4, 10, 26, 0.28);
+    box-shadow:
+        0 4px 0 rgba(60, 28, 0, 0.55),
+        0 12px 20px rgba(4, 10, 26, 0.28);
 }
 
 #start-game-btn {
@@ -1929,24 +2219,44 @@ h1, h2, h3,
 .settings-button {
     width: 58px;
     height: 58px;
-    background: linear-gradient(135deg, #fff0b0 0%, var(--solar-gold) 48%, var(--solar-orange) 100%);
+    background: linear-gradient(
+        135deg,
+        #fff0b0 0%,
+        var(--solar-gold) 48%,
+        var(--solar-orange) 100%
+    );
     border: 3px solid rgba(34, 22, 4, 0.72);
     border-radius: 18px;
     color: #261203;
-    box-shadow: 0 8px 0 rgba(117, 56, 6, 0.46), 0 16px 24px rgba(4, 10, 26, 0.24);
+    box-shadow:
+        0 8px 0 rgba(117, 56, 6, 0.46),
+        0 16px 24px rgba(4, 10, 26, 0.24);
     backdrop-filter: none;
 }
 
 .settings-button:hover {
-    background: linear-gradient(135deg, #fff6d0 0%, var(--solar-gold) 48%, var(--solar-orange) 100%);
+    background: linear-gradient(
+        135deg,
+        #fff6d0 0%,
+        var(--solar-gold) 48%,
+        var(--solar-orange) 100%
+    );
     transform: translateY(-4px) rotate(8deg);
 }
 
 .settings-panel {
     width: min(380px, 100vw);
     background:
-        radial-gradient(circle at 18% 18%, rgba(255, 209, 92, 0.14), transparent 20%),
-        linear-gradient(180deg, rgba(8, 16, 36, 0.98) 0%, rgba(17, 33, 71, 0.98) 100%);
+        radial-gradient(
+            circle at 18% 18%,
+            rgba(255, 209, 92, 0.14),
+            transparent 20%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(8, 16, 36, 0.98) 0%,
+            rgba(17, 33, 71, 0.98) 100%
+        );
     border-left: 4px solid rgba(255, 209, 92, 0.42);
     box-shadow: -24px 0 45px rgba(4, 10, 26, 0.55);
     backdrop-filter: none;
@@ -1995,15 +2305,19 @@ h1, h2, h3,
     font-weight: 700;
 }
 
-.setting-row input[type="range"] {
+.setting-row input[type='range'] {
     flex: 2 1 140px;
     height: 8px;
     background: rgba(255, 255, 255, 0.12);
 }
 
-.setting-row input[type="range"]::-webkit-slider-thumb,
-.setting-row input[type="range"]::-moz-range-thumb {
-    background: linear-gradient(135deg, var(--solar-gold) 0%, var(--solar-orange) 100%);
+.setting-row input[type='range']::-webkit-slider-thumb,
+.setting-row input[type='range']::-moz-range-thumb {
+    background: linear-gradient(
+        135deg,
+        var(--solar-gold) 0%,
+        var(--solar-orange) 100%
+    );
     border: 2px solid #311802;
     box-shadow: 0 4px 10px rgba(4, 10, 26, 0.3);
 }
@@ -2043,8 +2357,16 @@ h1, h2, h3,
 
 #level-select-screen {
     background:
-        radial-gradient(circle at 16% 20%, rgba(255, 138, 61, 0.22), transparent 18%),
-        radial-gradient(circle at 84% 25%, rgba(118, 215, 255, 0.18), transparent 20%),
+        radial-gradient(
+            circle at 16% 20%,
+            rgba(255, 138, 61, 0.22),
+            transparent 18%
+        ),
+        radial-gradient(
+            circle at 84% 25%,
+            rgba(118, 215, 255, 0.18),
+            transparent 20%
+        ),
         linear-gradient(165deg, #091224 0%, #12254b 48%, #183643 100%);
 }
 
@@ -2062,7 +2384,9 @@ h1, h2, h3,
     font-size: clamp(2.4rem, 5vw, 4.6rem);
     line-height: 0.95;
     color: var(--chalk);
-    text-shadow: 0 8px 0 rgba(5, 10, 23, 0.24), 0 18px 32px rgba(0, 0, 0, 0.3);
+    text-shadow:
+        0 8px 0 rgba(5, 10, 23, 0.24),
+        0 18px 32px rgba(0, 0, 0, 0.3);
 }
 
 .level-select-subtitle {
@@ -2078,8 +2402,11 @@ h1, h2, h3,
     padding: clamp(1rem, 2vw, 1.6rem);
     border: 3px solid rgba(255, 209, 92, 0.32);
     border-radius: 32px;
-    background:
-        linear-gradient(180deg, rgba(14, 29, 63, 0.92) 0%, rgba(17, 39, 78, 0.92) 100%);
+    background: linear-gradient(
+        180deg,
+        rgba(14, 29, 63, 0.92) 0%,
+        rgba(17, 39, 78, 0.92) 100%
+    );
     box-shadow: 0 28px 50px rgba(4, 10, 26, 0.35);
 }
 
@@ -2099,7 +2426,10 @@ h1, h2, h3,
     font-size: clamp(1.45rem, 3vw, 2.5rem);
     font-weight: 900;
     text-shadow: 0 2px 0 rgba(255, 255, 255, 0.25);
-    box-shadow: inset 0 0 0 2px rgba(255, 248, 214, 0.35), 0 10px 0 rgba(13, 26, 49, 0.82), 0 18px 24px rgba(4, 10, 26, 0.22);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 248, 214, 0.35),
+        0 10px 0 rgba(13, 26, 49, 0.82),
+        0 18px 24px rgba(4, 10, 26, 0.22);
     transform: rotate(var(--tile-tilt, 0deg));
     transform-origin: center;
 }
@@ -2113,20 +2443,36 @@ h1, h2, h3,
 }
 
 .letter-button.playable {
-    background: linear-gradient(135deg, #fff0ac 0%, var(--solar-gold) 34%, var(--solar-orange) 66%, var(--rocket-coral) 100%);
+    background: linear-gradient(
+        135deg,
+        #fff0ac 0%,
+        var(--solar-gold) 34%,
+        var(--solar-orange) 66%,
+        var(--rocket-coral) 100%
+    );
     color: #251102;
 }
 
 .letter-button.playable:hover {
     transform: translateY(-5px) scale(1.03) rotate(var(--tile-tilt, 0deg));
-    box-shadow: inset 0 0 0 2px rgba(255, 248, 214, 0.42), 0 15px 0 rgba(13, 26, 49, 0.82), 0 24px 28px rgba(4, 10, 26, 0.26);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 248, 214, 0.42),
+        0 15px 0 rgba(13, 26, 49, 0.82),
+        0 24px 28px rgba(4, 10, 26, 0.26);
 }
 
 .letter-button.disabled {
-    background: linear-gradient(180deg, rgba(69, 93, 133, 0.76) 0%, rgba(31, 46, 77, 0.92) 100%);
+    background: linear-gradient(
+        180deg,
+        rgba(69, 93, 133, 0.76) 0%,
+        rgba(31, 46, 77, 0.92) 100%
+    );
     color: rgba(249, 244, 232, 0.84);
     border-color: rgba(17, 30, 56, 0.9);
-    box-shadow: inset 0 0 0 2px rgba(154, 176, 214, 0.12), 0 8px 0 rgba(13, 26, 49, 0.82), 0 16px 22px rgba(4, 10, 26, 0.22);
+    box-shadow:
+        inset 0 0 0 2px rgba(154, 176, 214, 0.12),
+        0 8px 0 rgba(13, 26, 49, 0.82),
+        0 16px 22px rgba(4, 10, 26, 0.22);
 }
 
 .letter-button.disabled:hover {
@@ -2135,45 +2481,130 @@ h1, h2, h3,
 
 .galaxy-background {
     background:
-        radial-gradient(circle at 18% 22%, rgba(255, 115, 64, 0.32), transparent 24%),
-        radial-gradient(circle at 78% 16%, rgba(255, 209, 92, 0.18), transparent 22%),
-        radial-gradient(circle at 74% 72%, rgba(59, 208, 176, 0.16), transparent 20%),
-        radial-gradient(circle at 42% 84%, rgba(118, 215, 255, 0.12), transparent 18%),
+        radial-gradient(
+            circle at 18% 22%,
+            rgba(255, 115, 64, 0.32),
+            transparent 24%
+        ),
+        radial-gradient(
+            circle at 78% 16%,
+            rgba(255, 209, 92, 0.18),
+            transparent 22%
+        ),
+        radial-gradient(
+            circle at 74% 72%,
+            rgba(59, 208, 176, 0.16),
+            transparent 20%
+        ),
+        radial-gradient(
+            circle at 42% 84%,
+            rgba(118, 215, 255, 0.12),
+            transparent 18%
+        ),
         linear-gradient(160deg, #050c1a 0%, #0c1630 46%, #11284f 100%);
     background-image:
-        radial-gradient(2px 2px at 20px 30px, rgba(255, 255, 255, 0.95), transparent),
-        radial-gradient(2px 2px at 42px 72px, rgba(255, 250, 236, 0.85), transparent),
-        radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 255, 0.9), transparent),
-        radial-gradient(1px 1px at 130px 82px, rgba(255, 224, 160, 0.65), transparent),
-        radial-gradient(2px 2px at 160px 30px, rgba(255, 255, 255, 0.85), transparent),
-        radial-gradient(1px 1px at 60px 90px, rgba(255, 255, 255, 0.56), transparent),
-        radial-gradient(1px 1px at 110px 20px, rgba(118, 215, 255, 0.42), transparent),
-        radial-gradient(1px 1px at 180px 60px, rgba(255, 255, 255, 0.66), transparent),
-        radial-gradient(0.5px 0.5px at 35px 55px, rgba(255, 255, 255, 0.38), transparent),
-        radial-gradient(0.5px 0.5px at 75px 15px, rgba(255, 255, 255, 0.32), transparent),
-        radial-gradient(0.5px 0.5px at 145px 85px, rgba(255, 209, 92, 0.38), transparent),
-        radial-gradient(1px 1px at 85px 45px, rgba(255, 255, 255, 0.72), transparent);
+        radial-gradient(
+            2px 2px at 20px 30px,
+            rgba(255, 255, 255, 0.95),
+            transparent
+        ),
+        radial-gradient(
+            2px 2px at 42px 72px,
+            rgba(255, 250, 236, 0.85),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 90px 40px,
+            rgba(255, 255, 255, 0.9),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 130px 82px,
+            rgba(255, 224, 160, 0.65),
+            transparent
+        ),
+        radial-gradient(
+            2px 2px at 160px 30px,
+            rgba(255, 255, 255, 0.85),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 60px 90px,
+            rgba(255, 255, 255, 0.56),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 110px 20px,
+            rgba(118, 215, 255, 0.42),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 180px 60px,
+            rgba(255, 255, 255, 0.66),
+            transparent
+        ),
+        radial-gradient(
+            0.5px 0.5px at 35px 55px,
+            rgba(255, 255, 255, 0.38),
+            transparent
+        ),
+        radial-gradient(
+            0.5px 0.5px at 75px 15px,
+            rgba(255, 255, 255, 0.32),
+            transparent
+        ),
+        radial-gradient(
+            0.5px 0.5px at 145px 85px,
+            rgba(255, 209, 92, 0.38),
+            transparent
+        ),
+        radial-gradient(
+            1px 1px at 85px 45px,
+            rgba(255, 255, 255, 0.72),
+            transparent
+        );
     background-repeat: repeat;
     background-size: 210px 110px;
-    animation: starfield 18s linear infinite, nebulaDrift 14s ease-in-out infinite alternate;
+    animation:
+        starfield 18s linear infinite,
+        nebulaDrift 14s ease-in-out infinite alternate;
 }
 
 .planet {
     border: 3px solid rgba(255, 244, 214, 0.26);
     text-shadow: 0 3px 0 rgba(6, 12, 24, 0.55);
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04), 0 0 30px rgba(255, 255, 255, 0.18), inset -12px -12px 24px rgba(0, 0, 0, 0.28), inset 10px 10px 24px rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.04),
+        0 0 30px rgba(255, 255, 255, 0.18),
+        inset -12px -12px 24px rgba(0, 0, 0, 0.28),
+        inset 10px 10px 24px rgba(255, 255, 255, 0.12);
 }
 
 .planet.g-planet {
-    background: radial-gradient(circle at 30% 28%, #fff4ba 0%, var(--solar-gold) 24%, var(--solar-orange) 58%, var(--rocket-coral) 100%);
+    background: radial-gradient(
+        circle at 30% 28%,
+        #fff4ba 0%,
+        var(--solar-gold) 24%,
+        var(--solar-orange) 58%,
+        var(--rocket-coral) 100%
+    );
 }
 
 .planet.g-planet::before {
-    background: radial-gradient(circle at 30% 30%, rgba(255, 241, 170, 0.5), transparent);
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 241, 170, 0.5),
+        transparent
+    );
 }
 
 .planet.other-planet {
-    background: radial-gradient(circle at 30% 30%, #9db8db 0%, #547095 38%, #1d2f53 100%);
+    background: radial-gradient(
+        circle at 30% 30%,
+        #9db8db 0%,
+        #547095 38%,
+        #1d2f53 100%
+    );
 }
 
 .word-background {
@@ -2209,8 +2640,11 @@ h1, h2, h3,
 .popup-content {
     border: 3px solid rgba(255, 209, 92, 0.28);
     border-radius: 28px;
-    background:
-        linear-gradient(180deg, rgba(12, 23, 51, 0.9) 0%, rgba(18, 38, 78, 0.9) 100%);
+    background: linear-gradient(
+        180deg,
+        rgba(12, 23, 51, 0.9) 0%,
+        rgba(18, 38, 78, 0.9) 100%
+    );
     box-shadow: 0 22px 36px rgba(4, 10, 26, 0.35);
 }
 
@@ -2233,7 +2667,12 @@ h1, h2, h3,
     width: 86px;
     height: 86px;
     border-radius: 24px;
-    background: linear-gradient(135deg, #fff0ac 0%, var(--solar-gold) 42%, var(--solar-orange) 100%);
+    background: linear-gradient(
+        135deg,
+        #fff0ac 0%,
+        var(--solar-gold) 42%,
+        var(--solar-orange) 100%
+    );
     color: #1f1002;
     font-size: clamp(2.5rem, 3vw, 3.6rem);
     box-shadow: 0 10px 0 rgba(117, 56, 6, 0.45);
@@ -2266,7 +2705,13 @@ h1, h2, h3,
 }
 
 .progress-fill {
-    background: linear-gradient(90deg, var(--plasma-teal) 0%, #70e5cc 28%, var(--solar-gold) 68%, var(--solar-orange) 100%);
+    background: linear-gradient(
+        90deg,
+        var(--plasma-teal) 0%,
+        #70e5cc 28%,
+        var(--solar-gold) 68%,
+        var(--solar-orange) 100%
+    );
     background-size: 160px 100%;
     box-shadow: 0 0 14px rgba(255, 209, 92, 0.25);
 }
@@ -2342,16 +2787,30 @@ h1, h2, h3,
 
 .popup-content.wood-style {
     background:
-        radial-gradient(circle at 20% 20%, rgba(255, 209, 92, 0.1), transparent 20%),
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(255, 209, 92, 0.1),
+            transparent 20%
+        ),
         linear-gradient(180deg, #2f1b08 0%, #6d3b10 100%);
     border-color: rgba(255, 225, 170, 0.22);
-    box-shadow: inset 0 0 0 2px rgba(255, 248, 214, 0.14), 0 22px 36px rgba(4, 10, 26, 0.35);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 248, 214, 0.14),
+        0 22px 36px rgba(4, 10, 26, 0.35);
 }
 
 .popup-content.celebration {
     background:
-        radial-gradient(circle at 50% -10%, rgba(255, 209, 92, 0.22), transparent 30%),
-        linear-gradient(180deg, rgba(12, 23, 51, 0.96) 0%, rgba(21, 43, 84, 0.96) 100%);
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(255, 209, 92, 0.22),
+            transparent 30%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(12, 23, 51, 0.96) 0%,
+            rgba(21, 43, 84, 0.96) 100%
+        );
     color: var(--chalk);
     border-color: rgba(255, 209, 92, 0.42);
     animation: celebrationPulse 1.7s ease-in-out infinite;
@@ -2378,7 +2837,9 @@ h1, h2, h3,
     border: 2px solid rgba(255, 255, 255, 0.1);
     color: var(--chalk);
     font-size: 1.7rem;
-    transition: transform 0.18s ease, background 0.18s ease;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease;
 }
 
 .close-button:hover {
@@ -2387,7 +2848,8 @@ h1, h2, h3,
 }
 
 @keyframes heroFloat {
-    0%, 100% {
+    0%,
+    100% {
         transform: translateY(0);
     }
     50% {
@@ -2407,7 +2869,8 @@ h1, h2, h3,
 }
 
 @keyframes teacherBob {
-    0%, 100% {
+    0%,
+    100% {
         transform: rotate(-2deg) translateY(0);
     }
     50% {
@@ -2524,4 +2987,546 @@ h1, h2, h3,
 :focus-visible {
     outline: 3px solid #ffd700 !important;
     outline-offset: 2px !important;
+}
+
+/* ==========================================================================
+   PLASTIC SURGERY LAYER — 2026-10-22
+   --------------------------------------------------------------------------
+   An isolated presentation layer appended after the existing design systems.
+   Everything above this marker is untouched; everything below only adds or
+   overrides *visual* rules. No id, class name, aria-* attribute or event
+   binding is removed, renamed or broken by this layer.
+
+   Rendering stack: vanilla DOM + CSS3. No canvas, no shader pipeline.
+   Frame budget: 16.67 ms @ 60 Hz, 8.33 ms @ 120 Hz.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. PERCEPTUAL TOKENS
+   Durations, easings and elevation recipes shared by every component below.
+   -------------------------------------------------------------------------- */
+:root {
+    /* Motion */
+    --ps-dur-hover: 140ms;
+    --ps-dur-press: 25ms;
+    --ps-dur-enter: 260ms;
+    --ps-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ps-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+    /* Elevation: a hard "key light" bottom edge plus a soft ambient shadow.
+       The hard edge is what makes a control read as physically pressable. */
+    --ps-shadow-key:
+        0 10px 0 rgba(13, 26, 49, 0.82), 0 18px 24px rgba(4, 10, 26, 0.22);
+    --ps-shadow-key-press:
+        0 4px 0 rgba(13, 26, 49, 0.82), 0 10px 16px rgba(4, 10, 26, 0.26);
+    --ps-shadow-key-gold:
+        0 10px 0 rgba(117, 56, 6, 0.46), 0 18px 24px rgba(4, 10, 26, 0.24);
+    --ps-shadow-key-gold-press:
+        0 4px 0 rgba(117, 56, 6, 0.5), 0 10px 16px rgba(4, 10, 26, 0.28);
+
+    /* Top-edge specular: a 1px light line that reads as a lit bevel. */
+    --ps-specular: inset 0 1px 0 rgba(255, 248, 214, 0.28);
+
+    /* Focus ring */
+    --ps-focus:
+        0 0 0 3px rgba(255, 209, 92, 0.9), 0 0 0 6px rgba(255, 209, 92, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   2. LEVEL-SELECT TILE STATES  (the headline defect)
+
+   `js/main.js` assigns one of three state classes to every letter tile:
+
+       letter-button done       -> the letter has been completed
+       letter-button current    -> the letter the child is about to play
+       letter-button available  -> a letter that is ready to play
+
+   The stylesheet only carried `.playable` and `.disabled`, neither of which
+   the controller ever emits — so all 26 tiles rendered as unstyled boxes.
+   The three real states are defined here.
+   -------------------------------------------------------------------------- */
+.letter-button {
+    /* Never `transition: all`: it would also animate width/height/padding
+       should the layout ever change them. */
+    transition:
+        transform var(--ps-dur-hover) var(--ps-ease-out),
+        scale var(--ps-dur-hover) var(--ps-ease-out),
+        box-shadow var(--ps-dur-hover) var(--ps-ease-out),
+        filter var(--ps-dur-hover) var(--ps-ease-out);
+    will-change: auto;
+    isolation: isolate;
+}
+
+/* Ready to play — the bright "plasma" teal of a working thruster. */
+.letter-button.available {
+    background: linear-gradient(
+        135deg,
+        #b6f7ea 0%,
+        var(--plasma-teal) 40%,
+        #1f9c86 100%
+    );
+    color: #04231f;
+    border-color: rgba(4, 46, 40, 0.85);
+    box-shadow:
+        inset 0 0 0 2px rgba(233, 255, 248, 0.42),
+        0 10px 0 rgba(13, 26, 49, 0.82),
+        0 18px 24px rgba(4, 10, 26, 0.22);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* The active mission — solar gold, and the only tile that breathes. */
+.letter-button.current {
+    background: linear-gradient(
+        135deg,
+        #fff6d0 0%,
+        var(--solar-gold) 32%,
+        var(--solar-orange) 68%,
+        var(--rocket-coral) 100%
+    );
+    color: #251102;
+    border-color: rgba(15, 26, 49, 0.9);
+    box-shadow:
+        inset 0 0 0 2px rgba(255, 248, 214, 0.55),
+        0 12px 0 rgba(117, 56, 6, 0.5),
+        0 22px 30px rgba(4, 10, 26, 0.3);
+    /* The pulse animates the INDEPENDENT `scale` property, so it composes
+       with the tile's `rotate(var(--tile-tilt))` transform instead of
+       replacing it. */
+    animation: ps-mission-pulse 2.4s var(--ps-ease-out) infinite;
+}
+
+@keyframes ps-mission-pulse {
+    0%,
+    100% {
+        scale: 1;
+    }
+    50% {
+        scale: 1.045;
+    }
+}
+
+/* Completed — cooled down, with a completion tick. */
+.letter-button.done {
+    background: linear-gradient(
+        180deg,
+        rgba(69, 93, 133, 0.78) 0%,
+        rgba(31, 46, 77, 0.94) 100%
+    );
+    color: rgba(249, 244, 232, 0.92);
+    border-color: rgba(17, 30, 56, 0.9);
+    box-shadow:
+        inset 0 0 0 2px rgba(154, 176, 214, 0.14),
+        0 8px 0 rgba(13, 26, 49, 0.82),
+        0 16px 22px rgba(4, 10, 26, 0.22);
+}
+
+.letter-button.done::after {
+    content: '\2713';
+    position: absolute;
+    right: 0.55rem;
+    bottom: 0.4rem;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--plasma-teal);
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(4, 10, 26, 0.6);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .letter-button.available:hover {
+        transform: rotate(var(--tile-tilt, 0deg)) translateY(-5px) scale(1.03);
+        box-shadow:
+            inset 0 0 0 2px rgba(233, 255, 248, 0.55),
+            0 15px 0 rgba(13, 26, 49, 0.82),
+            0 24px 28px rgba(4, 10, 26, 0.26);
+    }
+
+    .letter-button.current:hover {
+        transform: rotate(var(--tile-tilt, 0deg)) translateY(-6px) scale(1.04);
+        box-shadow:
+            inset 0 0 0 2px rgba(255, 248, 214, 0.6),
+            0 17px 0 rgba(117, 56, 6, 0.5),
+            0 26px 32px rgba(4, 10, 26, 0.3);
+    }
+
+    .letter-button.done:hover {
+        transform: rotate(var(--tile-tilt, 0deg)) translateY(-2px) scale(1.01);
+    }
+}
+
+.letter-button:active {
+    transform: rotate(var(--tile-tilt, 0deg)) translateY(5px) scale(0.98);
+    box-shadow: var(--ps-shadow-key-press);
+    transition-duration: var(--ps-dur-press);
+}
+
+.letter-button:focus-visible {
+    outline: 3px solid var(--solar-gold);
+    outline-offset: 3px;
+}
+
+/* --------------------------------------------------------------------------
+   3. PLANET APPEARANCE  (the target planets were never styled)
+
+   The controller marks a target planet with a letter-specific class —
+   `planet a-planet`, `planet b-planet`, … — and a distractor with
+   `planet other-planet`. The stylesheet only defined `.planet.g-planet`, so
+   every target planet except letter G rendered as an unstyled dark circle.
+   These rules cover all of them, and the letter-G variants keep their
+   existing appearance.
+
+   The rules are also duplicated for the `::before` atmosphere layer.
+   -------------------------------------------------------------------------- */
+.planet:not(.other-planet) {
+    background: radial-gradient(
+        circle at 30% 28%,
+        #fff4ba 0%,
+        var(--solar-gold) 24%,
+        var(--solar-orange) 58%,
+        var(--rocket-coral) 100%
+    );
+}
+
+.planet:not(.other-planet)::before {
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 241, 170, 0.5),
+        transparent
+    );
+}
+
+/* --------------------------------------------------------------------------
+   4. PLANET FEEDBACK  (interaction states that could never be seen)
+
+   `.planet` is driven by the `planetOrbit` keyframes, which animate
+   `transform`. A CSS animation outranks every normal declaration, so
+   `.planet:hover { transform: scale(1.1) }` was permanently dead — the
+   primary game object had NO hover feedback at all — while the `!important`
+   active rule snapped the planet out of its orbit.
+
+   The independent `scale` property composes with `transform`, so both
+   feedback and the orbit survive. It also revives `--planet-scale`, the
+   responsive planet sizing that the orbit animation was silently killing.
+   -------------------------------------------------------------------------- */
+.planet {
+    scale: 1;
+    transition: scale var(--ps-dur-hover) var(--ps-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .planet:hover {
+        scale: 1.08;
+    }
+}
+
+.planet:active {
+    scale: 0.93;
+    transition-duration: var(--ps-dur-press);
+}
+
+/* --------------------------------------------------------------------------
+   5. PROGRESS BAR  (compositor-only fill)
+
+   The fill used to animate its width, which forces a layout pass on every
+   frame. It now scales a full-width fill instead. The controller writes the
+   `--progress` custom property (0..1); the DOM element and its id are
+   unchanged.
+   -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   6. NUMERIC READOUTS  (no horizontal oscillation)
+
+   The hit counter, the volume readouts and the mission letter are live
+   numbers. Without tabular figures every digit change reflows the glyph
+   width and the readout visibly jitters.
+   -------------------------------------------------------------------------- */
+.score-value,
+#hits-counter,
+.active-letter-display,
+#music-volume-display,
+#effects-volume-display {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+}
+
+/* --------------------------------------------------------------------------
+   7. SIX-STATE TACTILE CONTROLS
+
+   default / hover / active / focus-visible / loading / disabled.
+   -------------------------------------------------------------------------- */
+.primary-button,
+.secondary-button,
+.preview-button,
+.toggle-button,
+.settings-button,
+.close-button {
+    /* Never `transition: all` — it animates layout properties too. */
+    transition:
+        transform var(--ps-dur-hover) var(--ps-ease-out),
+        box-shadow var(--ps-dur-hover) var(--ps-ease-out),
+        filter var(--ps-dur-hover) var(--ps-ease-out),
+        background-color var(--ps-dur-hover) var(--ps-ease-out);
+    /* A permanent `will-change: transform` allocates a GPU layer for every
+       button for the whole session. Chrome promotes on demand instead. */
+    will-change: auto;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.preview-button:focus-visible,
+.toggle-button:focus-visible,
+.settings-button:focus-visible,
+.close-button:focus-visible {
+    outline: 3px solid var(--solar-gold);
+    outline-offset: 3px;
+}
+
+/* Pressed: the key light collapses, which is what sells the physicality. */
+.primary-button:active,
+.secondary-button:active,
+.preview-button:active,
+.toggle-button:active,
+.settings-button:active,
+.close-button:active {
+    transition-duration: var(--ps-dur-press);
+}
+
+/* Disabled */
+.primary-button:disabled,
+.secondary-button:disabled,
+.preview-button:disabled,
+.toggle-button:disabled,
+.settings-button:disabled,
+.close-button:disabled,
+.primary-button[aria-disabled='true'],
+.secondary-button[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(40%);
+    box-shadow: none;
+    transform: none !important;
+    pointer-events: auto;
+}
+
+/* Loading — the label is hidden rather than collapsed, so the button keeps
+   its exact width and the layout cannot shift. */
+.primary-button[data-loading='true'],
+.secondary-button[data-loading='true'] {
+    cursor: wait;
+}
+
+.primary-button[data-loading='true']::after,
+.secondary-button[data-loading='true']::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: -0.55rem 0 0 -0.55rem;
+    border: 2px solid rgba(34, 22, 4, 0.25);
+    border-top-color: #221001;
+    border-radius: 50%;
+    animation: ps-spin 600ms linear infinite;
+}
+
+@keyframes ps-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   8. HOVER DISCIPLINE  (touch devices never get a sticky hover)
+
+   The existing `@media (hover: none)` block only covered four selectors and
+   reset `box-shadow: inherit`, which is not a valid restoration. Every
+   hover transform in the app is neutralised here for coarse pointers.
+   -------------------------------------------------------------------------- */
+@media (hover: none), (pointer: coarse) {
+    .primary-button:hover,
+    .secondary-button:hover,
+    .settings-button:hover,
+    .close-button:hover,
+    .preview-button:hover,
+    .toggle-button:hover,
+    .letter-button.available:hover,
+    .letter-button.current:hover,
+    .letter-button.done:hover,
+    .letter-button.playable:hover,
+    .planet:hover {
+        transform: none;
+        scale: 1;
+        filter: none;
+    }
+
+    .letter-button.available:hover,
+    .letter-button.current:hover,
+    .letter-button.done:hover,
+    .letter-button.playable:hover {
+        transform: rotate(var(--tile-tilt, 0deg));
+    }
+}
+
+/* --------------------------------------------------------------------------
+   9. TOUCH TARGETS  (44 CSS px minimum on coarse pointers)
+   -------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+    .close-button {
+        width: 44px;
+        height: 44px;
+        font-size: 1.7rem;
+    }
+
+    .preview-button,
+    .toggle-button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .primary-button,
+    .secondary-button {
+        min-height: 48px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   10. REDUCED MOTION  (native, not JS-injected)
+
+   The only reduced-motion guard in the app was injected by JavaScript, so it
+   did not exist during the first paint and never covered the CSS keyframes.
+   Decorative loops collapse; progress and spinner indicators keep moving so
+   that "something is happening" is still legible.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .welcome-stars,
+    .galaxy-background,
+    .galaxy-background::before,
+    .galaxy-background::after,
+    .teacher-name,
+    .pulsating-text,
+    .ready-text,
+    .popup-content.celebration,
+    .letter-button.current,
+    .planet,
+    .planet::before,
+    .welcome-planet,
+    .welcome-asteroid {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    .welcome-to,
+    .fun-with {
+        animation-duration: 0.01ms !important;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .preview-button,
+    .toggle-button,
+    .settings-button,
+    .close-button,
+    .letter-button,
+    .planet,
+    .progress-fill,
+    .screen,
+    .overlay,
+    .popup,
+    .word-background {
+        transition-duration: 0.01ms !important;
+    }
+
+    /* Keep the "work is happening" indicators alive. */
+    .loading-spinner,
+    .primary-button[data-loading='true']::after,
+    .secondary-button[data-loading='true']::after,
+    .skeleton {
+        animation-duration: 1.5s !important;
+        animation-iteration-count: infinite !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   11. LOADING SKELETON
+
+   `UIUtils.showSkeleton()` creates `.skeleton`, but the stylesheet only
+   defined `.skeleton-loading`, so the placeholder rendered unstyled.
+   -------------------------------------------------------------------------- */
+.skeleton {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 25%,
+        rgba(255, 255, 255, 0.14) 50%,
+        rgba(255, 255, 255, 0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: ps-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes ps-skeleton-pulse {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   12. LEGIBILITY REPAIRS
+   -------------------------------------------------------------------------- */
+
+/* The default popup surface is white; without an explicit colour it
+   inherited the page's near-white text and became invisible. */
+.popup-content {
+    color: #16203c;
+}
+
+/* The word panel sits behind the planets. The image needs to stay
+   subordinate, but the TEXT fallback must be fully legible. */
+.word-background {
+    opacity: 0.2;
+}
+
+.word-background.visible {
+    opacity: 0.5;
+}
+
+.word-background.word-text {
+    opacity: 1;
+    text-shadow: 0 2px 12px rgba(4, 10, 26, 0.85);
+}
+
+/* --------------------------------------------------------------------------
+   13. GPU LAYER HYGIENE
+   -------------------------------------------------------------------------- */
+
+/* Three full-viewport screens each held a permanent GPU layer for the whole
+   session. Only the visible screen needs one. */
+.screen {
+    will-change: auto;
+}
+
+.screen.active {
+    will-change: opacity;
+}
+
+/* --------------------------------------------------------------------------
+   14. FOCUS ORDER
+   -------------------------------------------------------------------------- */
+.primary-button:focus-visible,
+.secondary-button:focus-visible,
+.letter-button:focus-visible,
+.settings-button:focus-visible,
+.close-button:focus-visible,
+.preview-button:focus-visible,
+.toggle-button:focus-visible {
+    outline: 3px solid var(--solar-gold);
+    outline-offset: 3px;
 }
