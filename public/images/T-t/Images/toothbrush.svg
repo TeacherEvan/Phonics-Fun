@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="T is for toothbrush">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="22" cy="311" r="2.1" fill="#fff" opacity="0.64"/><circle cx="390" cy="133" r="1.1" fill="#fff" opacity="0.35"/><circle cx="121" cy="403" r="1.6" fill="#fff" opacity="0.44"/><circle cx="327" cy="46" r="1.7" fill="#fff" opacity="0.53"/><circle cx="360" cy="253" r="1.5" fill="#fff" opacity="0.40"/><circle cx="312" cy="42" r="2.3" fill="#fff" opacity="0.62"/><circle cx="335" cy="99" r="1.5" fill="#fff" opacity="0.60"/><circle cx="398" cy="164" r="2.1" fill="#fff" opacity="0.47"/><circle cx="99" cy="419" r="1.5" fill="#fff" opacity="0.35"/><circle cx="320" cy="84" r="1.9" fill="#fff" opacity="0.32"/><circle cx="478" cy="363" r="1.6" fill="#fff" opacity="0.26"/><circle cx="77" cy="53" r="1.2" fill="#fff" opacity="0.47"/><circle cx="84" cy="455" r="1.8" fill="#fff" opacity="0.58"/><circle cx="302" cy="473" r="1.5" fill="#fff" opacity="0.53"/><circle cx="303" cy="319" r="2.3" fill="#fff" opacity="0.29"/><circle cx="340" cy="96" r="2.1" fill="#fff" opacity="0.56"/><circle cx="325" cy="157" r="1.4" fill="#fff" opacity="0.53"/><circle cx="217" cy="9" r="2.2" fill="#fff" opacity="0.51"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">T</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">toothbrush</text>
+</svg>

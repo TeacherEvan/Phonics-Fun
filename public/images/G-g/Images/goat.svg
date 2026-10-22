@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="G is for goat">
+  <defs>
+    <radialGradient id="frame" cx="0.5" cy="0.5" r="0.7">
+      <stop offset="0" stop-color="#0c1630" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#frame)"/>
+  <image x="26" y="26" width="460" height="460"
+         preserveAspectRatio="xMidYMid meet"
+         xlink:href="G-g/Images/goat-clipart-md(1).png" href="G-g/Images/goat-clipart-md(1).png"/>
+  <rect x="8" y="8" width="496" height="496" rx="40" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.35" stroke-width="4"/>
+</svg>

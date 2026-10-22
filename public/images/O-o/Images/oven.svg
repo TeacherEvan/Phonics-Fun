@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="O is for oven">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="56" cy="459" r="1.7" fill="#fff" opacity="0.60"/><circle cx="426" cy="123" r="1.1" fill="#fff" opacity="0.57"/><circle cx="427" cy="194" r="1.5" fill="#fff" opacity="0.36"/><circle cx="490" cy="440" r="2.2" fill="#fff" opacity="0.26"/><circle cx="172" cy="212" r="2.4" fill="#fff" opacity="0.49"/><circle cx="229" cy="46" r="1.2" fill="#fff" opacity="0.32"/><circle cx="345" cy="274" r="1.3" fill="#fff" opacity="0.34"/><circle cx="490" cy="489" r="1.6" fill="#fff" opacity="0.29"/><circle cx="189" cy="275" r="2.3" fill="#fff" opacity="0.36"/><circle cx="352" cy="162" r="1.8" fill="#fff" opacity="0.37"/><circle cx="143" cy="397" r="1.2" fill="#fff" opacity="0.31"/><circle cx="467" cy="358" r="1.6" fill="#fff" opacity="0.32"/><circle cx="141" cy="11" r="1.2" fill="#fff" opacity="0.27"/><circle cx="164" cy="358" r="1.1" fill="#fff" opacity="0.41"/><circle cx="378" cy="456" r="1.2" fill="#fff" opacity="0.54"/><circle cx="79" cy="471" r="2.4" fill="#fff" opacity="0.38"/><circle cx="442" cy="424" r="2.1" fill="#fff" opacity="0.63"/><circle cx="96" cy="256" r="2.4" fill="#fff" opacity="0.42"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">O</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">oven</text>
+</svg>

@@ -5,7 +5,8 @@
  */
 
 import { getWords } from './letter-data.js';
-import { imageDirFor } from './asset-paths.js';
+import { imagePathCandidates } from './asset-paths.js';
+import { loadFirstAvailableImage } from './image-loader.js';
 import { debounce as sharedDebounce } from './utils.js';
 
 class PerformanceUtils {
@@ -283,11 +284,6 @@ class PerformanceUtils {
      */
     preloadLetterImages(letter, words = getWords(letter)) {
         return new Promise((resolve) => {
-            // Vite serves `public/` from the deploy root, so the asset lives
-            // under `/images/...`. The previous `Assets/images/...` path only
-            // resolved on the dev server and 404'd in production.
-            const imagePath = imageDirFor(letter);
-
             const images = (words || []).filter((word) => {
                 return !this.resourceCache.has(`${letter}-${word}`);
             });
@@ -315,21 +311,32 @@ class PerformanceUtils {
             PerformanceUtils.requestIdleCallback(() => {
                 images.forEach((word, index) => {
                     // Stagger image loading to avoid blocking
-                    setTimeout(() => {
-                        const img = new Image();
-                        img.onload = () => {
+                    setTimeout(async () => {
+                        // The SAME candidate list the gameplay display uses.
+                        // Building the URL here by hand is what made the
+                        // preload request a single .png path that 404'd for
+                        // every word, leaving the cache permanently empty.
+                        const result = await loadFirstAvailableImage(
+                            imagePathCandidates(letter, word),
+                        );
+
+                        if (result) {
                             console.log(`✅ Preloaded: ${letter}-${word}`);
-                            self.resourceCache.set(`${letter}-${word}`, img);
-                            checkComplete();
-                        };
-                        img.onerror = () => {
+                            // The resolved URL is stored alongside the image:
+                            // the first candidate is not necessarily the one
+                            // that loaded, and the display must render the
+                            // URL that actually resolved.
+                            self.resourceCache.set(`${letter}-${word}`, {
+                                url: result.url,
+                                image: result.image,
+                            });
+                        } else {
                             console.log(
                                 `⚠️ Failed to preload: ${letter}-${word}`,
                             );
                             self.resourceCache.delete(`${letter}-${word}`);
-                            checkComplete();
-                        };
-                        img.src = `${imagePath}${word}.png`;
+                        }
+                        checkComplete();
                     }, index * 100); // Stagger by 100ms
                 });
             });
@@ -343,10 +350,10 @@ class PerformanceUtils {
     }
 
     /**
-     * Get cached image for a letter-word combination
+     * Get the cached image for a letter-word combination
      * @param {string} letter - The letter
      * @param {string} word - The word
-     * @returns {HTMLImageElement|null} Cached image or null
+     * @returns {{url: string, image: HTMLImageElement}|null}
      */
     getCachedImage(letter, word) {
         return this.resourceCache.get(`${letter}-${word}`) || null;

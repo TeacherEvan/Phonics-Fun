@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="J is for jet">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="177" cy="490" r="1.3" fill="#fff" opacity="0.41"/><circle cx="91" cy="401" r="2.0" fill="#fff" opacity="0.48"/><circle cx="455" cy="165" r="2.2" fill="#fff" opacity="0.29"/><circle cx="123" cy="308" r="1.1" fill="#fff" opacity="0.63"/><circle cx="448" cy="341" r="1.7" fill="#fff" opacity="0.29"/><circle cx="259" cy="244" r="1.5" fill="#fff" opacity="0.52"/><circle cx="157" cy="469" r="2.1" fill="#fff" opacity="0.45"/><circle cx="40" cy="206" r="1.9" fill="#fff" opacity="0.57"/><circle cx="6" cy="454" r="1.9" fill="#fff" opacity="0.33"/><circle cx="81" cy="136" r="2.3" fill="#fff" opacity="0.59"/><circle cx="451" cy="224" r="1.7" fill="#fff" opacity="0.32"/><circle cx="479" cy="287" r="1.6" fill="#fff" opacity="0.27"/><circle cx="474" cy="117" r="1.0" fill="#fff" opacity="0.63"/><circle cx="155" cy="331" r="2.3" fill="#fff" opacity="0.49"/><circle cx="76" cy="1" r="2.1" fill="#fff" opacity="0.29"/><circle cx="197" cy="301" r="2.2" fill="#fff" opacity="0.57"/><circle cx="112" cy="231" r="2.0" fill="#fff" opacity="0.59"/><circle cx="447" cy="276" r="2.2" fill="#fff" opacity="0.50"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">J</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">jet</text>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="U is for ukulele">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="333" cy="211" r="2.4" fill="#fff" opacity="0.51"/><circle cx="122" cy="69" r="1.8" fill="#fff" opacity="0.29"/><circle cx="271" cy="166" r="2.0" fill="#fff" opacity="0.26"/><circle cx="451" cy="375" r="1.2" fill="#fff" opacity="0.28"/><circle cx="492" cy="350" r="2.0" fill="#fff" opacity="0.48"/><circle cx="476" cy="187" r="1.6" fill="#fff" opacity="0.34"/><circle cx="153" cy="175" r="1.2" fill="#fff" opacity="0.51"/><circle cx="55" cy="331" r="1.4" fill="#fff" opacity="0.33"/><circle cx="155" cy="26" r="1.6" fill="#fff" opacity="0.46"/><circle cx="230" cy="141" r="1.1" fill="#fff" opacity="0.33"/><circle cx="105" cy="155" r="1.5" fill="#fff" opacity="0.31"/><circle cx="72" cy="22" r="1.7" fill="#fff" opacity="0.61"/><circle cx="431" cy="504" r="2.0" fill="#fff" opacity="0.60"/><circle cx="218" cy="324" r="2.4" fill="#fff" opacity="0.60"/><circle cx="427" cy="422" r="2.0" fill="#fff" opacity="0.61"/><circle cx="300" cy="123" r="1.1" fill="#fff" opacity="0.27"/><circle cx="433" cy="353" r="1.4" fill="#fff" opacity="0.50"/><circle cx="495" cy="6" r="1.8" fill="#fff" opacity="0.61"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">U</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">ukulele</text>
+</svg>

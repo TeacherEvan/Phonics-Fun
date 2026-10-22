@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Z is for zebra">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="71" cy="193" r="2.0" fill="#fff" opacity="0.48"/><circle cx="311" cy="379" r="1.6" fill="#fff" opacity="0.62"/><circle cx="302" cy="26" r="1.5" fill="#fff" opacity="0.35"/><circle cx="301" cy="284" r="1.1" fill="#fff" opacity="0.53"/><circle cx="115" cy="380" r="1.1" fill="#fff" opacity="0.30"/><circle cx="416" cy="295" r="1.8" fill="#fff" opacity="0.42"/><circle cx="482" cy="224" r="1.2" fill="#fff" opacity="0.33"/><circle cx="109" cy="315" r="1.5" fill="#fff" opacity="0.30"/><circle cx="275" cy="206" r="1.2" fill="#fff" opacity="0.44"/><circle cx="312" cy="88" r="1.1" fill="#fff" opacity="0.40"/><circle cx="237" cy="486" r="2.3" fill="#fff" opacity="0.27"/><circle cx="128" cy="187" r="1.7" fill="#fff" opacity="0.53"/><circle cx="322" cy="15" r="1.7" fill="#fff" opacity="0.42"/><circle cx="205" cy="344" r="1.6" fill="#fff" opacity="0.40"/><circle cx="149" cy="322" r="2.1" fill="#fff" opacity="0.34"/><circle cx="5" cy="250" r="2.1" fill="#fff" opacity="0.43"/><circle cx="505" cy="506" r="1.1" fill="#fff" opacity="0.30"/><circle cx="215" cy="253" r="1.6" fill="#fff" opacity="0.31"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">Z</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">zebra</text>
+</svg>

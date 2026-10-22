@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="E is for engine">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="504" cy="76" r="2.0" fill="#fff" opacity="0.49"/><circle cx="158" cy="367" r="1.9" fill="#fff" opacity="0.36"/><circle cx="456" cy="350" r="2.0" fill="#fff" opacity="0.64"/><circle cx="96" cy="454" r="1.9" fill="#fff" opacity="0.46"/><circle cx="381" cy="441" r="1.8" fill="#fff" opacity="0.63"/><circle cx="254" cy="500" r="1.7" fill="#fff" opacity="0.45"/><circle cx="267" cy="4" r="1.3" fill="#fff" opacity="0.25"/><circle cx="497" cy="160" r="1.5" fill="#fff" opacity="0.36"/><circle cx="47" cy="511" r="1.1" fill="#fff" opacity="0.33"/><circle cx="299" cy="357" r="2.2" fill="#fff" opacity="0.54"/><circle cx="370" cy="454" r="2.2" fill="#fff" opacity="0.65"/><circle cx="487" cy="424" r="1.3" fill="#fff" opacity="0.48"/><circle cx="463" cy="305" r="2.1" fill="#fff" opacity="0.60"/><circle cx="33" cy="388" r="1.7" fill="#fff" opacity="0.59"/><circle cx="250" cy="341" r="2.3" fill="#fff" opacity="0.44"/><circle cx="173" cy="224" r="1.7" fill="#fff" opacity="0.27"/><circle cx="66" cy="37" r="1.7" fill="#fff" opacity="0.27"/><circle cx="486" cy="155" r="1.4" fill="#fff" opacity="0.58"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">E</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">engine</text>
+</svg>

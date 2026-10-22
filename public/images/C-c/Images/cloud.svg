@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="C is for cloud">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="106" cy="439" r="1.0" fill="#fff" opacity="0.28"/><circle cx="377" cy="350" r="2.3" fill="#fff" opacity="0.26"/><circle cx="279" cy="139" r="2.0" fill="#fff" opacity="0.26"/><circle cx="418" cy="362" r="1.3" fill="#fff" opacity="0.48"/><circle cx="485" cy="87" r="1.6" fill="#fff" opacity="0.54"/><circle cx="51" cy="97" r="1.2" fill="#fff" opacity="0.50"/><circle cx="406" cy="459" r="2.2" fill="#fff" opacity="0.46"/><circle cx="24" cy="10" r="2.2" fill="#fff" opacity="0.33"/><circle cx="432" cy="276" r="1.8" fill="#fff" opacity="0.52"/><circle cx="484" cy="119" r="2.0" fill="#fff" opacity="0.47"/><circle cx="146" cy="284" r="1.8" fill="#fff" opacity="0.57"/><circle cx="256" cy="278" r="1.3" fill="#fff" opacity="0.44"/><circle cx="173" cy="371" r="1.6" fill="#fff" opacity="0.58"/><circle cx="493" cy="105" r="1.8" fill="#fff" opacity="0.51"/><circle cx="222" cy="210" r="2.2" fill="#fff" opacity="0.65"/><circle cx="434" cy="88" r="1.8" fill="#fff" opacity="0.50"/><circle cx="486" cy="62" r="2.1" fill="#fff" opacity="0.46"/><circle cx="97" cy="297" r="1.8" fill="#fff" opacity="0.55"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">C</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">cloud</text>
+</svg>

@@ -13,9 +13,7 @@
 import { describe, it, expect } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
-import {
-    PHONICS_FUN_LETTER_DATA,
-} from '../../js/letter-data.js';
+import { PHONICS_FUN_LETTER_DATA } from '../../js/letter-data.js';
 import {
     imagePathFor,
     imagePathCandidates,
@@ -39,7 +37,9 @@ describe('P0-3: picture URLs address the served public/ tree', () => {
     it('uses the letter directory layout that actually exists', () => {
         for (const letter of Object.keys(PHONICS_FUN_LETTER_DATA)) {
             const dir = imageDirFor(letter);
-            expect(dir).toBe(`/images/${letter}-${letter.toLowerCase()}/Images/`);
+            expect(dir).toBe(
+                `/images/${letter}-${letter.toLowerCase()}/Images/`,
+            );
 
             // The directory may not exist for every letter yet, but when it
             // does it must be the one the code addresses.
@@ -62,7 +62,7 @@ describe('P0-3: picture URLs address the served public/ tree', () => {
         for (const [letter, word] of shipped) {
             const candidates = imagePathCandidates(letter, word);
             const found = candidates.some((url) =>
-                fs.existsSync(path.join(PUBLIC_DIR, url.replace(/^\//, '')))
+                fs.existsSync(path.join(PUBLIC_DIR, url.replace(/^\//, ''))),
             );
             expect(found).toBe(true);
         }
@@ -71,15 +71,34 @@ describe('P0-3: picture URLs address the served public/ tree', () => {
     it('offers a decorated alias for words whose artwork is not named <word>.png', () => {
         const candidates = imagePathCandidates('G', 'girl');
         expect(candidates.length).toBeGreaterThan(1);
-        expect(candidates[0]).toBe('/images/G-g/Images/girl.png');
-        expect(candidates.some((url) => url.includes('girl-clipart-lg.png'))).toBe(
-            true
-        );
+        expect(
+            candidates.some((url) => url.includes('girl-clipart-lg.png')),
+        ).toBe(true);
     });
 
-    it('keeps the canonical candidate first', () => {
+    it('puts the generated word card first, because one exists for every word', () => {
         const candidates = imagePathCandidates('A', 'apple');
-        expect(candidates[0]).toBe('/images/A-a/Images/apple.png');
+        expect(candidates[0]).toBe('/images/A-a/Images/apple.svg');
+        // The raster original and the decorated alias remain as fallbacks.
+        expect(candidates).toContain('/images/A-a/Images/apple.png');
+    });
+
+    it('every word in the curriculum has a card that resolves on disk', () => {
+        // The generator writes one card per word. This is the contract that
+        // stops the picture feature from being empty in production again.
+        const missing = [];
+        for (const [letter, words] of Object.entries(PHONICS_FUN_LETTER_DATA)) {
+            for (const word of words) {
+                const candidates = imagePathCandidates(letter, word);
+                const found = candidates.some((url) =>
+                    fs.existsSync(
+                        path.join(PUBLIC_DIR, url.replace(/^\//, '')),
+                    ),
+                );
+                if (!found) missing.push(`${letter}/${word}`);
+            }
+        }
+        expect(missing).toEqual([]);
     });
 });
 
@@ -90,7 +109,7 @@ describe('P0-3: sound URLs address the served public/ tree', () => {
             const url = soundPathFor(id);
             expect(url).toMatch(/^\/sounds\//);
             expect(
-                fs.existsSync(path.join(PUBLIC_DIR, url.replace(/^\//, '')))
+                fs.existsSync(path.join(PUBLIC_DIR, url.replace(/^\//, ''))),
             ).toBe(true);
         }
     });
@@ -109,7 +128,7 @@ describe('P0-3: sound URLs address the served public/ tree', () => {
 describe('P0-5: the service worker versions its cache per build', () => {
     const swSource = fs.readFileSync(
         path.resolve(process.cwd(), 'public/sw.js'),
-        'utf8'
+        'utf8',
     );
 
     it('stamps a build identifier into the cache name', () => {
@@ -125,6 +144,6 @@ describe('P0-5: the service worker versions its cache per build', () => {
 
     it('uses network-first for stable URLs and cache-first for hashed assets', () => {
         expect(swSource).toContain('isImmutableAsset');
-        expect(swSource).toContain("/assets/");
+        expect(swSource).toContain('/assets/');
     });
 });

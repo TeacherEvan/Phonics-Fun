@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="X is for xylophone">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="415" cy="438" r="1.6" fill="#fff" opacity="0.55"/><circle cx="294" cy="222" r="1.8" fill="#fff" opacity="0.37"/><circle cx="489" cy="368" r="2.2" fill="#fff" opacity="0.26"/><circle cx="138" cy="334" r="1.7" fill="#fff" opacity="0.41"/><circle cx="231" cy="63" r="1.1" fill="#fff" opacity="0.29"/><circle cx="354" cy="391" r="1.2" fill="#fff" opacity="0.27"/><circle cx="15" cy="387" r="1.5" fill="#fff" opacity="0.47"/><circle cx="89" cy="39" r="1.2" fill="#fff" opacity="0.46"/><circle cx="33" cy="477" r="1.8" fill="#fff" opacity="0.37"/><circle cx="483" cy="146" r="1.1" fill="#fff" opacity="0.41"/><circle cx="490" cy="360" r="1.7" fill="#fff" opacity="0.32"/><circle cx="274" cy="505" r="1.3" fill="#fff" opacity="0.50"/><circle cx="48" cy="133" r="1.5" fill="#fff" opacity="0.30"/><circle cx="403" cy="256" r="1.5" fill="#fff" opacity="0.46"/><circle cx="187" cy="347" r="1.3" fill="#fff" opacity="0.40"/><circle cx="193" cy="1" r="1.3" fill="#fff" opacity="0.48"/><circle cx="123" cy="482" r="1.7" fill="#fff" opacity="0.41"/><circle cx="485" cy="501" r="1.9" fill="#fff" opacity="0.64"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">X</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">xylophone</text>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="J is for jacket">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="305" cy="316" r="2.0" fill="#fff" opacity="0.51"/><circle cx="450" cy="501" r="1.4" fill="#fff" opacity="0.32"/><circle cx="470" cy="416" r="1.2" fill="#fff" opacity="0.59"/><circle cx="465" cy="90" r="1.8" fill="#fff" opacity="0.63"/><circle cx="299" cy="249" r="2.0" fill="#fff" opacity="0.33"/><circle cx="227" cy="430" r="1.9" fill="#fff" opacity="0.37"/><circle cx="487" cy="227" r="1.7" fill="#fff" opacity="0.45"/><circle cx="48" cy="116" r="1.8" fill="#fff" opacity="0.36"/><circle cx="484" cy="494" r="2.3" fill="#fff" opacity="0.55"/><circle cx="56" cy="254" r="2.3" fill="#fff" opacity="0.38"/><circle cx="111" cy="438" r="1.7" fill="#fff" opacity="0.55"/><circle cx="419" cy="211" r="2.2" fill="#fff" opacity="0.51"/><circle cx="186" cy="163" r="1.1" fill="#fff" opacity="0.63"/><circle cx="63" cy="449" r="1.2" fill="#fff" opacity="0.28"/><circle cx="107" cy="322" r="1.9" fill="#fff" opacity="0.50"/><circle cx="40" cy="135" r="1.4" fill="#fff" opacity="0.28"/><circle cx="81" cy="329" r="2.4" fill="#fff" opacity="0.44"/><circle cx="259" cy="293" r="2.0" fill="#fff" opacity="0.39"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">J</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">jacket</text>
+</svg>

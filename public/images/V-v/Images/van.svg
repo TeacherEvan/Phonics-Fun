@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="V is for van">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#12254b" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#0c1630" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="none"/>
+  <circle cx="159" cy="17" r="1.0" fill="#fff" opacity="0.46"/><circle cx="297" cy="428" r="2.0" fill="#fff" opacity="0.61"/><circle cx="435" cy="372" r="1.8" fill="#fff" opacity="0.33"/><circle cx="251" cy="211" r="1.5" fill="#fff" opacity="0.52"/><circle cx="279" cy="496" r="1.6" fill="#fff" opacity="0.32"/><circle cx="178" cy="337" r="1.2" fill="#fff" opacity="0.59"/><circle cx="318" cy="192" r="2.3" fill="#fff" opacity="0.62"/><circle cx="1" cy="86" r="1.2" fill="#fff" opacity="0.45"/><circle cx="94" cy="217" r="1.7" fill="#fff" opacity="0.56"/><circle cx="84" cy="335" r="1.8" fill="#fff" opacity="0.33"/><circle cx="129" cy="504" r="2.2" fill="#fff" opacity="0.27"/><circle cx="433" cy="390" r="1.6" fill="#fff" opacity="0.59"/><circle cx="60" cy="469" r="2.1" fill="#fff" opacity="0.51"/><circle cx="64" cy="486" r="2.2" fill="#fff" opacity="0.53"/><circle cx="3" cy="372" r="1.6" fill="#fff" opacity="0.40"/><circle cx="113" cy="217" r="1.4" fill="#fff" opacity="0.35"/><circle cx="32" cy="151" r="2.2" fill="#fff" opacity="0.53"/><circle cx="444" cy="74" r="1.8" fill="#fff" opacity="0.45"/>
+
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="url(#panel)"/>
+  <rect x="26" y="26" width="460" height="460" rx="56" fill="none"
+        stroke="#ffd15c" stroke-opacity="0.5" stroke-width="4"/>
+
+  <text x="256" y="228" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="188" font-weight="900" fill="#ffd15c">V</text>
+
+  <rect x="176" y="308" width="160" height="4" rx="2" fill="#ffd15c" opacity="0.6"/>
+
+  <text x="256" y="398" text-anchor="middle"
+        font-family="'Arial Rounded MT Bold','Trebuchet MS',Verdana,sans-serif"
+        font-size="66" font-weight="900" fill="#f9f4e8">van</text>
+</svg>

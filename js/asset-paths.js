@@ -19,7 +19,7 @@ export const PUBLIC_ROOT = '/';
  * real artwork and some of it was committed as `<name>-clipart-<size>.png`.
  * @type {Readonly<Record<string, string>>}
  */
-const IMAGE_FILENAME_ALIASES = Object.freeze({
+export const IMAGE_FILENAME_ALIASES = Object.freeze({
     goat: 'goat-clipart-md(1).png',
     gold: 'pot-with-gold-clipart-md.png',
     girl: 'girl-clipart-lg.png',
@@ -48,17 +48,23 @@ export function imagePathFor(letter, word) {
 
 /**
  * Every URL that could serve the picture for a letter/word pair, most
- * canonical first. Consumers should try them in order and fall back to the
- * text rendering when all of them fail.
+ * canonical first.
+ *
+ * A generated word card (`.svg`) is listed first because one exists for
+ * every word in the curriculum; when the card wraps real artwork it is
+ * rendered instead of the card design. The raster original and the
+ * decorated-name alias follow as fallbacks.
+ *
  * @param {string} letter
  * @param {string} word
  * @returns {string[]}
  */
 export function imagePathCandidates(letter, word) {
-    const candidates = [imagePathFor(letter, word)];
+    const dir = imageDirFor(letter);
+    const candidates = [`${dir}${word}.svg`, `${dir}${word}.png`];
     const alias = IMAGE_FILENAME_ALIASES[String(word ?? '').toLowerCase()];
     if (alias) {
-        candidates.push(`${imageDirFor(letter)}${alias}`);
+        candidates.push(`${dir}${alias}`);
     }
     return candidates;
 }

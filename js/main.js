@@ -23,6 +23,7 @@ import {
     getEnabledLetters,
 } from './letter-data.js';
 import { imagePathCandidates } from './asset-paths.js';
+import { loadFirstAvailableImage } from './image-loader.js';
 
 // Re-exported so existing importers keep working.
 export { PHONICS_FUN_LETTER_DATA };
@@ -1541,23 +1542,22 @@ class GameState {
         wordBackground.style.fontWeight = '';
         wordBackground.style.padding = '';
 
-        // Candidate URLs, most canonical first. The previous code built
+        // Candidate URLs, most preferred first. The previous code built
         // `Assets/images/...`, which only resolves on the Vite dev server and
         // 404s in every production build.
         const candidates = imagePathCandidates(letter, word);
 
-        // Check if image is cached
+        // Check if image is cached. The cache stores the URL that actually
+        // loaded, which is not necessarily the first candidate.
         if (this.performanceUtils && this.performanceUtils.getCachedImage) {
-            const cachedImage = this.performanceUtils.getCachedImage(
-                letter,
-                word,
-            );
+            const cached = this.performanceUtils.getCachedImage(letter, word);
             if (
-                cachedImage &&
-                cachedImage.complete &&
-                cachedImage.naturalWidth > 0
+                cached &&
+                cached.image &&
+                cached.image.complete &&
+                cached.image.naturalWidth > 0
             ) {
-                wordBackground.style.backgroundImage = `url('${candidates[0]}')`;
+                wordBackground.style.backgroundImage = `url('${cached.url}')`;
                 wordBackground.classList.remove('loading');
                 wordBackground.classList.add('visible');
                 this.scheduleImageHide(wordBackground);
@@ -1565,31 +1565,19 @@ class GameState {
             }
         }
 
-        // Load image progressively with loading indicator, trying each
-        // candidate URL in turn.
-        const tryNextCandidate = (index) => {
-            if (index >= candidates.length) {
+        // Load the first candidate that resolves.
+        loadFirstAvailableImage(candidates).then((result) => {
+            if (!result) {
                 this.showWordTextFallback(wordBackground, letter, word);
                 return;
             }
 
-            const imagePath = candidates[index];
-            const img = new Image();
-            img.onload = () => {
-                wordBackground.textContent = '';
-                wordBackground.style.backgroundImage = `url('${imagePath}')`;
-                wordBackground.classList.remove('loading');
-                wordBackground.classList.add('visible');
-                this.scheduleImageHide(wordBackground);
-            };
-            img.onerror = () => {
-                console.warn(`Failed to load image: ${imagePath}`);
-                tryNextCandidate(index + 1);
-            };
-            img.src = imagePath;
-        };
-
-        tryNextCandidate(0);
+            wordBackground.textContent = '';
+            wordBackground.style.backgroundImage = `url('${result.url}')`;
+            wordBackground.classList.remove('loading');
+            wordBackground.classList.add('visible');
+            this.scheduleImageHide(wordBackground);
+        });
     }
 
     /**
