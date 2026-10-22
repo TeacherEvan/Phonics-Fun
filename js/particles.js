@@ -331,7 +331,7 @@ class ParticleSystem {
                     maxLife: 0.5,
                     speed: 0,
                     velocity: { x: 0, y: 0 },
-                }
+                },
             );
         }
     }

@@ -261,7 +261,7 @@ class UIUtils {
     setupRippleEffect() {
         document.addEventListener('click', (e) => {
             const button = e.target.closest(
-                '.primary-button, .secondary-button, .letter-button'
+                '.primary-button, .secondary-button, .letter-button',
             );
             if (!button) return;
 
@@ -461,7 +461,7 @@ class UIUtils {
             fromScreen.classList.remove(
                 'active',
                 'screen-transition-exit',
-                'screen-transition-exit-active'
+                'screen-transition-exit-active',
             );
 
             // Enter animation for new screen
