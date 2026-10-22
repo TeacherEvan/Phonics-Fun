@@ -243,7 +243,12 @@ class DisplayManager {
         styles.textContent = `
             /* Dynamic viewport-based scaling */
             .planet {
-                transform: scale(var(--planet-scale, 1));
+                /* The independent \`scale\` property, not \`transform\`: the
+                   planetOrbit keyframes animate \`transform\`, and a CSS
+                   animation outranks every normal declaration, so the
+                   responsive planet sizing was silently overridden and the
+                   value never applied. \`scale\` composes with \`transform\`. */
+                scale: var(--planet-scale, 1);
                 transform-origin: center center;
             }
             
@@ -346,8 +351,8 @@ class DisplayManager {
             /* Improved touch feedback for mobile */
             .device-mobile .planet:active,
             .device-tablet .planet:active {
-                transform: scale(calc(var(--planet-scale, 1) * 0.9)) !important;
-                transition: transform 0.1s ease;
+                scale: calc(var(--planet-scale, 1) * 0.9) !important;
+                transition: scale 0.1s ease;
             }
 
             /* Smooth scrolling optimization */

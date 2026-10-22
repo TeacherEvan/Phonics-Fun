@@ -1530,6 +1530,7 @@ class GameState {
 
         // Show loading state
         wordBackground.classList.add('loading');
+        wordBackground.classList.remove('word-text');
         wordBackground.textContent = '';
         wordBackground.style.display = '';
         wordBackground.style.alignItems = '';
@@ -1609,6 +1610,9 @@ class GameState {
         wordBackground.style.fontWeight = '700';
         wordBackground.style.padding = '1.5rem';
         wordBackground.classList.remove('loading');
+        // Text must be fully legible: the picture panel is deliberately
+        // translucent so the planets stay readable behind it.
+        wordBackground.classList.add('word-text');
         wordBackground.classList.add('visible');
         this.scheduleImageHide(wordBackground);
     }
@@ -1644,7 +1648,12 @@ class GameState {
 
         const progressPercentage =
             (this.correctHitsCount / this.requiredHitsToComplete) * 100;
-        progressFillElement.style.width = `${progressPercentage}%`;
+        // The fill is scaled by the compositor (scaleX) rather than by
+        // animating `width`, which forced a layout pass every frame.
+        progressFillElement.style.setProperty(
+            '--progress',
+            String(Math.max(0, Math.min(1, progressPercentage / 100))),
+        );
         hitsCounterElement.textContent = this.correctHitsCount;
         this.syncLetterDisplays();
     }
