@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 // Comprehensive DOM + Web Audio mock (modeled on game-state.test.mjs, with a
 // capturing createBuffer so we can assert per-letter phoneme output differs).
 function setupDOM() {
-  document.body.innerHTML = `
+    document.body.innerHTML = `
     <main id="welcome-screen" class="screen active"></main>
     <main id="level-select-screen" class="screen"></main>
     <main id="gameplay-screen" class="screen"></main>
@@ -55,92 +55,92 @@ function setupDOM() {
     <span id="level-complete-letter"></span>
   `;
 
-  class MockAudioContext {
-    constructor() {
-      this.destination = {};
-      this.state = 'running';
-      this.sampleRate = 44100;
-      this._lastData = null;
+    class MockAudioContext {
+        constructor() {
+            this.destination = {};
+            this.state = 'running';
+            this.sampleRate = 44100;
+            this._lastData = null;
+        }
+        createGain() {
+            return { connect: vi.fn(), gain: { value: 1 } };
+        }
+        createBuffer(ch, len, rate) {
+            const data = new Float32Array(len);
+            this._lastData = data;
+            return { getChannelData: () => data, length: len };
+        }
+        createBufferSource() {
+            return {
+                start: vi.fn(),
+                stop: vi.fn(),
+                connect: vi.fn(),
+                buffer: null,
+                loop: false,
+            };
+        }
+        decodeAudioData() {
+            return Promise.resolve({ duration: 1 });
+        }
+        close() {
+            return Promise.resolve();
+        }
     }
-    createGain() {
-      return { connect: vi.fn(), gain: { value: 1 } };
+    global.AudioContext = MockAudioContext;
+    global.webkitAudioContext = MockAudioContext;
+    global.fetch = vi.fn(() =>
+        Promise.resolve({
+            ok: true,
+            arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        }),
+    );
+    global.Audio = class Audio {
+        constructor() {
+            this.src = '';
+            this.volume = 1;
+            this.loop = false;
+            this.currentTime = 0;
+            this.play = vi.fn(() => Promise.resolve());
+            this.pause = vi.fn();
+            this.addEventListener = vi.fn();
+            this.preload = 'metadata';
+        }
+    };
+    global.speechSynthesis = {
+        cancel: vi.fn(),
+        getVoices: vi.fn(() => [{ name: 'Test Voice', lang: 'en-US' }]),
+        speak: vi.fn(),
+        onvoiceschanged: null,
+    };
+    class MockSpeechSynthesisUtterance {
+        constructor(text) {
+            this.text = text;
+            this.rate = 1;
+            this.pitch = 1;
+            this.volume = 1;
+            this.voice = null;
+        }
     }
-    createBuffer(ch, len, rate) {
-      const data = new Float32Array(len);
-      this._lastData = data;
-      return { getChannelData: () => data, length: len };
+    global.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    global.localStorage = {
+        getItem: vi.fn(() => null),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+    };
+    // Non-recursing rAF mock: records the callback but does NOT auto-schedule,
+    // so the GameState/CollisionManager render loop never leaks after teardown.
+    global.requestAnimationFrame = vi.fn(() => 1);
+    global.cancelAnimationFrame = vi.fn();
+    class MockIntersectionObserver {
+        constructor(callback) {
+            this.callback = callback;
+            this.observe = vi.fn();
+            this.unobserve = vi.fn();
+            this.disconnect = vi.fn();
+            this.takeRecords = vi.fn(() => []);
+        }
     }
-    createBufferSource() {
-      return {
-        start: vi.fn(),
-        stop: vi.fn(),
-        connect: vi.fn(),
-        buffer: null,
-        loop: false,
-      };
-    }
-    decodeAudioData() {
-      return Promise.resolve({ duration: 1 });
-    }
-    close() {
-      return Promise.resolve();
-    }
-  }
-  global.AudioContext = MockAudioContext;
-  global.webkitAudioContext = MockAudioContext;
-  global.fetch = vi.fn(() =>
-    Promise.resolve({
-      ok: true,
-      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-    })
-  );
-  global.Audio = class Audio {
-    constructor() {
-      this.src = '';
-      this.volume = 1;
-      this.loop = false;
-      this.currentTime = 0;
-      this.play = vi.fn(() => Promise.resolve());
-      this.pause = vi.fn();
-      this.addEventListener = vi.fn();
-      this.preload = 'metadata';
-    }
-  };
-  global.speechSynthesis = {
-    cancel: vi.fn(),
-    getVoices: vi.fn(() => [{ name: 'Test Voice', lang: 'en-US' }]),
-    speak: vi.fn(),
-    onvoiceschanged: null,
-  };
-  class MockSpeechSynthesisUtterance {
-    constructor(text) {
-      this.text = text;
-      this.rate = 1;
-      this.pitch = 1;
-      this.volume = 1;
-      this.voice = null;
-    }
-  }
-  global.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
-  global.localStorage = {
-    getItem: vi.fn(() => null),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-  };
-  // Non-recursing rAF mock: records the callback but does NOT auto-schedule,
-  // so the GameState/CollisionManager render loop never leaks after teardown.
-  global.requestAnimationFrame = vi.fn(() => 1);
-  global.cancelAnimationFrame = vi.fn();
-  class MockIntersectionObserver {
-    constructor(callback) {
-      this.callback = callback;
-      this.observe = vi.fn();
-      this.unobserve = vi.fn();
-      this.disconnect = vi.fn();
-      this.takeRecords = vi.fn(() => []);
-    }
-  }
-  global.IntersectionObserver = MockIntersectionObserver;
+    global.IntersectionObserver = MockIntersectionObserver;
 }
 
 import '../../js/event-bus.js';
@@ -151,205 +151,207 @@ import '../../js/performance-utils.js';
 import '../../js/main.js';
 
 function arraysEqual(a, b) {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
-  }
-  return true;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
 }
 
 // ---------------------------------------------------------------------------
 // Task 1: per-letter phoneme sound profile
 // ---------------------------------------------------------------------------
 describe('generatePhonemeSound per-letter profiles', () => {
-  let am;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    am = new window.AudioManager();
-  });
+    let am;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        am = new window.AudioManager();
+    });
 
-  it('produces distinct output for different non-G letters (no generic default)', () => {
-    am.generatePhonemeSound('b');
-    const bData = Float32Array.from(am.audioContext._lastData);
-    am.generatePhonemeSound('c');
-    const cData = Float32Array.from(am.audioContext._lastData);
-    expect(arraysEqual(bData, cData)).toBe(false);
-  });
+    it('produces distinct output for different non-G letters (no generic default)', () => {
+        am.generatePhonemeSound('b');
+        const bData = Float32Array.from(am.audioContext._lastData);
+        am.generatePhonemeSound('c');
+        const cData = Float32Array.from(am.audioContext._lastData);
+        expect(arraysEqual(bData, cData)).toBe(false);
+    });
 
-  it('produces a pairwise-distinct waveform for every letter A-Z', () => {
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    const waveforms = {};
-    for (const letter of alphabet) {
-      am.generatePhonemeSound(letter);
-      waveforms[letter] = Float32Array.from(am.audioContext._lastData);
-    }
-    const seen = {};
-    for (const letter of alphabet) {
-      const key = Array.from(waveforms[letter]).join(',');
-      // Two letters sharing the same waveform means the per-letter map
-      // collapsed them to one frequency — the G-centric regression.
-      expect(seen[key]).toBeFalsy();
-      seen[key] = letter;
-    }
-  });
+    it('produces a pairwise-distinct waveform for every letter A-Z', () => {
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        const waveforms = {};
+        for (const letter of alphabet) {
+            am.generatePhonemeSound(letter);
+            waveforms[letter] = Float32Array.from(am.audioContext._lastData);
+        }
+        const seen = {};
+        for (const letter of alphabet) {
+            const key = Array.from(waveforms[letter]).join(',');
+            // Two letters sharing the same waveform means the per-letter map
+            // collapsed them to one frequency — the G-centric regression.
+            expect(seen[key]).toBeFalsy();
+            seen[key] = letter;
+        }
+    });
 
-  it('returns an audible source for every letter A-Z', () => {
-    for (const l of 'abcdefghijklmnopqrstuvwxyz') {
-      const src = am.generatePhonemeSound(l);
-      expect(src).toBeTruthy();
-      expect(typeof src.start).toBe('function');
-    }
-  });
+    it('returns an audible source for every letter A-Z', () => {
+        for (const l of 'abcdefghijklmnopqrstuvwxyz') {
+            const src = am.generatePhonemeSound(l);
+            expect(src).toBeTruthy();
+            expect(typeof src.start).toBe('function');
+        }
+    });
 });
 
 // ---------------------------------------------------------------------------
 // Task 2: offline-safe word audio routing (skip fetch for unrecorded letters)
 // ---------------------------------------------------------------------------
 describe('word audio routing', () => {
-  let am;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    am = new window.AudioManager();
-  });
+    let am;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        am = new window.AudioManager();
+    });
 
-  it('does not attempt to fetch a .wav for letters without recorded assets', () => {
-    const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
-    am.ensureLetterAudio('A');
-    const voiceCalls = fetchSpy.mock.calls.filter(
-      ([id]) => typeof id === 'string' && id.startsWith('voice-')
-    );
-    expect(voiceCalls).toHaveLength(0);
-  });
+    it('does not attempt to fetch a .wav for letters without recorded assets', () => {
+        const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
+        am.ensureLetterAudio('A');
+        const voiceCalls = fetchSpy.mock.calls.filter(
+            ([id]) => typeof id === 'string' && id.startsWith('voice-'),
+        );
+        expect(voiceCalls).toHaveLength(0);
+    });
 
-  it('does fetch recorded voice assets for letter G', () => {
-    const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
-    am.ensureLetterAudio('G');
-    const voiceCalls = fetchSpy.mock.calls.filter(
-      ([id]) => typeof id === 'string' && id.startsWith('voice-')
-    );
-    expect(voiceCalls.length).toBeGreaterThan(0);
-  });
+    it('does fetch recorded voice assets for letter G', () => {
+        const fetchSpy = vi.spyOn(am, 'ensureSoundLoaded');
+        am.ensureLetterAudio('G');
+        const voiceCalls = fetchSpy.mock.calls.filter(
+            ([id]) => typeof id === 'string' && id.startsWith('voice-'),
+        );
+        expect(voiceCalls.length).toBeGreaterThan(0);
+    });
 });
 
 // ---------------------------------------------------------------------------
 // Task 3: progression pointer (next-uncompleted + advance)
 // ---------------------------------------------------------------------------
 describe('letter progression pointer', () => {
-  let gs;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    gs = new window.GameState();
-  });
+    let gs;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        gs = new window.GameState();
+    });
 
-  it('starts at A by default', () => {
-    expect(gs.activeLetterLevel).toBe('A');
-  });
+    it('starts at A by default', () => {
+        expect(gs.activeLetterLevel).toBe('A');
+    });
 
-  it('advances to the next uncompleted letter after completion', () => {
-    gs.completedLevels = [];
-    gs.activeLetterLevel = 'A';
-    gs.completeLevelSuccessfully();
-    expect(gs.completedLevels).toContain('A');
-    expect(gs.activeLetterLevel).toBe('B');
-  });
+    it('advances to the next uncompleted letter after completion', () => {
+        gs.completedLevels = [];
+        gs.activeLetterLevel = 'A';
+        gs.completeLevelSuccessfully();
+        expect(gs.completedLevels).toContain('A');
+        expect(gs.activeLetterLevel).toBe('B');
+    });
 
-  it('returns null and stays put when all letters are complete', () => {
-    gs.completedLevels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    expect(gs.getNextUncompletedLetter()).toBeNull();
-    gs.advanceToNextLetter();
-    expect('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).toContain(gs.activeLetterLevel);
-  });
+    it('returns null and stays put when all letters are complete', () => {
+        gs.completedLevels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        expect(gs.getNextUncompletedLetter()).toBeNull();
+        gs.advanceToNextLetter();
+        expect('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')).toContain(
+            gs.activeLetterLevel,
+        );
+    });
 });
 
 // ---------------------------------------------------------------------------
 // Task 4: three-state letter grid (done / current / available)
 // ---------------------------------------------------------------------------
 describe('letter grid three-state rendering', () => {
-  let gs;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    gs = new window.GameState();
-  });
+    let gs;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        gs = new window.GameState();
+    });
 
-  it('marks completed letters done, active letter current, others available', () => {
-    gs.completedLevels = ['A'];
-    gs.activeLetterLevel = 'B';
-    gs.renderLetterSelectionGrid();
+    it('marks completed letters done, active letter current, others available', () => {
+        gs.completedLevels = ['A'];
+        gs.activeLetterLevel = 'B';
+        gs.renderLetterSelectionGrid();
 
-    const a = document.querySelector('[data-letter="A"]');
-    const b = document.querySelector('[data-letter="B"]');
-    const c = document.querySelector('[data-letter="C"]');
+        const a = document.querySelector('[data-letter="A"]');
+        const b = document.querySelector('[data-letter="B"]');
+        const c = document.querySelector('[data-letter="C"]');
 
-    expect(a.className).toContain('done');
-    expect(b.className).toContain('current');
-    expect(c.className).toContain('available');
-    expect(a.getAttribute('aria-label')).toContain('completed');
-    expect(b.getAttribute('aria-label')).toContain('current level');
-    expect(c.getAttribute('aria-label')).toContain('available');
-  });
+        expect(a.className).toContain('done');
+        expect(b.className).toContain('current');
+        expect(c.className).toContain('available');
+        expect(a.getAttribute('aria-label')).toContain('completed');
+        expect(b.getAttribute('aria-label')).toContain('current level');
+        expect(c.getAttribute('aria-label')).toContain('available');
+    });
 });
 
 // ---------------------------------------------------------------------------
 // Task 5: per-letter adaptive difficulty (reset live; keep cumulative)
 // ---------------------------------------------------------------------------
 describe('per-letter adaptive difficulty', () => {
-  let gs;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    gs = new window.GameState();
-  });
+    let gs;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        gs = new window.GameState();
+    });
 
-  it('resets live counters at the start of each letter session', () => {
-    gs.correctHitsCount = 5;
-    gs.incorrectHitsCount = 2;
-    gs.totalAnswersCount = 7;
-    gs.startGameplaySession();
-    expect(gs.correctHitsCount).toBe(0);
-    expect(gs.incorrectHitsCount).toBe(0);
-    expect(gs.totalAnswersCount).toBe(0);
-  });
+    it('resets live counters at the start of each letter session', () => {
+        gs.correctHitsCount = 5;
+        gs.incorrectHitsCount = 2;
+        gs.totalAnswersCount = 7;
+        gs.startGameplaySession();
+        expect(gs.correctHitsCount).toBe(0);
+        expect(gs.incorrectHitsCount).toBe(0);
+        expect(gs.totalAnswersCount).toBe(0);
+    });
 
-  it('accumulates cumulative stats for teacher export across letters', () => {
-    gs.cumCorrect = 3;
-    gs.cumIncorrect = 1;
-    gs.cumTotal = 4;
-    gs.startGameplaySession();
-    gs.correctHitsCount = 1;
-    gs.totalAnswersCount = 1;
-    const data = gs.exportTeacherData();
-    expect(data.correctHits).toBe(4); // 3 + 1
-    expect(data.incorrectHits).toBe(1);
-  });
+    it('accumulates cumulative stats for teacher export across letters', () => {
+        gs.cumCorrect = 3;
+        gs.cumIncorrect = 1;
+        gs.cumTotal = 4;
+        gs.startGameplaySession();
+        gs.correctHitsCount = 1;
+        gs.totalAnswersCount = 1;
+        const data = gs.exportTeacherData();
+        expect(data.correctHits).toBe(4); // 3 + 1
+        expect(data.incorrectHits).toBe(1);
+    });
 });
 
 // ---------------------------------------------------------------------------
 // Task 6: A-Z completeness gate (prevents silent G-centric regression)
 // ---------------------------------------------------------------------------
 describe('A-Z completeness gate', () => {
-  let gs;
-  let am;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    gs = new window.GameState();
-    am = new window.AudioManager();
-  });
+    let gs;
+    let am;
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
+        gs = new window.GameState();
+        am = new window.AudioManager();
+    });
 
-  it('every enabled letter is playable with a phoneme profile and word routing', () => {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    for (const letter of alphabet) {
-      // phoneme profile exists (no throw, returns a source)
-      expect(am.generatePhonemeSound(letter.toLowerCase())).toBeTruthy();
-      // word vocabulary present
-      const words = gs.letterVocabulary[letter].map((w) => w.word);
-      expect(words.length).toBeGreaterThan(0);
-      // ensureLetterAudio does not throw for any letter
-      expect(() => am.ensureLetterAudio(letter)).not.toThrow();
-    }
-  });
+    it('every enabled letter is playable with a phoneme profile and word routing', () => {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        for (const letter of alphabet) {
+            // phoneme profile exists (no throw, returns a source)
+            expect(am.generatePhonemeSound(letter.toLowerCase())).toBeTruthy();
+            // word vocabulary present
+            const words = gs.letterVocabulary[letter].map((w) => w.word);
+            expect(words.length).toBeGreaterThan(0);
+            // ensureLetterAudio does not throw for any letter
+            expect(() => am.ensureLetterAudio(letter)).not.toThrow();
+        }
+    });
 });

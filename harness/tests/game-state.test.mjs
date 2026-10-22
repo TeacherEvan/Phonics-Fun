@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock DOM elements - setup in beforeEach to ensure clean state for each test
 function setupDOM() {
-  document.body.innerHTML = `
+    document.body.innerHTML = `
     <main id="welcome-screen" class="screen active"></main>
     <main id="level-select-screen" class="screen"></main>
     <main id="gameplay-screen" class="screen"></main>
@@ -52,90 +52,92 @@ function setupDOM() {
     <div class="asteroids-container"></div>
     <div class="explosions-container"></div>
   `;
-  
-  // Mock AudioContext
-  global.AudioContext = class AudioContext {
-    constructor() {
-      this.destination = {};
-      this.state = 'running';
-    }
-    createGain() {
-      return {
-        connect: vi.fn(),
-        gain: { value: 1 }
-      };
-    }
-    createBufferSource() {
-      return {
-        start: vi.fn(),
-        stop: vi.fn(),
-        connect: vi.fn(),
-        buffer: null,
-        loop: false
-      };
-    }
-    decodeAudioData(arrayBuffer) {
-      return Promise.resolve({ duration: 1 });
-    }
-    close() {
-      return Promise.resolve();
-    }
-  };
-  global.webkitAudioContext = global.AudioContext;
-  global.fetch = vi.fn(() => Promise.resolve({
-    ok: true,
-    arrayBuffer: () => Promise.resolve(new ArrayBuffer(8))
-  }));
-  global.Audio = class Audio {
-    constructor() {
-      this.src = '';
-      this.volume = 1;
-      this.loop = false;
-      this.currentTime = 0;
-      this.play = vi.fn(() => Promise.resolve());
-      this.pause = vi.fn();
-      this.addEventListener = vi.fn();
-      this.preload = 'metadata';
-    }
-  };
-  global.speechSynthesis = {
-    cancel: vi.fn(),
-    getVoices: vi.fn(() => [{ name: 'Test Voice', lang: 'en-US' }]),
-    speak: vi.fn(),
-    onvoiceschanged: null
-  };
-  // Mock SpeechSynthesisUtterance as a constructor
-  class MockSpeechSynthesisUtterance {
-    constructor(text) {
-      this.text = text;
-      this.rate = 1;
-      this.pitch = 1;
-      this.volume = 1;
-      this.voice = null;
-    }
-  }
 
-  global.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
-  global.localStorage = {
-    getItem: vi.fn(),
-    setItem: vi.fn(),
-    removeItem: vi.fn()
-  };
-  // Non-recursing rAF mock: records callback but does not recurse into setTimeout
-  global.requestAnimationFrame = vi.fn(() => 1);
-  global.cancelAnimationFrame = vi.fn();
-  // Mock IntersectionObserver as a constructor
-  class MockIntersectionObserver {
-    constructor(callback) {
-      this.callback = callback;
-      this.observe = vi.fn();
-      this.unobserve = vi.fn();
-      this.disconnect = vi.fn();
-      this.takeRecords = vi.fn(() => []);
+    // Mock AudioContext
+    global.AudioContext = class AudioContext {
+        constructor() {
+            this.destination = {};
+            this.state = 'running';
+        }
+        createGain() {
+            return {
+                connect: vi.fn(),
+                gain: { value: 1 },
+            };
+        }
+        createBufferSource() {
+            return {
+                start: vi.fn(),
+                stop: vi.fn(),
+                connect: vi.fn(),
+                buffer: null,
+                loop: false,
+            };
+        }
+        decodeAudioData(arrayBuffer) {
+            return Promise.resolve({ duration: 1 });
+        }
+        close() {
+            return Promise.resolve();
+        }
+    };
+    global.webkitAudioContext = global.AudioContext;
+    global.fetch = vi.fn(() =>
+        Promise.resolve({
+            ok: true,
+            arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+        }),
+    );
+    global.Audio = class Audio {
+        constructor() {
+            this.src = '';
+            this.volume = 1;
+            this.loop = false;
+            this.currentTime = 0;
+            this.play = vi.fn(() => Promise.resolve());
+            this.pause = vi.fn();
+            this.addEventListener = vi.fn();
+            this.preload = 'metadata';
+        }
+    };
+    global.speechSynthesis = {
+        cancel: vi.fn(),
+        getVoices: vi.fn(() => [{ name: 'Test Voice', lang: 'en-US' }]),
+        speak: vi.fn(),
+        onvoiceschanged: null,
+    };
+    // Mock SpeechSynthesisUtterance as a constructor
+    class MockSpeechSynthesisUtterance {
+        constructor(text) {
+            this.text = text;
+            this.rate = 1;
+            this.pitch = 1;
+            this.volume = 1;
+            this.voice = null;
+        }
     }
-  }
 
-  global.IntersectionObserver = MockIntersectionObserver;
+    global.SpeechSynthesisUtterance = MockSpeechSynthesisUtterance;
+    global.localStorage = {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+    };
+    // Non-recursing rAF mock: records callback but does not recurse into setTimeout
+    global.requestAnimationFrame = vi.fn(() => 1);
+    global.cancelAnimationFrame = vi.fn();
+    // Mock IntersectionObserver as a constructor
+    class MockIntersectionObserver {
+        constructor(callback) {
+            this.callback = callback;
+            this.observe = vi.fn();
+            this.unobserve = vi.fn();
+            this.disconnect = vi.fn();
+            this.takeRecords = vi.fn(() => []);
+        }
+    }
+
+    global.IntersectionObserver = MockIntersectionObserver;
 }
 
 // Load dependencies first
@@ -152,57 +154,59 @@ function buildLetterVocabulary(letterData) {
     return Object.fromEntries(
         Object.entries(letterData).map(([letter, words]) => [
             letter,
-            words.map(word => ({
+            words.map((word) => ({
                 letter,
                 word,
-                audioKey: `voice-${word}`
-            }))
-        ])
+                audioKey: `voice-${word}`,
+            })),
+        ]),
     );
 }
 
 describe('GameState pure functions', () => {
-  let gameState;
+    let gameState;
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    setupDOM();
-    
-    gameState = new window.GameState();
-  });
+    beforeEach(() => {
+        vi.clearAllMocks();
+        setupDOM();
 
-  afterEach(() => {
-    if (gameState) {
-      gameState.audioManager?.stopAll();
-    }
-  });
+        gameState = new window.GameState();
+    });
 
-  it('should instantiate without throwing', () => {
-    expect(gameState).toBeDefined();
-    expect(gameState.currentScreen).toBe('welcome');
-    expect(gameState.correctHitsCount).toBe(0);
-  });
+    afterEach(() => {
+        if (gameState) {
+            gameState.audioManager?.stopAll();
+        }
+    });
 
-  it('should execute completeLevelSuccessfully and updateProgressDisplay without crashing', () => {
-    expect(() => gameState.updateProgressDisplay()).not.toThrow();
-    expect(() => gameState.completeLevelSuccessfully()).not.toThrow();
-    expect(gameState.isGameplayActive).toBe(false);
-  });
+    it('should instantiate without throwing', () => {
+        expect(gameState).toBeDefined();
+        expect(gameState.currentScreen).toBe('welcome');
+        expect(gameState.correctHitsCount).toBe(0);
+    });
+
+    it('should execute completeLevelSuccessfully and updateProgressDisplay without crashing', () => {
+        expect(() => gameState.updateProgressDisplay()).not.toThrow();
+        expect(() => gameState.completeLevelSuccessfully()).not.toThrow();
+        expect(gameState.isGameplayActive).toBe(false);
+    });
 });
 
 describe('PHONICS_FUN_LETTER_DATA', () => {
-  it('should be frozen', () => {
-    expect(Object.isFrozen(window.PHONICS_FUN_LETTER_DATA)).toBe(true);
-  });
+    it('should be frozen', () => {
+        expect(Object.isFrozen(window.PHONICS_FUN_LETTER_DATA)).toBe(true);
+    });
 
-  it('should have all 26 letters', () => {
-    const keys = Object.keys(window.PHONICS_FUN_LETTER_DATA);
-    expect(keys).toHaveLength(26);
-  });
+    it('should have all 26 letters', () => {
+        const keys = Object.keys(window.PHONICS_FUN_LETTER_DATA);
+        expect(keys).toHaveLength(26);
+    });
 
-  it('should have 5 words per letter', () => {
-    for (const [letter, words] of Object.entries(window.PHONICS_FUN_LETTER_DATA)) {
-      expect(words).toHaveLength(5);
-    }
-  });
+    it('should have 5 words per letter', () => {
+        for (const [letter, words] of Object.entries(
+            window.PHONICS_FUN_LETTER_DATA,
+        )) {
+            expect(words).toHaveLength(5);
+        }
+    });
 });

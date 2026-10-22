@@ -35,9 +35,8 @@ describe('P0-1: the AudioContext is resumed on the first user gesture', () => {
     });
 
     it('starts in the suspended state and reports it', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
 
         expect(audioManager.getAudioContextState()).toBe('suspended');
@@ -45,9 +44,8 @@ describe('P0-1: the AudioContext is resumed on the first user gesture', () => {
     });
 
     it('resumes the instance context when the user first interacts', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
 
         expect(audioManager.audioContext.resume).not.toHaveBeenCalled();
@@ -60,9 +58,8 @@ describe('P0-1: the AudioContext is resumed on the first user gesture', () => {
     });
 
     it('does not resume a context that is already running', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
         audioManager.audioContext.state = 'running';
 
@@ -73,9 +70,8 @@ describe('P0-1: the AudioContext is resumed on the first user gesture', () => {
     });
 
     it('resumes on touchstart and keydown too', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
 
         window.dispatchEvent(new Event('touchstart'));
@@ -89,9 +85,8 @@ describe('P0-1: the AudioContext is resumed on the first user gesture', () => {
     });
 
     it('suspends and resumes with the page visibility', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
         audioManager.audioContext.state = 'running';
 
@@ -124,9 +119,8 @@ describe('P1-11: exactly one AudioContext is allocated', () => {
     });
 
     it('allocates one context per AudioManager instance', async () => {
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const before = audioState.contexts;
         const audioManager = new AudioManager();
         expect(audioState.contexts).toBe(before + 1);
@@ -152,13 +146,12 @@ describe('P1-17: a missing sound asset is not requested twice', () => {
                 ok: false,
                 status: 404,
                 arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-            })
+            }),
         );
         installBrowserGlobals({ fetchImpl });
 
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
 
         await audioManager.ensureSoundLoaded('phoneme-b');
@@ -191,9 +184,8 @@ describe('P0-4: a storage failure does not abort the game', () => {
             removeItem: vi.fn(),
         };
 
-        const { default: AudioManager } = await import(
-            '../../js/audio-manager.js'
-        );
+        const { default: AudioManager } =
+            await import('../../js/audio-manager.js');
         const audioManager = new AudioManager();
 
         expect(() => audioManager.loadSettings({})).not.toThrow();

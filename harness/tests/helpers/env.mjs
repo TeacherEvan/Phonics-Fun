@@ -134,7 +134,7 @@ export function installBrowserGlobals({ fetchImpl } = {}) {
             Promise.resolve({
                 ok: true,
                 arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-            })
+            }),
         );
 
     global.Audio = class Audio {

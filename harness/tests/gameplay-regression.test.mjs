@@ -75,7 +75,9 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
         const pairIds = [...game.collisionManager.collisionPairs.keys()];
         expect(pairIds.length).toBeGreaterThan(0);
         expect(
-            pairIds.some((pairId) => pairId.includes(planet.dataset.collisionId))
+            pairIds.some((pairId) =>
+                pairId.includes(planet.dataset.collisionId),
+            ),
         ).toBe(true);
     });
 
@@ -92,10 +94,12 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
     });
 
     it('homes onto the moving planet instead of a stale coordinate', () => {
-        stubRect(
-            document.querySelector('.asteroids-container'),
-            { left: 0, top: 0, width: 1024, height: 768 }
-        );
+        stubRect(document.querySelector('.asteroids-container'), {
+            left: 0,
+            top: 0,
+            width: 1024,
+            height: 768,
+        });
 
         game.isGameplayActive = true;
         game.renderGameplayPlanets();
@@ -117,12 +121,13 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
             // from the DOM.
             const asteroidX =
                 parseFloat(asteroid.style.left) + ASTEROID_SIZE / 2;
-            const asteroidY = parseFloat(asteroid.style.top) + ASTEROID_SIZE / 2;
+            const asteroidY =
+                parseFloat(asteroid.style.top) + ASTEROID_SIZE / 2;
             hit = {
                 planetId: data.planet.id,
                 distance: Math.hypot(
                     asteroidX - (planetLeft + PLANET_SIZE / 2),
-                    asteroidY - (300 + PLANET_SIZE / 2)
+                    asteroidY - (300 + PLANET_SIZE / 2),
                 ),
             };
         });
@@ -130,7 +135,7 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
         game.handlePlanetInteraction(planet, 'A');
 
         const asteroid = document.querySelector(
-            '.asteroids-container .asteroid'
+            '.asteroids-container .asteroid',
         );
         expect(asteroid).toBeTruthy();
 
@@ -167,7 +172,8 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
 
         const before = game.correctHitsCount;
         const [asteroidId, planetId] = [
-            ...game.collisionManager.collisionPairs.keys()][0].split('_');
+            ...game.collisionManager.collisionPairs.keys(),
+        ][0].split('_');
         const asteroid = game.collisionManager.getObject(asteroidId);
         const target = game.collisionManager.getObject(planetId);
 
@@ -184,10 +190,12 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
     });
 
     it('resolves the hit within 1.5 seconds of simulated flight', () => {
-        stubRect(
-            document.querySelector('.asteroids-container'),
-            { left: 0, top: 0, width: 1024, height: 768 }
-        );
+        stubRect(document.querySelector('.asteroids-container'), {
+            left: 0,
+            top: 0,
+            width: 1024,
+            height: 768,
+        });
 
         game.isGameplayActive = true;
         game.renderGameplayPlanets();
@@ -223,7 +231,7 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
         const planets = [...document.querySelectorAll('.planet.a-planet')];
         game.handlePlanetInteraction(planets[0], 'A');
         const firstAsteroid = document.querySelector(
-            '.asteroids-container .asteroid'
+            '.asteroids-container .asteroid',
         );
         expect(firstAsteroid).toBeTruthy();
 
@@ -231,7 +239,7 @@ describe('P0-2: an asteroid is bound to the planet that was tapped', () => {
 
         // Exactly one asteroid is in flight: the first tap was cancelled.
         const inFlight = document.querySelectorAll(
-            '.asteroids-container .asteroid'
+            '.asteroids-container .asteroid',
         );
         expect(inFlight.length).toBe(1);
     });
@@ -260,14 +268,14 @@ describe('P1-8: the completion popup names the letter that was completed', () =>
 
         // ...but the popup and the announcement must name what was completed.
         expect(
-            document.getElementById('level-complete-letter').textContent
+            document.getElementById('level-complete-letter').textContent,
         ).toBe('A');
         expect(document.getElementById('game-announcer').textContent).toContain(
-            'letter A'
+            'letter A',
         );
-        expect(document.getElementById('game-announcer').textContent).not.toContain(
-            'letter B'
-        );
+        expect(
+            document.getElementById('game-announcer').textContent,
+        ).not.toContain('letter B');
     });
 
     it('keeps the gameplay HUD showing the active letter', () => {
@@ -277,7 +285,7 @@ describe('P1-8: the completion popup names the letter that was completed', () =>
         game.completeLevelSuccessfully();
 
         expect(
-            document.getElementById('active-letter-display').textContent
+            document.getElementById('active-letter-display').textContent,
         ).toBe('B');
     });
 });
@@ -321,9 +329,9 @@ describe('P1-16: the screen state is committed with the DOM', () => {
 
         expect(game.currentScreen).toBe('level-select');
         expect(
-            document.getElementById('level-select-screen').classList.contains(
-                'active'
-            )
+            document
+                .getElementById('level-select-screen')
+                .classList.contains('active'),
         ).toBe(true);
     });
 
