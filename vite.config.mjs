@@ -1,9 +1,43 @@
 import { defineConfig } from 'vite';
 import legacy from '@vitejs/plugin-legacy';
+import fs from 'node:fs';
+import path from 'node:path';
+
+/**
+ * Stamp a per-build identifier into the service worker.
+ *
+ * The service worker lives in `public/`, so Vite copies it verbatim and the
+ * `define` replacement below never reaches it. Without a build id the worker
+ * kept a single, permanently named cache, so a redeploy that replaced the
+ * teacher voice pack kept serving the previous recording to every device
+ * that had already visited the site.
+ */
+function serviceWorkerBuildId(buildId) {
+  let outDir = 'dist';
+  return {
+    name: 'service-worker-build-id',
+    apply: 'build',
+    enforce: 'post',
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+    },
+    closeBundle() {
+      const swPath = path.join(outDir, 'sw.js');
+      if (!fs.existsSync(swPath)) return;
+      const source = fs.readFileSync(swPath, 'utf8');
+      fs.writeFileSync(swPath, source.replace(/__BUILD_ID__/g, buildId));
+    },
+  };
+}
+
+const BUILD_ID = Date.now().toString(36);
 
 export default defineConfig({
   root: '.',
   publicDir: 'public',
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+  },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -69,7 +103,8 @@ export default defineConfig({
     legacy({
       targets: ['defaults', 'not IE 11'],
       additionalLegacyPolyfills: ['regenerator-runtime/runtime']
-    })
+    }),
+    serviceWorkerBuildId(BUILD_ID),
   ],
   server: {
     port: 8080,

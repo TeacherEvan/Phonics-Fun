@@ -1,4 +1,22 @@
-const CACHE_NAME = 'phonics-fun-v2';
+/**
+ * Phonics Fun service worker.
+ *
+ * Cache policy:
+ *  - Content-hashed build assets (/assets/...) are immutable → cache first.
+ *  - Everything else (sounds, images, index.html) is addressable by a stable
+ *    URL and can be replaced by a new build → network first, cache fallback.
+ *
+ * The previous policy was cache-first for everything with a static cache
+ * name, so a redeploy that replaced, say, the British-female voice pack kept
+ * serving the previous recording forever on any device that had visited the
+ * site once. The cache name is now stamped with a per-build identifier and
+ * every old cache is removed on activation.
+ */
+
+// Replaced at build time with a per-build identifier.
+const BUILD_ID = '__BUILD_ID__';
+
+const CACHE_NAME = `phonics-fun-${BUILD_ID}`;
 
 // Precache the static shell. Build output uses hashed filenames under
 // assets/, so we do NOT hardcode per-file paths here — they change every
@@ -32,19 +50,24 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
+      // Remove EVERY cache, not just the ones with a different name. Keeping
+      // the previous build's cache alive is what made stale assets persist.
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('[Service Worker] Removing old cache', key);
-            return caches.delete(key);
-          }
+          console.log('[Service Worker] Removing cache', key);
+          return caches.delete(key);
         })
       );
     }).then(() => self.clients.claim())
   );
 });
 
-// Fetch Event (Cache First with network fallback)
+// Is this a content-hashed, immutable build asset?
+function isImmutableAsset(url) {
+  return url.pathname.includes('/assets/');
+}
+
+// Fetch Event
 self.addEventListener('fetch', (event) => {
   // Only handle HTTP/HTTPS (ignore chrome-extension, etc.)
   if (!event.request.url.startsWith('http')) return;
@@ -64,31 +87,62 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const requestUrl = new URL(event.request.url);
+
+  // Immutable, content-hashed assets: serve from cache, refresh in the
+  // background. Their URL changes whenever the content changes.
+  if (isImmutableAsset(requestUrl)) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        const networkPromise = fetch(event.request)
+          .then((networkResponse) => {
+            if (
+              networkResponse &&
+              networkResponse.status === 200 &&
+              networkResponse.type === 'basic'
+            ) {
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            }
+            return networkResponse;
+          })
+          .catch(() => cachedResponse);
+
+        return cachedResponse || networkPromise;
+      })
+    );
+    return;
+  }
+
+  // Stable URLs (sounds, images): network first so a redeploy is picked up
+  // immediately, with the cache as the offline fallback.
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type === 'basic'
+        ) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
-
-        // Cache dynamically fetched files
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
-
         return networkResponse;
-      }).catch(() => {
-        // Safe offline fallback: return 503 so respondWith does not reject with TypeError
-        return new Response('', {
-          status: 503,
-          statusText: 'Service Unavailable (Offline)',
-        });
-      });
-    })
+      })
+      .catch(() =>
+        caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          // Safe offline fallback: return 503 so respondWith does not reject
+          // with a TypeError.
+          return new Response('', {
+            status: 503,
+            statusText: 'Service Unavailable (Offline)',
+          });
+        })
+      )
   );
 });
