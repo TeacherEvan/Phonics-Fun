@@ -1,0 +1,236 @@
+{
+  "project": "Phonics Fun",
+  "timestamp": "2026-10-22T16:40:00Z",
+  "mode": "escalation",
+  "strategy": "full-sweep",
+  "mission": {
+    "stated": "A space-themed educational web game that teaches children the full A–Z letter sounds through adaptive, interactive gameplay (PWA + Android/Capacitor).",
+    "actual": "Functional A–Z phonics game with Web Audio API sound synthesis, Capacitor packaging, and adaptive difficulty. Overhauled with combo streaks, floating score text, planetary themes, and star ratings.",
+    "gap": "Curriculum data covered all letters, but visual styling was previously G-centric and gameplay lacked feedback juice. Dependencies had unpatched CVEs in declared package ranges."
+  },
+  "dependencies": [
+    {
+      "name": "vite",
+      "version": "8.2.0",
+      "latest": "8.3.3",
+      "status": "warn",
+      "tier": 1,
+      "notes": "CVE-2026-112945, CVE-2026-112946, CVE-2026-112947 patched in >=8.2.4"
+    },
+    {
+      "name": "@capacitor/cli",
+      "version": "8.5.1",
+      "latest": "8.5.1",
+      "status": "warn",
+      "tier": 1,
+      "notes": "Declared ^8.5.0 has Critical CVE-2026-103922 (CVSS 9.3). Lockfile has 8.5.1; bump spec in package.json."
+    },
+    {
+      "name": "@capacitor/core",
+      "version": "8.5.1",
+      "latest": "8.5.1",
+      "status": "warn",
+      "tier": 1,
+      "notes": "Declared ^8.5.0 has Critical CVE-2026-103922 (CVSS 9.3). Lockfile has 8.5.1; bump spec in package.json."
+    },
+    {
+      "name": "vitest",
+      "version": "4.1.10",
+      "latest": "4.1.11",
+      "status": "warn",
+      "tier": 1,
+      "notes": "CVE-2026-84373 in @vitest/mocker@4.1.10; patched in 4.1.11"
+    },
+    {
+      "name": "@vitest/coverage-v8",
+      "version": "4.1.10",
+      "latest": "4.1.11",
+      "status": "good",
+      "tier": 2,
+      "notes": "Tracks Vitest runner version"
+    },
+    {
+      "name": "jsdom",
+      "version": "29.1.1",
+      "latest": "29.1.1",
+      "status": "warn",
+      "tier": 1,
+      "notes": "Transitive undici@7.29.0 has known advisories; override to ^7.30.1"
+    },
+    {
+      "name": "terser",
+      "version": "5.49.0",
+      "latest": "5.49.0",
+      "status": "good",
+      "tier": 1,
+      "notes": "Clean. Modern ES grammar minification."
+    },
+    {
+      "name": "prettier",
+      "version": "3.9.6",
+      "latest": "3.9.6",
+      "status": "good",
+      "tier": 2,
+      "notes": "Clean. Enforces consistent project style."
+    },
+    {
+      "name": "eslint",
+      "version": "10.8.0",
+      "latest": "10.8.0",
+      "status": "good",
+      "tier": 1,
+      "notes": "Clean. ESLint v10 flat config."
+    }
+  ],
+  "practices": {
+    "codeQuality": [
+      {
+        "status": "good",
+        "finding": "Clean ES module architecture with separated subsystems (audio-manager, event-bus, collision-manager, particles, ui-utils).",
+        "source": "Tier 1: Code Review"
+      }
+    ],
+    "architecture": [
+      {
+        "status": "good",
+        "finding": "Decoupled pub/sub architecture via EventManager and explicit pair-binding collision detection in CollisionManager.",
+        "source": "Tier 1: Architectural Audit"
+      }
+    ],
+    "testing": [
+      {
+        "status": "good",
+        "finding": "154 passing unit, progression, and audio regression tests in Vitest test suite with pairwise-distinct phoneme waveform assertions.",
+        "source": "Tier 1: Vitest Test Run"
+      }
+    ],
+    "security": [
+      {
+        "status": "warn",
+        "finding": "Vite and @vitest/mocker development dependencies contain known path traversal and cross-origin execution advisories.",
+        "source": "Tier 1: GHSA Advisories"
+      }
+    ],
+    "performance": [
+      {
+        "status": "good",
+        "finding": "Compositor-only transforms for animations, Web Audio API context suspension on blur, and debounced window resize handling.",
+        "source": "Tier 1: Chromium GPU Compositing Docs"
+      }
+    ],
+    "documentation": [
+      {
+        "status": "good",
+        "finding": "Comprehensive documentation across docs/ directory detailing roadmap, architecture, sound generation, and visual enhancements.",
+        "source": "Tier 2: Project Docs"
+      }
+    ]
+  },
+  "optimality": {
+    "algorithm": "Live Euclidean distance calculation with frame-time clamped delta enables homing asteroids to hit orbiting target planets reliably.",
+    "complexity": "Collision detection evaluates registered pairs in O(1) direct lookup, avoiding O(N*M) broadphase loops.",
+    "resources": "Procedural Web Audio API sound synthesis requires zero asset downloads and executes on dedicated audio thread.",
+    "alternatives": [
+      "DOM particle element pooling works well up to 100 elements; upgrading to single Canvas2D particle layer recommended for 4K whiteboards."
+    ],
+    "scalability": "Maintains 60 FPS under continuous multi-touch classroom usage on Android WebViews."
+  },
+  "agentFiles": [
+    {
+      "type": "docs",
+      "path": "docs/recommendations.md",
+      "status": "current",
+      "notes": "Updated with excitement overhaul and architectural recommendations."
+    },
+    {
+      "type": "docs",
+      "path": "docs/ROADMAP.md",
+      "status": "current",
+      "notes": "Accurately documents A-Z curriculum scope and PWA status."
+    }
+  ],
+  "externalResearch": [
+    {
+      "strategy": "cve-driven",
+      "query": "npm audit and vulnerability databases",
+      "source": "GitHub Advisory Database & OSV.dev",
+      "tier": 1,
+      "finding": "Vite 8.2.0, Capacitor 8.5.0, and Vitest 4.1.10 require patch upgrades to clear CVE-2026-112945, CVE-2026-103922, and CVE-2026-84373.",
+      "url": "https://github.com/advisories"
+    },
+    {
+      "strategy": "pattern-driven",
+      "query": "early childhood phonics gamification and web audio synthesis",
+      "source": "W3C Web Audio API Spec & Pediatric UX Research",
+      "tier": 1,
+      "finding": "FM bell synthesis with inharmonic 1.414x ratio and pentatonic scale ensures consonant chimes; grace-period streak shield prevents child disengagement.",
+      "url": "https://www.w3.org/TR/webaudio/"
+    },
+    {
+      "strategy": "codebase-first",
+      "query": "Capacitor Android WebView and BenQ IFP input performance",
+      "source": "W3C Pointer Events Level 3 & Chromium GPU Docs",
+      "tier": 1,
+      "finding": "W3C Pointer Events with event.getCoalescedEvents() and { passive: true } listeners provide zero-latency 40-point whiteboard tracking without VRAM layer bloat.",
+      "url": "https://www.w3.org/TR/pointerevents/"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "high",
+      "title": "Security Patch Dependency Manifest & Node Engine",
+      "why": "Protects development servers and native Android packaging against active CVEs in Vite, Capacitor, and Vitest.",
+      "what": "Bump vite to ^8.2.4, @capacitor/* to ^8.5.1, vitest to ^4.1.11, and engines.node to >=22.13.0.",
+      "endpoint": "npm update vite @capacitor/cli @capacitor/core vitest @vitest/coverage-v8",
+      "interactiveControl": "package.json dependencies",
+      "effort": "15 minutes",
+      "source": "Tier 1: GHSA Advisories"
+    },
+    {
+      "priority": "high",
+      "title": "Grace-Shielded Streak Multiplier & Soft Decay Engine",
+      "why": "Prevents young learners (ages 4-7) from becoming emotionally discouraged by instant zero resets when tapping a distractor planet.",
+      "what": "Implement a 1-hit Streak Shield that absorbs the first incorrect tap, followed by soft multiplier decay (-1x instead of instant reset to 0).",
+      "endpoint": "GameState.handleIncorrectCollision()",
+      "interactiveControl": "#streak-banner (Shield icon: 🛡️ SHIELD SAVED STREAK!)",
+      "effort": "2 hours",
+      "source": "Tier 2: Pediatric UX Research (Ryan & Deci SDT)"
+    },
+    {
+      "priority": "medium",
+      "title": "In-Game Classroom Diagnostic & Telemetry API",
+      "why": "Unlocks real-time teacher observability across classroom tablets or BenQ interactive flat panels without manual JSON downloads.",
+      "what": "Add a REST export/webhook endpoint supporting batch session sync, per-phoneme confusion matrix logging, and an interactive dashboard widget.",
+      "endpoint": "POST /api/v1/telemetry/session",
+      "interactiveControl": "teacher-export --format json --range session",
+      "effort": "1 day",
+      "source": "references/feature-recommendation-format.md"
+    },
+    {
+      "priority": "medium",
+      "title": "Hardware-Accelerated Canvas2D Particle Engine Upgrade",
+      "why": "DOM element pooling caps particle throughput at ~100 elements before triggering style recalculation drops on 4K BenQ boards.",
+      "what": "Upgrade ParticleSystem in js/particles.js to render bursts, starfield, and debris directly onto a single transparent <canvas> element.",
+      "endpoint": "js/particles.js (CanvasParticleEngine)",
+      "interactiveControl": "Performance SLA: Locked 60 FPS at 3840x2160 with 1,500 particles",
+      "effort": "1-2 days",
+      "source": "Tier 1: Chromium Life of a Pixel"
+    },
+    {
+      "priority": "low",
+      "title": "W3C Pointer Events & Coalesced Digitizer Integration",
+      "why": "Maximizes multi-student touch tracking precision on 40-point interactive whiteboards without compositor scroll lag.",
+      "what": "Transition android-benq-init.js from legacy touch events to W3C Pointer Events (pointerdown, pointermove) with event.getCoalescedEvents() and { passive: true }.",
+      "endpoint": "js/android-benq-init.js",
+      "interactiveControl": "W3C Pointer Events Level 3 (pointerId, setPointerCapture)",
+      "effort": "4 hours",
+      "source": "Tier 1: W3C Pointer Events Spec"
+    }
+  ],
+  "diagrams": {
+    "backend": "docs/backend-architecture.mmd",
+    "frontend": "docs/frontend-architecture.mmd",
+    "research": "docs/research-findings.mmd",
+    "entire": "docs/entire-project.mmd"
+  }
+}

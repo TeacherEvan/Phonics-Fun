@@ -1,0 +1,33 @@
+graph TD
+    subgraph Build_and_Packaging ["Build & Toolchain Environment"]
+        Vite["Vite 8.2 (Bundler & Dev Server)"]
+        ESLint["ESLint 10.4 (Flat Config)"]
+        Prettier["Prettier 3.8 (Code Style)"]
+        Vitest["Vitest 4.1 (Unit & Regression Tests)"]
+        Capacitor["Capacitor 8.5 (Android Packaging)"]
+    end
+
+    subgraph Runtime_Application ["Runtime Application Core"]
+        Main["Main Game Controller (js/main.js)"]
+        AudioMgr["Audio Manager (Web Audio API + Synth)"]
+        Particles["Particle System (Starfield & Explosions)"]
+        Collision["Collision Detection Engine"]
+        Display["Display & Touch Manager"]
+    end
+
+    subgraph Educational_Curriculum ["A-Z Phonics Curriculum"]
+        LetterData["Canonical Vocabulary Table (js/letter-data.js)"]
+        PhonemeMap["26 Unique Phoneme Frequencies"]
+        AdaptiveEngine["Dynamic Difficulty Scaffolding (Easy/Normal/Hard)"]
+    end
+
+    subgraph Classroom_and_Student_UX ["Classroom & Student Experience"]
+        TouchDisplays["BenQ Whiteboards & Android Tablets"]
+        VisualJuice["Combo Badges, Hyperspace Warp & Stars"]
+        TeacherExport["Teacher Diagnostic Export (JSON Session Log)"]
+        PWAOffline["Offline PWA Service Worker"]
+    end
+
+    Build_and_Packaging --> Runtime_Application
+    Runtime_Application --> Educational_Curriculum
+    Runtime_Application --> Classroom_and_Student_UX

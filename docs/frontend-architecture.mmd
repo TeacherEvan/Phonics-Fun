@@ -1,0 +1,50 @@
+graph TD
+    subgraph Core_Controller ["Game Controller (js/main.js)"]
+        GameState["GameState (State Machine)"]
+        LetterData["LetterData Vocabulary (js/letter-data.js A-Z)"]
+        AdaptiveEngine["Adaptive Difficulty Engine (DDA)"]
+        ScoreSystem["Score & Combo Streak Multiplier Tracker"]
+    end
+
+    subgraph Event_Coordination ["Event & Collision Backbone"]
+        EventBus["EventBus (js/event-bus.js)"]
+        EventManager["EventManager (js/event-manager.js Priority Queue)"]
+        CollisionManager["CollisionManager (js/collision-manager.js Pair Binding)"]
+    end
+
+    subgraph Visual_FX_and_Display ["Visual FX & Responsive Layout"]
+        ParticleSys["ParticleSystem (js/particles.js)"]
+        DisplayMgr["DisplayManager (js/display-manager.js)"]
+        UIUtils["UIUtils (js/ui-utils.js Skeletons & Transitions)"]
+        PerfUtils["PerformanceUtils (js/performance-utils.js Lazy Loading)"]
+    end
+
+    subgraph DOM_HUD_Layer ["DOM Presentation & Screen Views"]
+        WelcomeScreen["#welcome-screen"]
+        LevelSelect["#level-select-screen (A-Z Grid)"]
+        GameplayScreen["#gameplay-screen"]
+        PopupCelebration["#level-complete-popup (3-Star Rating)"]
+        FloatingContainer["#floating-text-container (Popups + Points)"]
+        StreakBadge["#streak-banner (🔥 2x..5x COMBO!)"]
+    end
+
+    GameState -->|Reads vocabulary| LetterData
+    GameState -->|Calculates accuracy| AdaptiveEngine
+    GameState -->|Updates points| ScoreSystem
+    GameState -->|Subscribes & Emits| EventManager
+    EventManager -->|Dispatches| EventBus
+    GameState -->|Registers pairs| CollisionManager
+    CollisionManager -->|Triggers hit| GameState
+
+    GameState -->|Spawns bursts| ParticleSys
+    GameState -->|Monitors viewport| DisplayMgr
+    GameState -->|Controls screens| UIUtils
+    GameState -->|Preloads assets| PerfUtils
+
+    GameState -->|Renders letter mission| GameplayScreen
+    ScoreSystem -->|Bumps live value| GameplayScreen
+    ScoreSystem -->|Animates badge| StreakBadge
+    GameState -->|Spawns juice text| FloatingContainer
+    GameState -->|Advances level| PopupCelebration
+    GameState -->|Selects letters| LevelSelect
+    GameState -->|Greets player| WelcomeScreen

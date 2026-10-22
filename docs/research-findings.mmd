@@ -1,0 +1,25 @@
+graph TD
+    subgraph Track1 ["Track 1: CVE & Dependency Security (cve-driven)"]
+        T1_Vite["vite@8.2.0: 3 Moderate CVEs -> Upgrade to >=8.2.4"]
+        T1_Cap["@capacitor/cli@8.5.0: Critical CVE-2026-103922 -> Pin to ^8.5.1"]
+        T1_Vitest["@vitest/mocker@4.1.10: CVE-2026-84373 -> Upgrade to >=4.1.11"]
+        T1_Engines["Node Engines: jsdom/eslint require >=22.13.0 instead of >=22"]
+    end
+
+    subgraph Track2 ["Track 2: Early Childhood Phonics Gamification (pattern-driven)"]
+        T2_Streak["Child Psychology (Ages 4-7): Soft Decay / Grace Shield over Punitive Reset"]
+        T2_Audio["Web Audio Synthesis: FM Chimes with Inharmonic 1.414x Ratio & Major Pentatonic Scale"]
+        T2_Rewards["Multisensory Micro-Rewards: Floating +Points, Sparkle Explosions, Star Rating"]
+        T2_A11y["Accessibility & Safety: >=48px Touch Targets, WCAG 4.5:1 Contrast, prefers-reduced-motion"]
+    end
+
+    subgraph Track3 ["Track 3: Mobile & Interactive Whiteboard Optimization (codebase-first)"]
+        T3_IFP["BenQ IFP Whiteboard: W3C Pointer Events with pointerId & rAF Coalesced Events"]
+        T3_VRAM["Android WebView VRAM: Avoid will-change sprawl; 4K layer = 33MB RAM"]
+        T3_PWA["Service Worker: CacheFirst with HTTP 206 Partial Content Range Parsing for Audio"]
+        T3_Canvas["Particle Evolution: Single Canvas2D replaces DOM element pooling at 4K"]
+    end
+
+    Track1 --> Synthesis["Unified Production Blueprint"]
+    Track2 --> Synthesis
+    Track3 --> Synthesis

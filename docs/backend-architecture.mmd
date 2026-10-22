@@ -1,0 +1,52 @@
+graph TD
+    subgraph PWA_and_Offline_Layer ["PWA & Offline Service Layer"]
+        SW["Service Worker (public/sw.js)"]
+        CacheStorage["CacheStorage (v2.0-core)"]
+        RangeHandler["HTTP Range Request Handler (206 Partial Content)"]
+        StaticAssets["Static Sound & Image Cache"]
+    end
+
+    subgraph Native_Platform_Bridge ["Capacitor Native Platform Bridge"]
+        CapCore["@capacitor/core (v8.5.1)"]
+        CapCLI["@capacitor/cli (v8.5.1)"]
+        AndroidWV["Android WebView (Hardware Accelerated)"]
+        BenQShim["AndroidBenQInitializer (js/android-benq-init.js)"]
+    end
+
+    subgraph Audio_Architecture ["Web Audio API Audio Graph (js/audio-manager.js)"]
+        AudioCtx["AudioContext (Hardware Clock)"]
+        MasterGain["MasterGainNode"]
+        MusicGain["MusicGainNode (Low Priority)"]
+        EffectsGain["EffectsGainNode (Medium Priority)"]
+        VoiceGain["VoiceGainNode (High Priority)"]
+
+        subgraph Sound_Generators ["Procedural Synthesizers (Zero Download)"]
+            StreakChime["FM Bell Chime (Carrier + Modulator 1.414x)"]
+            MissBoing["Incorrect Pitch Drop Synthesizer"]
+            Fanfare["Multi-Chord Victory Fanfare"]
+            PhonemeOsc["Phoneme Formant Oscillator Bank"]
+        end
+
+        subgraph Audio_Fallbacks ["Voice Fallback System"]
+            HTML5Audio["HTML5 <audio> (Recorded G Assets)"]
+            SpeechSynth["Web Speech API (SpeechSynthesisUtterance @ 0.85 rate)"]
+        end
+    end
+
+    SW -->|CacheFirst Strategy| CacheStorage
+    SW --> RangeHandler
+    RangeHandler --> StaticAssets
+    CapCore --> AndroidWV
+    AndroidWV --> BenQShim
+
+    AudioCtx --> MasterGain
+    MasterGain --> MusicGain
+    MasterGain --> EffectsGain
+    MasterGain --> VoiceGain
+
+    StreakChime --> EffectsGain
+    MissBoing --> EffectsGain
+    Fanfare --> EffectsGain
+    PhonemeOsc --> VoiceGain
+    HTML5Audio --> VoiceGain
+    SpeechSynth -.->|Fallback when WAV absent| AudioCtx

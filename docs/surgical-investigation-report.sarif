@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Surgical-Investigation",
+          "version": "1.1.0",
+          "informationUri": "https://github.com/TeacherEvan/Phonics-Fun",
+          "rules": [
+            {
+              "id": "DEPENDENCY-AUDIT",
+              "name": "Dependency Audit Finding",
+              "shortDescription": { "text": "Dependency version, security vulnerability, or maintenance finding" },
+              "fullDescription": { "text": "Found during Step 3 (Dependency Audit) of surgical-investigation." },
+              "defaultConfiguration": { "level": "warning" }
+            },
+            {
+              "id": "PRACTICE-REVIEW",
+              "name": "Best Practice Assessment",
+              "shortDescription": { "text": "Code quality, architecture, testing, security, performance, or docs issue" },
+              "fullDescription": { "text": "Found during Step 4 (Engineering Best Practices) of surgical-investigation." },
+              "defaultConfiguration": { "level": "note" }
+            },
+            {
+              "id": "RECOMMENDATION",
+              "name": "Feature Recommendation",
+              "shortDescription": { "text": "Actionable feature recommendation with endpoint or interactive control" },
+              "fullDescription": { "text": "Produced during Step 8a (Recommendations) of surgical-investigation." },
+              "defaultConfiguration": { "level": "note" }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DEPENDENCY-AUDIT",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Dependency 'vite' at 8.2.0 has known CVEs (CVE-2026-112945, CVE-2026-112946, CVE-2026-112947); upgrade to >=8.2.4 recommended."
+          },
+          "properties": {
+            "priority": "high",
+            "why": "Prevents cross-origin script execution and unauthorized host file access via dev server.",
+            "what": "Bump vite to ^8.2.4 in package.json",
+            "effort": "15 minutes",
+            "source": "[Tier 1: GHSA-9jrq-w75r-8gcw]"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json",
+                  "uriBaseId": "PROJECTROOT"
+                },
+                "region": {
+                  "startLine": 48,
+                  "startColumn": 5
+                }
+              },
+              "message": {
+                "text": "vite dependency declaration"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DEPENDENCY-AUDIT",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "Dependency '@capacitor/cli' specification '^8.5.0' includes vulnerable version 8.5.0 with Critical CVE-2026-103922 (CVSS 9.3); pin to '^8.5.1'."
+          },
+          "properties": {
+            "priority": "high",
+            "why": "Prevents remote content from executing inside WebView at the local app origin via HTTP proxy bypass.",
+            "what": "Pin @capacitor/core and @capacitor/cli to ^8.5.1 in package.json",
+            "effort": "15 minutes",
+            "source": "[Tier 1: GHSA-rvm3-566m-v7fv]"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json",
+                  "uriBaseId": "PROJECTROOT"
+                },
+                "region": {
+                  "startLine": 39,
+                  "startColumn": 5
+                }
+              },
+              "message": {
+                "text": "@capacitor/cli and @capacitor/core dependency declarations"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "DEPENDENCY-AUDIT",
+          "ruleIndex": 0,
+          "level": "warning",
+          "message": {
+            "text": "Dependency 'vitest' at 4.1.10 includes '@vitest/mocker@4.1.10' with CVE-2026-84373 (Path Traversal / Arbitrary File Read); upgrade to >=4.1.11."
+          },
+          "properties": {
+            "priority": "high",
+            "why": "Prevents local path traversal via test redirect mocks.",
+            "what": "Bump vitest and @vitest/coverage-v8 to ^4.1.11 in package.json",
+            "effort": "15 minutes",
+            "source": "[Tier 1: GHSA-82fw-gwwq-j7x9]"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json",
+                  "uriBaseId": "PROJECTROOT"
+                },
+                "region": {
+                  "startLine": 49,
+                  "startColumn": 5
+                }
+              },
+              "message": {
+                "text": "vitest dependency declaration"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RECOMMENDATION",
+          "ruleIndex": 2,
+          "level": "note",
+          "message": {
+            "text": "Implement Grace-Shielded Streak Multiplier and soft decay engine for learners ages 4-7."
+          },
+          "properties": {
+            "priority": "high",
+            "why": "Prevents young learners from becoming emotionally discouraged by instant zero resets when tapping a distractor planet.",
+            "what": "Implement 1-hit Streak Shield that absorbs the first incorrect tap, followed by soft multiplier decay (-1x instead of instant reset to 0).",
+            "endpoint": "GameState.handleIncorrectCollision()",
+            "interactiveControl": "#streak-banner (Shield icon: 🛡️ SHIELD SAVED STREAK!)",
+            "effort": "2 hours",
+            "source": "Tier 2: Pediatric UX Research (Ryan & Deci SDT)"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "js/main.js",
+                  "uriBaseId": "PROJECTROOT"
+                },
+                "region": {
+                  "startLine": 609,
+                  "startColumn": 5
+                }
+              },
+              "message": {
+                "text": "handleIncorrectCollision method in GameState"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "RECOMMENDATION",
+          "ruleIndex": 2,
+          "level": "note",
+          "message": {
+            "text": "Add Classroom Diagnostic & Telemetry API for real-time teacher observability."
+          },
+          "properties": {
+            "priority": "medium",
+            "why": "Unlocks real-time teacher observability across classroom tablets or BenQ interactive flat panels without manual JSON downloads.",
+            "what": "Add a REST export/webhook endpoint supporting batch session sync, per-phoneme confusion matrix logging, and an interactive dashboard widget.",
+            "endpoint": "POST /api/v1/telemetry/session",
+            "interactiveControl": "teacher-export --format json --range session",
+            "effort": "1 day",
+            "source": "references/feature-recommendation-format.md"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "js/main.js",
+                  "uriBaseId": "PROJECTROOT"
+                },
+                "region": {
+                  "startLine": 2073,
+                  "startColumn": 5
+                }
+              },
+              "message": {
+                "text": "exportTeacherData method in GameState"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
