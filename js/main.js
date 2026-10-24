@@ -1049,6 +1049,17 @@ class GameState {
         const planetsContainer = document.querySelector('.planets-container');
         planetsContainer.innerHTML = '';
 
+        // Drop the previous board from the collision registry before building
+        // the new one. The innerHTML reset detaches those elements, and a
+        // detached planet measures 0x0 at (0,0) while keeping its old radius,
+        // so an asteroid spawning in the top-left corner could still "hit" a
+        // ghost of a letter that is no longer being played.
+        for (const id of Array.from(this.collisionManager.objects.keys())) {
+            if (id.startsWith('planet-')) {
+                this.collisionManager.unregisterObject(id);
+            }
+        }
+
         const letterLower = this.activeLetterLevel.toLowerCase();
 
         // One orbit radius per board, published to CSS so the planetOrbit
