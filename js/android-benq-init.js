@@ -298,29 +298,17 @@ class AndroidBenQInitializer {
     }
 
     setupTouchOptimization() {
-        // Optimize touch events for better performance
-        const optimizeTouchEvents = () => {
-            const gameArea = document.querySelector('.game-area');
-            if (gameArea) {
-                // Use passive event listeners where possible
-                gameArea.addEventListener(
-                    'touchstart',
-                    (e) => {
-                        // Only prevent default if necessary
-                        if (e.target.classList.contains('planet')) {
-                            e.preventDefault();
-                        }
-                    },
-                    { passive: false },
-                );
-            }
-        };
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', optimizeTouchEvents);
-        } else {
-            optimizeTouchEvents();
-        }
+        // No touchstart listener is installed on purpose.
+        //
+        // This used to call `e.preventDefault()` on every touchstart that hit a
+        // `.planet`. Cancelling touchstart suppresses the browser's synthetic
+        // mousedown/mouseup/click sequence, so on any real touch device the
+        // planets' click handlers never fired and taps scored nothing — the
+        // game was readable but unplayable on a phone.
+        //
+        // Scrolling is already blocked by `touch-action: none` on body and
+        // `.game-area`, and by the non-passive `touchmove` handler in
+        // js/main.js, so there is nothing left for this method to do.
     }
 
     setupPerformanceOptimization() {

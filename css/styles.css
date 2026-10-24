@@ -33,6 +33,7 @@ body {
     left: 0;
     width: 100%;
     height: 100vh;
+    height: 100dvh; /* mobile browser chrome must not clip the playfield */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -494,6 +495,7 @@ body {
     position: relative;
     width: 100%;
     height: 100vh;
+    height: 100dvh;
 }
 
 .galaxy-background {
@@ -846,10 +848,11 @@ body {
 
 @keyframes planetOrbit {
     0% {
-        transform: rotate(0deg) translateX(200px) rotate(0deg);
+        transform: rotate(0deg) translateX(var(--orbit-radius, 200px)) rotate(0deg);
     }
     100% {
-        transform: rotate(360deg) translateX(200px) rotate(-360deg);
+        transform: rotate(360deg) translateX(var(--orbit-radius, 200px))
+            rotate(-360deg);
     }
 }
 
@@ -1991,6 +1994,9 @@ img.loaded {
     --sky-spark: #76d7ff;
     --chalk: #f9f4e8;
     --chalk-soft: #dbe7ff;
+    /* Orbit radius is written by the game loop (js/main.js) so that a
+       planet's whole orbit fits the space the HUD leaves free. */
+    --orbit-radius: 200px;
 }
 
 body {
@@ -2878,14 +2884,106 @@ h3,
     }
 }
 
-@media (max-width: 900px) {
-    .game-ui,
+/* ── Compact HUD ──────────────────────────────────────────────────────────
+   Below 900px wide (and on any short landscape phone) the mission panels
+   become ONE thin row. The previous rule stacked them into a column, which
+   measured 364px tall — 41% of a 390×844 phone and 93% of an 844×390 phone,
+   covering the playfield and the letter planets hidden behind it. */
+@media (max-width: 900px), (max-height: 620px) and (orientation: landscape) {
+    .game-ui {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        gap: 0.4rem;
+        flex-direction: row;
+        align-items: stretch;
+        font-size: 1rem;
+        /* Only the panels themselves should swallow a tap; the gaps between
+           them let the child reach a planet that drifts under the strip. */
+        pointer-events: none;
+    }
+
     .hud-cluster {
-        flex-direction: column;
+        flex-direction: row;
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 0.4rem;
+    }
+
+    .active-letter-panel,
+    .progress-panel,
+    .score-display {
+        pointer-events: auto;
+    }
+
+    .active-letter-panel {
+        flex: 0 0 auto;
+        min-width: 0;
+        padding: 0.3rem 0.45rem;
+        gap: 0;
+        align-content: center;
+        justify-items: center;
+        border-width: 2px;
+        border-radius: 18px;
+    }
+
+    /* The gold tile and the bar explain themselves; the labels were eating
+       a third of the strip's height. */
+    .active-letter-panel .hud-label,
+    .progress-panel .hud-label {
+        display: none;
+    }
+
+    .active-letter-display {
+        width: clamp(38px, 11vw, 56px);
+        height: clamp(38px, 11vw, 56px);
+        border-radius: 14px;
+        font-size: clamp(1.3rem, 4.8vw, 1.8rem);
+        box-shadow: 0 5px 0 rgba(117, 56, 6, 0.45);
+    }
+
+    .progress-panel {
+        padding: 0.3rem 0.55rem;
+        gap: 0;
+        align-content: center;
+        min-width: 0;
+        border-width: 2px;
+        border-radius: 18px;
+    }
+
+    .progress-bar {
+        height: clamp(14px, 3.4vw, 20px);
+        border-width: 2px;
+        border-radius: 12px;
     }
 
     .score-display {
+        flex: 0 0 auto;
         min-width: 0;
+        padding: 0.3rem 0.5rem;
+        gap: 0.15rem 0.6rem;
+        align-content: center;
+        grid-auto-flow: column;
+        grid-auto-columns: auto;
+        border-width: 2px;
+        border-radius: 18px;
+    }
+
+    .score-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.3rem;
+        white-space: nowrap;
+    }
+
+    .score-value {
+        font-size: clamp(0.95rem, 3.6vw, 1.25rem);
+    }
+
+    .hud-label,
+    .score-label {
+        font-size: 0.6rem;
+        letter-spacing: 0.06em;
     }
 }
 
@@ -2902,9 +3000,11 @@ h3,
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
+    /* Keep the mission tile small: this block used to force a 76px tile,
+       which inflated the compact HUD strip back to ~106px tall. */
     .active-letter-display {
-        width: 76px;
-        height: 76px;
+        width: clamp(38px, 11vw, 56px);
+        height: clamp(38px, 11vw, 56px);
     }
 
     .overlay-content,

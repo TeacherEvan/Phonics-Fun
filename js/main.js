@@ -428,24 +428,83 @@ class GameState {
     }
 
     /**
+     * Radius of a planet's orbit, in pixels. Held to a fraction of the short
+     * viewport edge so a phone does not swing its targets off-screen.
+     * @returns {number}
+     */
+    computeOrbitRadius() {
+        const vmin = Math.min(window.innerWidth, window.innerHeight);
+        return Math.round(Math.min(200, Math.max(44, vmin * 0.22)));
+    }
+
+    /**
+     * Position a planet so that its whole orbit stays inside the part of the
+     * playfield the HUD does not cover, and return the radius actually used.
+     *
+     * The HUD is an opaque overlay anchored to the top of the screen. Planets
+     * used to be scattered over the full window, so on a phone most targets
+     * spawned underneath it — visible to the DOM, invisible and untappable to
+     * the child.
+     *
+     * @param {HTMLElement} planet - Element already mounted, so it has a width
+     * @param {number} requestedRadius - Desired orbit radius in pixels
+     * @returns {number} The orbit radius that fits
+     */
+    placePlanetInPlayArea(planet, requestedRadius) {
+        const area = document.querySelector('.game-area');
+        if (!area) return requestedRadius;
+
+        const areaRect = area.getBoundingClientRect();
+        const hud = document.querySelector('.game-ui');
+        const hudBottom = hud
+            ? Math.max(0, hud.getBoundingClientRect().bottom - areaRect.top)
+            : 0;
+
+        const size = planet.offsetWidth || 100;
+        const half = size / 2;
+        const pad = 6;
+
+        const freeWidth = Math.max(0, areaRect.width - 2 * (half + pad));
+        const freeHeight = Math.max(
+            0,
+            areaRect.height - hudBottom - 2 * (half + pad),
+        );
+        const radius = Math.max(
+            0,
+            Math.min(requestedRadius, freeWidth / 2, freeHeight / 2),
+        );
+
+        const minX = half + pad + radius;
+        const maxX = areaRect.width - half - pad - radius;
+        const minY = hudBottom + half + pad + radius;
+        const maxY = areaRect.height - half - pad - radius;
+
+        const centreX = minX + Math.random() * Math.max(0, maxX - minX);
+        const centreY = minY + Math.random() * Math.max(0, maxY - minY);
+
+        planet.style.left = `${Math.round(centreX - half)}px`;
+        planet.style.top = `${Math.round(centreY - half)}px`;
+
+        return Math.round(radius);
+    }
+
+    /**
      * Adjust planet positions for current viewport
      * @param {Object} displayInfo - Display information
      */
-    adjustPlanetPositions(displayInfo) {
-        const planets = document.querySelectorAll('.planet');
-        const { width, height } = displayInfo.viewport;
+    adjustPlanetPositions(_displayInfo) {
+        const orbitRadius = this.computeOrbitRadius();
+        document.documentElement.style.setProperty(
+            '--orbit-radius',
+            `${orbitRadius}px`,
+        );
 
-        planets.forEach((planet, _index) => {
-            // Recalculate position to keep planets visible
-            const currentLeft = parseInt(planet.style.left, 10) || 0;
-            const currentTop = parseInt(planet.style.top, 10) || 0;
-
-            // Ensure planet stays within new viewport bounds
-            const newLeft = Math.min(currentLeft, width - 120);
-            const newTop = Math.min(currentTop, height - 120);
-
-            planet.style.left = `${Math.max(10, newLeft)}px`;
-            planet.style.top = `${Math.max(10, newTop)}px`;
+        document.querySelectorAll('.planet').forEach((planet) => {
+            const usedRadius = this.placePlanetInPlayArea(
+                planet,
+                orbitRadius,
+            );
+            planet.style.setProperty('--orbit-radius', `${usedRadius}px`);
         });
     }
 
@@ -992,6 +1051,14 @@ class GameState {
 
         const letterLower = this.activeLetterLevel.toLowerCase();
 
+        // One orbit radius per board, published to CSS so the planetOrbit
+        // keyframes and the spawn bounds cannot disagree.
+        const orbitRadius = this.computeOrbitRadius();
+        document.documentElement.style.setProperty(
+            '--orbit-radius',
+            `${orbitRadius}px`,
+        );
+
         // Dynamic speed based on adaptive difficulty
         const targetSpeed = 8 / this.difficultySpeedMultiplier;
 
@@ -1013,11 +1080,16 @@ class GameState {
                 `Target planet with letter ${this.activeLetterLevel}`,
             );
 
-            // Random position within game area
-            const posX = Math.random() * (window.innerWidth - 100);
-            const posY = Math.random() * (window.innerHeight - 100);
-            targetPlanet.style.left = `${posX}px`;
-            targetPlanet.style.top = `${posY}px`;
+            // Mount first: the play-area helper measures the rendered size.
+            planetsContainer.appendChild(targetPlanet);
+            const targetOrbit = this.placePlanetInPlayArea(
+                targetPlanet,
+                orbitRadius,
+            );
+            targetPlanet.style.setProperty(
+                '--orbit-radius',
+                `${targetOrbit}px`,
+            );
 
             // Staggered animation and dynamic speed
             targetPlanet.style.animation = `planetOrbit ${targetSpeed}s linear infinite, planetGlow 2s ease-in-out infinite alternate`;
@@ -1030,8 +1102,6 @@ class GameState {
                     this.activeLetterLevel,
                 );
             });
-
-            planetsContainer.appendChild(targetPlanet);
 
             // Register with collision detection system
             this.collisionManager.registerObject(
@@ -1066,11 +1136,16 @@ class GameState {
                 `Distractor planet with letter ${distractorLetter}`,
             );
 
-            // Random position
-            const posX = Math.random() * (window.innerWidth - 100);
-            const posY = Math.random() * (window.innerHeight - 100);
-            distractorPlanet.style.left = `${posX}px`;
-            distractorPlanet.style.top = `${posY}px`;
+            // Mount first so the play-area helper can measure the planet.
+            planetsContainer.appendChild(distractorPlanet);
+            const distractorOrbit = this.placePlanetInPlayArea(
+                distractorPlanet,
+                orbitRadius,
+            );
+            distractorPlanet.style.setProperty(
+                '--orbit-radius',
+                `${distractorOrbit}px`,
+            );
 
             // Slower animation and dynamic speed
             distractorPlanet.style.animation = `planetOrbit ${distractorSpeed}s linear infinite, planetGlow 3s ease-in-out infinite alternate`;
@@ -1083,8 +1158,6 @@ class GameState {
                     distractorLetter,
                 );
             });
-
-            planetsContainer.appendChild(distractorPlanet);
 
             // Register with collision detection
             this.collisionManager.registerObject(
