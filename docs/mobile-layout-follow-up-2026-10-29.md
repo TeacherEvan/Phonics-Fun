@@ -27,16 +27,20 @@ ARIA value to assistive technology.
   touches score/active state.
 - Reposition from `handleDisplayChange()` and `handleDeviceOrientationChange()`;
   `orientationchange` is covered even when the browser does not emit `resize`.
+- Lay the complete board out once on a responsive grid
+  (`placePlanetInPlayArea()` now takes a `{ index, total }` slot). Per-planet
+  random placement could stack two planets on top of each other on a short
+  landscape screen; the grid keeps adjacent centres at least a planet apart.
 - Replace `display: none` on the compact HUD labels with a visually-hidden
   clip pattern, and give `.progress-bar` a `progressbar` role with live
   `aria-valuenow` / `aria-valuemax` / `aria-valuetext` values.
 - Respect `env(safe-area-inset-*)` for the compact HUD on notched devices.
-- Add `harness/tests/mobile-layout.test.mjs` for the resize contract and
-  320×568 orbit bounds.
+- Add `harness/tests/mobile-layout.test.mjs` for the resize contract,
+  320×568 orbit bounds, deterministic re-layout, and the 9-planet grid.
 
 ## Verification
 
-- `npm test`: 179 passed, 3 skipped.
+- `npm test`: 181 passed, 3 skipped.
 - `npm run lint` and `npm run format:check`: clean.
 - `npm run build`: green (including the legacy bundle).
 - Playwright touch test at 390×844: real `touchscreen.tap()` on a target planet

@@ -456,9 +456,15 @@ class GameState {
      *
      * @param {HTMLElement} planet - Element already mounted, so it has a width
      * @param {number} requestedRadius - Desired orbit radius in pixels
+     * @param {{ index: number, total: number }} [slot] - Position in the
+     *     playfield grid. The default places a single planet in the centre.
      * @returns {number} The orbit radius that fits
      */
-    placePlanetInPlayArea(planet, requestedRadius) {
+    placePlanetInPlayArea(
+        planet,
+        requestedRadius,
+        slot = { index: 0, total: 1 },
+    ) {
         const area = document.querySelector('.game-area');
         if (!area) return requestedRadius;
 
@@ -486,9 +492,32 @@ class GameState {
         const maxX = areaRect.width - half - pad - radius;
         const minY = hudBottom + half + pad + radius;
         const maxY = areaRect.height - half - pad - radius;
+        const rangeX = Math.max(0, maxX - minX);
+        const rangeY = Math.max(0, maxY - minY);
 
-        const centreX = minX + Math.random() * Math.max(0, maxX - minX);
-        const centreY = minY + Math.random() * Math.max(0, maxY - minY);
+        const total = Math.max(1, Number(slot?.total) || 1);
+        const index = Math.min(
+            Math.max(0, Number(slot?.index) || 0),
+            total - 1,
+        );
+        const aspect = rangeY > 0 ? rangeX / rangeY : 1;
+        const cols = Math.max(
+            1,
+            Math.min(
+                total,
+                Math.round(Math.sqrt(total * Math.max(0.01, aspect))),
+            ),
+        );
+        const rows = Math.ceil(total / cols);
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const xStep = cols > 1 ? rangeX / (cols - 1) : 0;
+        const yStep = rows > 1 ? rangeY / (rows - 1) : 0;
+        const itemsInRow = Math.min(cols, total - row * cols);
+        const rowOffset = cols > 1 ? ((cols - itemsInRow) * xStep) / 2 : 0;
+        const centreX =
+            cols > 1 ? minX + col * xStep + rowOffset : minX + rangeX / 2;
+        const centreY = rows > 1 ? minY + row * yStep : minY + rangeY / 2;
 
         planet.style.left = `${Math.round(centreX - half)}px`;
         planet.style.top = `${Math.round(centreY - half)}px`;
@@ -502,15 +531,29 @@ class GameState {
      */
     adjustPlanetPositions(_displayInfo) {
         const orbitRadius = this.computeOrbitRadius();
-        document.documentElement.style.setProperty(
-            '--orbit-radius',
-            `${orbitRadius}px`,
-        );
+        const planets = Array.from(document.querySelectorAll('.planet'));
 
-        document.querySelectorAll('.planet').forEach((planet) => {
-            const usedRadius = this.placePlanetInPlayArea(planet, orbitRadius);
+        if (planets.length === 0) {
+            document.documentElement.style.setProperty(
+                '--orbit-radius',
+                `${orbitRadius}px`,
+            );
+            return;
+        }
+
+        let usedRadius = orbitRadius;
+        planets.forEach((planet, index) => {
+            usedRadius = this.placePlanetInPlayArea(planet, orbitRadius, {
+                index,
+                total: planets.length,
+            });
             planet.style.setProperty('--orbit-radius', `${usedRadius}px`);
         });
+
+        document.documentElement.style.setProperty(
+            '--orbit-radius',
+            `${usedRadius}px`,
+        );
     }
 
     /**
@@ -1099,16 +1142,9 @@ class GameState {
                 `Target planet with letter ${this.activeLetterLevel}`,
             );
 
-            // Mount first: the play-area helper measures the rendered size.
+            // Mount first; the board is laid out as a grid once every planet
+            // exists (see the adjustPlanetPositions() call at the end).
             planetsContainer.appendChild(targetPlanet);
-            const targetOrbit = this.placePlanetInPlayArea(
-                targetPlanet,
-                orbitRadius,
-            );
-            targetPlanet.style.setProperty(
-                '--orbit-radius',
-                `${targetOrbit}px`,
-            );
 
             // Staggered animation and dynamic speed
             targetPlanet.style.animation = `planetOrbit ${targetSpeed}s linear infinite, planetGlow 2s ease-in-out infinite alternate`;
@@ -1155,16 +1191,8 @@ class GameState {
                 `Distractor planet with letter ${distractorLetter}`,
             );
 
-            // Mount first so the play-area helper can measure the planet.
+            // Mount first; the board grid is applied after the loop.
             planetsContainer.appendChild(distractorPlanet);
-            const distractorOrbit = this.placePlanetInPlayArea(
-                distractorPlanet,
-                orbitRadius,
-            );
-            distractorPlanet.style.setProperty(
-                '--orbit-radius',
-                `${distractorOrbit}px`,
-            );
 
             // Slower animation and dynamic speed
             distractorPlanet.style.animation = `planetOrbit ${distractorSpeed}s linear infinite, planetGlow 3s ease-in-out infinite alternate`;
@@ -1189,6 +1217,11 @@ class GameState {
                 },
             );
         });
+
+        // Lay the complete board out once. Per-planet random placement made
+        // targets stack on short landscape screens; the grid keeps at least a
+        // planet-sized gap between adjacent centres.
+        this.adjustPlanetPositions();
     }
 
     /**

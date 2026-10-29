@@ -96,4 +96,84 @@ describe('mobile playfield layout', () => {
         expect(top - radius).toBeGreaterThanOrEqual(hudBottom);
         expect(top + size + radius).toBeLessThanOrEqual(568);
     });
+
+    it('keeps a planet at the same position when the layout reruns', () => {
+        const area = document.createElement('div');
+        area.className = 'game-area';
+        document.body.appendChild(area);
+
+        const hud = document.createElement('div');
+        hud.className = 'game-ui';
+        document.body.appendChild(hud);
+
+        const planet = document.createElement('div');
+        planet.className = 'planet';
+        document.body.appendChild(planet);
+        Object.defineProperty(planet, 'offsetWidth', {
+            value: 36,
+            configurable: true,
+        });
+
+        stubRect(area, { left: 0, top: 0, width: 320, height: 568 });
+        stubRect(hud, { left: 8, top: 8, width: 304, height: 75 });
+
+        game.placePlanetInPlayArea(planet, 70);
+        const first = { left: planet.style.left, top: planet.style.top };
+
+        game.placePlanetInPlayArea(planet, 70);
+
+        expect(planet.style.left).toBe(first.left);
+        expect(planet.style.top).toBe(first.top);
+    });
+
+    it('lays out nine planets on a grid without stacking them', () => {
+        const area = document.createElement('div');
+        area.className = 'game-area';
+        document.body.appendChild(area);
+
+        const hud = document.createElement('div');
+        hud.className = 'game-ui';
+        document.body.appendChild(hud);
+
+        stubRect(area, { left: 0, top: 0, width: 320, height: 568 });
+        stubRect(hud, { left: 8, top: 8, width: 304, height: 75 });
+
+        const planets = Array.from({ length: 9 }, (_, index) => {
+            const planet = document.createElement('div');
+            planet.className = 'planet';
+            planet.textContent = 'A';
+            Object.defineProperty(planet, 'offsetWidth', {
+                value: 36,
+                configurable: true,
+            });
+            document.body.appendChild(planet);
+            const radius = game.placePlanetInPlayArea(planet, 70, {
+                index,
+                total: 9,
+            });
+            expect(radius).toBe(70);
+            return planet;
+        });
+
+        const boxes = planets.map((planet) => ({
+            left: parseFloat(planet.style.left),
+            top: parseFloat(planet.style.top),
+        }));
+
+        for (const box of boxes) {
+            expect(box.left - 70).toBeGreaterThanOrEqual(0);
+            expect(box.left + 36 + 70).toBeLessThanOrEqual(320);
+            expect(box.top - 70).toBeGreaterThanOrEqual(83);
+            expect(box.top + 36 + 70).toBeLessThanOrEqual(568);
+        }
+
+        for (let i = 0; i < boxes.length; i += 1) {
+            for (let j = i + 1; j < boxes.length; j += 1) {
+                const separatedX =
+                    Math.abs(boxes[i].left - boxes[j].left) >= 36;
+                const separatedY = Math.abs(boxes[i].top - boxes[j].top) >= 36;
+                expect(separatedX || separatedY).toBe(true);
+            }
+        }
+    });
 });
