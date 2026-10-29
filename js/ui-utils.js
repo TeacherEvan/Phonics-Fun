@@ -332,13 +332,13 @@ class UIUtils {
     hideSkeleton(element) {
         const skeleton = this.loadingStates.get(element);
         if (skeleton) {
+            this.loadingStates.delete(element);
             skeleton.style.opacity = '0';
             skeleton.style.transition = 'opacity 0.3s ease';
             setTimeout(() => {
                 if (skeleton.parentNode) {
                     skeleton.remove();
                 }
-                this.loadingStates.delete(element);
             }, 300);
         }
     }
@@ -453,11 +453,31 @@ class UIUtils {
      * @param {Function} callback - Callback after transition
      */
     transitionScreens(fromScreen, toScreen, callback) {
+        // Cancel any pending transitions
+        if (this.activeTransitionTimeouts) {
+            this.activeTransitionTimeouts.forEach((t) => clearTimeout(t));
+            this.activeTransitionTimeouts = [];
+        } else {
+            this.activeTransitionTimeouts = [];
+        }
+
+        // Clean any lingering transition classes from inactive screens
+        document.querySelectorAll('.screen').forEach((scr) => {
+            if (scr !== toScreen && scr !== fromScreen) {
+                scr.classList.remove(
+                    'screen-transition-exit',
+                    'screen-transition-exit-active',
+                    'screen-transition-enter',
+                    'screen-transition-enter-active',
+                );
+            }
+        });
+
         // Exit animation for current screen
         fromScreen.classList.add('screen-transition-exit');
         fromScreen.classList.add('screen-transition-exit-active');
 
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
             fromScreen.classList.remove(
                 'active',
                 'screen-transition-exit',
@@ -473,11 +493,13 @@ class UIUtils {
                 toScreen.classList.remove('screen-transition-enter');
             });
 
-            setTimeout(() => {
+            const t2 = setTimeout(() => {
                 toScreen.classList.remove('screen-transition-enter-active');
                 if (callback) callback();
             }, this.transitionDuration);
+            this.activeTransitionTimeouts.push(t2);
         }, this.transitionDuration);
+        this.activeTransitionTimeouts.push(t1);
     }
 
     /**

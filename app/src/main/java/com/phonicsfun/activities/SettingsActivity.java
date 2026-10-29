@@ -50,6 +50,10 @@ public class SettingsActivity extends Activity {
         // meant the volume and mute changes made here were applied to an
         // orphan instance and never reached the audio the game actually used.
         GameState gameState = GameState.getInstance();
+        if (gameState == null) {
+            new GameState(getApplicationContext());
+            gameState = GameState.getInstance();
+        }
         if (gameState != null) {
             audioManager = gameState.getAudioManager();
         } else {

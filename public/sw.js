@@ -50,12 +50,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      // Remove EVERY cache, not just the ones with a different name. Keeping
-      // the previous build's cache alive is what made stale assets persist.
+      // Clean up stale caches from previous builds, preserving current cache
       return Promise.all(
         keys.map((key) => {
-          console.log('[Service Worker] Removing cache', key);
-          return caches.delete(key);
+          if (key !== CACHE_NAME) {
+            console.log('[Service Worker] Removing old cache', key);
+            return caches.delete(key);
+          }
         })
       );
     }).then(() => self.clients.claim())

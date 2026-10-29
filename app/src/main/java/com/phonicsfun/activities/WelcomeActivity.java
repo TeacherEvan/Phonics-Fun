@@ -280,10 +280,8 @@ public class WelcomeActivity extends Activity {
         if (welcomeAnimations != null && welcomeAnimations.isRunning()) {
             welcomeAnimations.cancel();
         }
-        // Cancel only this handler's pending callbacks. Passing null would
-        // clear the entire main looper queue, cancelling unrelated framework
-        // and library work.
-        animationHandler.removeCallbacksAndMessages(this);
+        // Cancel all pending callbacks posted to this activity's animation handler
+        animationHandler.removeCallbacksAndMessages(null);
     }
     
     @Override

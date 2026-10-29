@@ -7,7 +7,7 @@
 class ParticleSystem {
     constructor() {
         this.particles = [];
-        this.maxParticles = 100;
+        this.maxParticles = 200;
         this.container = null;
         this.animationId = null;
         this.isActive = false;
@@ -45,8 +45,15 @@ class ParticleSystem {
 
     createParticle(x, y, type = 'default', options = {}) {
         if (this.particles.length >= this.maxParticles) {
-            // Remove oldest particle
-            this.removeParticle(this.particles[0]);
+            // Remove oldest non-star particle to preserve starfield ambience
+            const oldestTransient = this.particles.find(
+                (p) => p.type !== 'star',
+            );
+            if (oldestTransient) {
+                this.removeParticle(oldestTransient);
+            } else {
+                this.removeParticle(this.particles[0]);
+            }
         }
 
         const particle = {
@@ -219,7 +226,7 @@ class ParticleSystem {
 
         for (let i = 0; i < particleCount; i++) {
             const angle = (i / particleCount) * Math.PI * 2;
-            const speed = (Math.random() * 100 + 50) * intensity;
+            const speed = (Math.random() * 3 + 2) * intensity;
             const size = Math.random() * 6 + 2;
             const color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -242,10 +249,10 @@ class ParticleSystem {
                 size: 2,
                 color: '#ffffff',
                 maxLife: 0.5,
-                speed: Math.random() * 150 + 100,
+                speed: (Math.random() * 4 + 2) * intensity,
                 velocity: {
-                    x: (Math.random() - 0.5) * 200,
-                    y: (Math.random() - 0.5) * 200,
+                    x: (Math.random() - 0.5) * 6,
+                    y: (Math.random() - 0.5) * 6,
                 },
             });
         }
@@ -341,7 +348,7 @@ class ParticleSystem {
 
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 80 + 20;
+            const speed = Math.random() * 2 + 1;
             const size = Math.random() * 4 + 1;
             const color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -402,7 +409,7 @@ class ParticleSystem {
         for (let i = 0; i < count; i++) {
             const angle =
                 (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
-            const speed = Math.random() * 90 + 60;
+            const speed = Math.random() * 2.5 + 1.5;
             this.createParticle(x, y, 'spark', {
                 size: Math.random() * 5 + 3,
                 color: colors[Math.floor(Math.random() * colors.length)],
@@ -434,8 +441,8 @@ class ParticleSystem {
                     ][Math.floor(Math.random() * 5)],
                     maxLife: 2,
                     velocity: {
-                        x: (Math.random() - 0.5) * 200,
-                        y: (Math.random() - 0.5) * 200,
+                        x: (Math.random() - 0.5) * 6,
+                        y: (Math.random() - 0.5) * 6,
                     },
                     gravity: 0.02,
                 });

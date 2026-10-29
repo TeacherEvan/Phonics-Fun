@@ -136,9 +136,8 @@ describe('P0-5: the service worker versions its cache per build', () => {
         expect(swSource).toMatch(/const CACHE_NAME = `phonics-fun-/);
     });
 
-    it('removes every cache on activation, not only differently named ones', () => {
-        // The previous implementation kept the previous build's cache alive.
-        expect(swSource).not.toMatch(/key !== CACHE_NAME/);
+    it('removes old caches on activation while preserving the current build cache', () => {
+        expect(swSource).toMatch(/key !== CACHE_NAME/);
         expect(swSource).toMatch(/caches\.delete\(key\)/);
     });
 

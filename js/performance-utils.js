@@ -329,6 +329,7 @@ class PerformanceUtils {
                             self.resourceCache.set(`${letter}-${word}`, {
                                 url: result.url,
                                 image: result.image,
+                                timestamp: Date.now(),
                             });
                         } else {
                             console.log(

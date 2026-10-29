@@ -127,6 +127,9 @@ class GameState {
     get totalHits() {
         return this.requiredHitsToComplete;
     }
+    set totalHits(value) {
+        this.requiredHitsToComplete = value;
+    }
     get gameActive() {
         return this.isGameplayActive;
     }
@@ -483,32 +486,39 @@ class GameState {
             0,
             areaRect.height - hudBottom - 2 * (half + pad),
         );
-        const radius = Math.max(
-            0,
-            Math.min(requestedRadius, freeWidth / 2, freeHeight / 2),
-        );
-
-        const minX = half + pad + radius;
-        const maxX = areaRect.width - half - pad - radius;
-        const minY = hudBottom + half + pad + radius;
-        const maxY = areaRect.height - half - pad - radius;
-        const rangeX = Math.max(0, maxX - minX);
-        const rangeY = Math.max(0, maxY - minY);
 
         const total = Math.max(1, Number(slot?.total) || 1);
         const index = Math.min(
             Math.max(0, Number(slot?.index) || 0),
             total - 1,
         );
-        const aspect = rangeY > 0 ? rangeX / rangeY : 1;
+        const boardAspect = Math.max(0.25, freeWidth / Math.max(1, freeHeight));
         const cols = Math.max(
             1,
             Math.min(
                 total,
-                Math.round(Math.sqrt(total * Math.max(0.01, aspect))),
+                Math.round(Math.sqrt(total * boardAspect)),
             ),
         );
-        const rows = Math.ceil(total / cols);
+        const rows = Math.max(1, Math.ceil(total / cols));
+
+        // Cap orbit radius so sufficient free space remains for row/col separation
+        const radius = Math.max(
+            0,
+            Math.min(
+                requestedRadius,
+                freeWidth / (cols + 1),
+                freeHeight / (rows + 1),
+            ),
+        );
+
+        const minX = half + pad + radius;
+        const maxX = Math.max(minX, areaRect.width - half - pad - radius);
+        const minY = hudBottom + half + pad + radius;
+        const maxY = Math.max(minY, areaRect.height - half - pad - radius);
+        const rangeX = Math.max(0, maxX - minX);
+        const rangeY = Math.max(0, maxY - minY);
+
         const col = index % cols;
         const row = Math.floor(index / cols);
         const xStep = cols > 1 ? rangeX / (cols - 1) : 0;
@@ -658,6 +668,7 @@ class GameState {
     }
 
     handleCorrectCollision(planet, x, y, asteroidId, planetId) {
+        if (!this.isGameplayActive) return;
         console.log('Correct collision!');
 
         // Create explosion at collision point
@@ -715,10 +726,17 @@ class GameState {
             this.triggerHyperspaceWarp();
         }
 
+        // Capture current vocabulary word before incrementing index
+        const hitWordItem =
+            this.activeVocabulary[this.vocabularyIndex] ||
+            this.activeVocabulary[0];
+        this.vocabularyIndex =
+            (this.vocabularyIndex + 1) % this.activeVocabulary.length;
+
         // Voice message and word image
         setTimeout(() => {
-            this.playVocabularyAudio();
-            this.displayWordImage();
+            this.playVocabularyAudio(hitWordItem);
+            this.displayWordImage(hitWordItem);
         }, 500);
 
         // Update progress
@@ -737,6 +755,7 @@ class GameState {
 
         // Check if level complete
         if (this.correctHits >= this.totalHits) {
+            this.isGameplayActive = false;
             setTimeout(() => {
                 this.eventManager.emit('level:complete');
             }, 2000);
@@ -1218,6 +1237,16 @@ class GameState {
             );
         });
 
+        // Shuffle planets in DOM container so target and distractor planets
+        // are distributed unpredictably across grid slots rather than targets
+        // always occupying the first 5 slots.
+        const planetEls = Array.from(planetsContainer.children);
+        for (let j = planetEls.length - 1; j > 0; j--) {
+            const randIdx = Math.floor(Math.random() * (j + 1));
+            planetsContainer.appendChild(planetEls[randIdx]);
+            planetEls.splice(randIdx, 1);
+        }
+
         // Lay the complete board out once. Per-planet random placement made
         // targets stack on short landscape screens; the grid keeps at least a
         // planet-sized gap between adjacent centres.
@@ -1645,9 +1674,11 @@ class GameState {
 
     /**
      * Play voice message for current vocabulary word
+     * @param {Object|string} [item] - Vocabulary item for the hit
      */
-    playVocabularyAudio() {
-        const vocabularyItem = this.activeVocabulary[this.vocabularyIndex];
+    playVocabularyAudio(item = null) {
+        const vocabularyItem =
+            item || this.activeVocabulary[this.vocabularyIndex];
 
         // Handle both legacy string format and new object format
         let word, letter, audioKey;
@@ -1655,38 +1686,31 @@ class GameState {
             word = vocabularyItem;
             letter = 'G';
             audioKey = `voice-${word}`;
-        } else {
+        } else if (vocabularyItem) {
             word = vocabularyItem.word;
             letter = vocabularyItem.letter;
             audioKey = vocabularyItem.audioKey;
         }
 
-        this.audioManager.play(audioKey);
+        if (audioKey) {
+            this.audioManager.play(audioKey);
+        }
 
-        // Fallback to speech synthesis if audio file fails
-        setTimeout(() => {
-            if (
-                document.visibilityState === 'visible' &&
-                this.audioManager.canUseSpeechSynthesis
-            ) {
-                this.audioManager.speak(`${letter} is for ${word}!`, {
-                    pitch: 1.2,
-                    rate: 0.9,
-                });
-            }
-        }, 500);
-
-        // Advance to next vocabulary item
-        this.vocabularyIndex =
-            (this.vocabularyIndex + 1) % this.activeVocabulary.length;
+        // Advance index only if caller did not supply a pre-captured item
+        if (!item) {
+            this.vocabularyIndex =
+                (this.vocabularyIndex + 1) % this.activeVocabulary.length;
+        }
     }
 
     /**
      * Display word image in the background
+     * @param {Object|string} [item] - Vocabulary item for the hit
      */
-    displayWordImage() {
+    displayWordImage(item = null) {
         const vocabularyItem =
-            this.activeVocabulary[this.vocabularyIndex - 1] ||
+            item ||
+            this.activeVocabulary[this.vocabularyIndex] ||
             this.activeVocabulary[0];
         const wordBackground = document.querySelector('.word-background');
 
@@ -1781,8 +1805,12 @@ class GameState {
      * @param {HTMLElement} wordBackground - Word background element
      */
     scheduleImageHide(wordBackground) {
-        // Hide after display duration
-        setTimeout(() => {
+        if (this.imageHideTimeout) {
+            clearTimeout(this.imageHideTimeout);
+            this.imageHideTimeout = null;
+        }
+        this.imageHideTimeout = setTimeout(() => {
+            this.imageHideTimeout = null;
             wordBackground.classList.remove('visible');
             wordBackground.classList.remove('loading');
             wordBackground.textContent = '';
@@ -1966,7 +1994,10 @@ class GameState {
         // Commit the screen state together with the DOM. Setting
         // `currentScreen` immediately made the model disagree with the DOM for
         // the whole 600ms transition.
+        const transitionSeq = (this._transitionSeq =
+            (this._transitionSeq || 0) + 1);
         const commit = () => {
+            if (this._transitionSeq !== transitionSeq) return;
             this.currentScreen = screenId;
             this.hasAppliedScreen = true;
             this.onScreenTransitionComplete(screenId);
@@ -2089,6 +2120,19 @@ class GameState {
         this.vocabularyIndex = 0;
         this.isGameplayActive = false;
         this.arePlanetsRendered = false;
+
+        if (this.imageHideTimeout) {
+            clearTimeout(this.imageHideTimeout);
+            this.imageHideTimeout = null;
+        }
+
+        const wordBackground = document.querySelector('.word-background');
+        if (wordBackground) {
+            wordBackground.classList.remove('visible');
+            wordBackground.classList.remove('loading');
+            wordBackground.textContent = '';
+            wordBackground.style.backgroundImage = '';
+        }
 
         // Clear collision detection registry
         this.collisionManager.clear();
@@ -2289,7 +2333,9 @@ class GameState {
             const savedData = localStorage.getItem('phonics_fun_stats');
             if (savedData) {
                 const parsed = JSON.parse(savedData);
-                this.completedLevels = parsed.completedLevels || [];
+                this.completedLevels = Array.isArray(parsed?.completedLevels)
+                    ? parsed.completedLevels
+                    : [];
                 this.correctHitsCount = parsed.correctHitsCount || 0;
                 this.incorrectHitsCount = parsed.incorrectHitsCount || 0;
                 this.totalAnswersCount = parsed.totalAnswersCount || 0;
@@ -2297,6 +2343,11 @@ class GameState {
                 this.cumIncorrect = parsed.cumIncorrect || 0;
                 this.cumTotal = parsed.cumTotal || 0;
                 this.updateAdaptiveDifficulty();
+
+                // If active letter is already completed, advance to next uncompleted letter
+                if (this.completedLevels.includes(this.activeLetterLevel)) {
+                    this.advanceToNextLetter();
+                }
             }
         } catch (e) {
             console.error('Failed to load stats from localStorage:', e);

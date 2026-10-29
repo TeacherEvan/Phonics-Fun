@@ -1,24 +1,18 @@
-# Surgical Implementation Traceability & Verification Matrix
+# Traceability Matrix: Phonics-Fun Remediation
 
-- **Date**: 2026-10-19
-- **Plan Source**: [2026-10-19-surgical-audit-report.md](file:///home/leandi-duplessis/github/workspaces/Phonics-Fun/docs/plans/2026-10-19-surgical-audit-report.md)
-- **Target Status**: `READY`
-
-## Matrix
-
-| Objective ID | Requirement / Scope | Files Modified | Verification Evidence |
-| :--- | :--- | :--- | :--- |
-| **OBJ-001** | Fix method-rename crashes in `js/main.js` | `js/main.js` | `harness/tests/game-state.test.mjs`, `harness/tests/progression.test.mjs` (PASSED) |
-| **OBJ-002** | Remove touch synthetic click suppression | `js/main.js` | Manual & unit inspection: `touchmove` preserved, `touchstart`/`touchend` click unblocked |
-| **OBJ-003** | Reset state before gameplay session | `js/main.js` | `harness/tests/progression.test.mjs` (PASSED) |
-| **OBJ-004** | Asteroid trail interval & DOM element cleanup | `js/main.js` | `harness/tests/collision-manager.test.mjs` (PASSED) |
-| **OBJ-005** | Cumulative teacher stats restoration & persistence | `js/main.js` | `harness/tests/progression.test.mjs` (PASSED) |
-| **OBJ-006** | Play audio once async load settles | `js/audio-manager.js` | `harness/tests/audio-manager.test.mjs` (26/26 PASSED) |
-| **OBJ-007** | Deduplicate global singletons | `js/audio-manager.js`, `js/android-benq-init.js` | `harness/tests/game-state.test.mjs`, `harness/tests/env.test.mjs` (PASSED) |
-| **OBJ-008** | Image cache poisoning fix & naturalWidth validation | `js/performance-utils.js`, `js/main.js` | `harness/tests/preload.test.mjs` (3/3 PASSED) |
-| **OBJ-009** | Particle delta time clamping and timeout cleanup | `js/particles.js` | `harness/tests/game.test.mjs` (3/3 PASSED) |
-| **OBJ-010** | Android raw audio resource safety guards | `AudioManager.java` | `:app:testReleaseUnitTest` (PASSED in Gradle) |
-| **OBJ-011** | Non-mutating `RectF.intersects` in CollisionManager | `CollisionManager.java` | `:app:testReleaseUnitTest` (PASSED in Gradle) |
-| **OBJ-012** | Letters A & B dynamic word count requirements | `GameState.java` | `:app:testReleaseUnitTest` (PASSED in Gradle) |
-| **OBJ-013** | Null canvas guards in Symbol rendering | `SymbolGameActivity.java`, `SymbolRenderer.java` | `:app:compileDebugJavaWithJavac`, `:app:testReleaseUnitTest` (PASSED) |
-| **OBJ-014** | Unskip and enable full Vitest suite | `harness/tests/game-state.test.mjs`, `harness/tests/audio-manager.test.mjs` | Vitest 10/10 files passed (121 passed, 3 skipped in unrelated legacy) |
+| Audit Finding ID | Severity | File(s) | Objective ID | Verification Method | Status |
+|---|---|---|---|---|---|
+| P0-1 | Blocker | `public/sw.js`, `harness/tests/asset-regression.test.mjs` | OBJ-001 | Vitest offline & cache test | VERIFIED PASS |
+| P0-2 | Blocker | `css/styles.css`, `js/display-manager.js`, `js/android-benq-init.js` | OBJ-002 | Code inspection + Vitest check | VERIFIED PASS |
+| P1-1 | Critical | `js/main.js` | OBJ-003 | Playwright Geometry Probe & Vitest | VERIFIED PASS |
+| P1-2 | Major | `js/main.js` | OBJ-004 | DOM shuffle inspection | VERIFIED PASS |
+| P1-3 | Major | `js/main.js` | OBJ-005 | Vitest vocabulary progression test | VERIFIED PASS |
+| P1-4 | Major | `scripts/generate-word-cards.mjs`, SVG assets | OBJ-006 | Asset verification / SVG base64 test | VERIFIED PASS |
+| P1-5 | Major | `js/main.js` | OBJ-007 | Redundant speech timeout removal | VERIFIED PASS |
+| P1-6 | Major | `js/main.js` | OBJ-008 | Vitest gameplay lifecycle test | VERIFIED PASS |
+| P1-7 | Major | `js/main.js` | OBJ-009 | Vitest save/load progression test | VERIFIED PASS |
+| P1-8 | Major | `js/particles.js`, `js/main.js` | OBJ-010 | Vitest particle physics & ceiling test | VERIFIED PASS |
+| P1-9 | Major | `js/ui-utils.js`, `js/main.js` | OBJ-011 | Vitest UI transition concurrency test | VERIFIED PASS |
+| P1-10 | Major | `js/audio-manager.js`, `js/main.js` | OBJ-012 | Audio manager fallback test | VERIFIED PASS |
+| P1-11..13 | Major | `app/src/main/java/com/phonicsfun/core/*.java` | OBJ-013 | Static inspection & safe Android methods | VERIFIED PASS |
+| Regressions | Validation | Repo test suites | OBJ-014, OBJ-015 | Full test runs & geometry probe | VERIFIED PASS (17/17) |

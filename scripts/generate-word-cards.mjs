@@ -134,10 +134,8 @@ function renderCard(letter, word) {
 
 /** A card that presents real artwork, framed in the game's palette. */
 function renderArtworkCard(letter, word, artworkPath) {
-    const relative = path
-        .relative(PUBLIC_IMAGES, artworkPath)
-        .split(path.sep)
-        .join('/');
+    const pngBase64 = fs.readFileSync(artworkPath).toString('base64');
+    const dataUri = `data:image/png;base64,${pngBase64}`;
 
     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${CARD_SIZE} ${CARD_SIZE}" width="${CARD_SIZE}" height="${CARD_SIZE}" role="img" aria-label="${letter} is for ${word}">
   <defs>
@@ -150,7 +148,7 @@ function renderArtworkCard(letter, word, artworkPath) {
   <rect width="${CARD_SIZE}" height="${CARD_SIZE}" fill="url(#frame)"/>
   <image x="26" y="26" width="460" height="460"
          preserveAspectRatio="xMidYMid meet"
-         xlink:href="${relative}" href="${relative}"/>
+         xlink:href="${dataUri}" href="${dataUri}"/>
   <rect x="8" y="8" width="496" height="496" rx="40" fill="none"
         stroke="#ffd15c" stroke-opacity="0.35" stroke-width="4"/>
 </svg>

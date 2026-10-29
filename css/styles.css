@@ -1695,8 +1695,13 @@ body {
 
 /* Low memory mode optimizations */
 .low-memory * {
-    animation-duration: 0.1s !important;
     transition-duration: 0.1s !important;
+}
+
+.low-memory .welcome-star,
+.low-memory .welcome-planet,
+.low-memory .welcome-asteroid {
+    animation: none !important;
 }
 
 .low-memory .welcome-background {

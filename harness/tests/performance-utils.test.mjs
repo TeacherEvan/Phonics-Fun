@@ -86,12 +86,9 @@ describe('PerformanceUtils', () => {
             expect(img.style.opacity).toBe('0');
         });
 
-        // Note: This test is skipped because jsdom always has IntersectionObserver available
-        // The fallback behavior is tested in the preload.test.mjs file
-        it.skip('should load image immediately when IntersectionObserver not supported', () => {
-            // Temporarily remove IntersectionObserver
+        it('should load image immediately when IntersectionObserver not supported', () => {
             const originalIO = global.IntersectionObserver;
-            global.IntersectionObserver = undefined;
+            delete global.IntersectionObserver;
 
             const perfUtilsNoIO = new window.PerformanceUtils();
 
@@ -231,21 +228,20 @@ describe('PerformanceUtils', () => {
             expect(global.requestIdleCallback).toHaveBeenCalledWith(callback);
         });
 
-        // Note: This test is skipped because jsdom always has requestIdleCallback available
-        // The fallback behavior is tested by verifying the code path exists
-        it.skip('should fallback to setTimeout when not available', () => {
-            // Mock requestIdleCallback as undefined to test fallback
+        it('should fallback to setTimeout when not available', () => {
             const originalRIC = global.requestIdleCallback;
-            global.requestIdleCallback = undefined;
+            delete global.requestIdleCallback;
+            const setTimeoutSpy = vi.spyOn(global, 'setTimeout');
 
             const callback = vi.fn();
             window.PerformanceUtils.requestIdleCallback(callback);
 
             // Should use setTimeout fallback
-            expect(setTimeout).toHaveBeenCalled();
+            expect(setTimeoutSpy).toHaveBeenCalled();
 
             // Restore
             global.requestIdleCallback = originalRIC;
+            setTimeoutSpy.mockRestore();
         });
     });
 
@@ -301,14 +297,13 @@ describe('PerformanceUtils', () => {
     });
 
     describe('destroy', () => {
-        // Note: This test is skipped due to test isolation issues with IntersectionObserver mock
-        // The destroy functionality is tested indirectly through other tests
-        it.skip('should disconnect observer and clear cache', () => {
+        it('should disconnect observer and clear cache', () => {
             // Create a new instance to test destroy
             const testUtils = new window.PerformanceUtils();
+            const disconnectSpy = vi.spyOn(testUtils.imageObserver, 'disconnect');
             testUtils.destroy();
 
-            expect(testUtils.imageObserver.disconnect).toHaveBeenCalled();
+            expect(disconnectSpy).toHaveBeenCalled();
             expect(testUtils.resourceCache.size).toBe(0);
             expect(testUtils.imageObserver).toBeNull();
         });

@@ -56,6 +56,10 @@ public class GameplayActivity extends Activity {
         // Share the GameState AudioManager so the volume and voice settings
         // chosen in Settings apply to the audio used while playing.
         gameState = GameState.getInstance();
+        if (gameState == null) {
+            new GameState(getApplicationContext());
+            gameState = GameState.getInstance();
+        }
         if (gameState != null) {
             audioManager = gameState.getAudioManager();
         } else {

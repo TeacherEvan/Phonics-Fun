@@ -24,6 +24,7 @@ const CRITICAL_SELECTORS = [
     '*',
     'html',
     'body',
+    ':root',
     '.screen',
     '.screen.active',
     '#welcome-screen',
@@ -32,6 +33,11 @@ const CRITICAL_SELECTORS = [
     '.welcome-planets',
     '.welcome-asteroids',
     '.welcome-container',
+    '.welcome-kicker',
+    '.welcome-subtitle',
+    '.welcome-actions',
+    '.welcome-helper',
+    '#start-game-btn',
     '.pulsating-text',
     '.welcome-to',
     '.fun-with',
@@ -39,6 +45,12 @@ const CRITICAL_SELECTORS = [
     '.primary-button',
     '.settings-container',
     '.settings-button',
+    '#ready-overlay',
+    '.ready-modal',
+    '.ready-title',
+    '.ready-subtitle',
+    '.ready-actions',
+    '.ready-start-button',
 ];
 
 const MARKER = '<!-- CRITICAL_CSS -->';

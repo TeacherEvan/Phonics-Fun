@@ -270,9 +270,6 @@ class AndroidBenQInitializer {
                 .large-display .welcome-container h1 {
                     font-size: 3em;
                 }
-                .large-display .game-area {
-                    transform: scale(1.1);
-                }
             `;
             document.head.appendChild(style);
         }
@@ -350,8 +347,12 @@ class AndroidBenQInitializer {
         const style = document.createElement('style');
         style.textContent = `
             .low-memory * {
-                animation-duration: 0.1s !important;
                 transition-duration: 0.1s !important;
+            }
+            .low-memory .welcome-star,
+            .low-memory .welcome-planet,
+            .low-memory .welcome-asteroid {
+                animation: none !important;
             }
             .low-memory .welcome-background {
                 display: none !important;

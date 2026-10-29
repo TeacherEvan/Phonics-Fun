@@ -57,14 +57,19 @@ public class EventManager {
     /**
      * Subscribe to an event type
      */
-    public void subscribe(String eventType, EventListener listener) {
-        eventListeners.computeIfAbsent(eventType, k -> new ArrayList<>()).add(listener);
+    public synchronized void subscribe(String eventType, EventListener listener) {
+        List<EventListener> listeners = eventListeners.get(eventType);
+        if (listeners == null) {
+            listeners = new ArrayList<>();
+            eventListeners.put(eventType, listeners);
+        }
+        listeners.add(listener);
     }
     
     /**
      * Unsubscribe from an event type
      */
-    public void unsubscribe(String eventType, EventListener listener) {
+    public synchronized void unsubscribe(String eventType, EventListener listener) {
         List<EventListener> listeners = eventListeners.get(eventType);
         if (listeners != null) {
             listeners.remove(listener);
@@ -94,6 +99,7 @@ public class EventManager {
      * Schedule a one-time event
      */
     public void scheduleEvent(ScheduledCallback callback, long delayMs) {
+        final ScheduledEvent[] eventHolder = new ScheduledEvent[1];
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -101,12 +107,16 @@ public class EventManager {
                     callback.execute();
                 } catch (Exception e) {
                     android.util.Log.e(TAG, "Error executing scheduled event: " + e.getMessage());
+                } finally {
+                    if (eventHolder[0] != null) {
+                        scheduledEvents.remove(eventHolder[0]);
+                    }
                 }
             }
         };
         
-        ScheduledEvent event = new ScheduledEvent(runnable, delayMs, false);
-        scheduledEvents.add(event);
+        eventHolder[0] = new ScheduledEvent(runnable, delayMs, false);
+        scheduledEvents.add(eventHolder[0]);
         mainHandler.postDelayed(runnable, delayMs);
     }
     
@@ -192,6 +202,6 @@ public class EventManager {
     public void cleanup() {
         cancelAllEvents();
         eventListeners.clear();
-        mainHandler.removeCallbacksAndMessages(this);
+        mainHandler.removeCallbacksAndMessages(null);
     }
 }

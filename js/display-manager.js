@@ -320,8 +320,13 @@ class DisplayManager {
             }
 
             .performance-low * {
-                animation-duration: 0.1s !important;
                 transition-duration: 0.1s !important;
+            }
+
+            .performance-low .welcome-star,
+            .performance-low .welcome-planet,
+            .performance-low .welcome-asteroid {
+                animation: none !important;
             }
 
             .performance-high .planet {

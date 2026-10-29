@@ -31,6 +31,10 @@ public class LevelSelectActivity extends Activity {
         
         // Initialize game state
         gameState = GameState.getInstance();
+        if (gameState == null) {
+            new GameState(getApplicationContext());
+            gameState = GameState.getInstance();
+        }
         
         // Initialize UI components
         initializeUI();

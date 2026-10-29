@@ -128,9 +128,13 @@ public class AudioManager {
     }
 
     private void loadVoiceVariant(String voiceKey, String template) {
+        String key = voiceKey + "_" + template;
+        if (voiceMap.containsKey(key)) {
+            return;
+        }
         int resId = getVoiceResId(voiceKey, template);
         if (resId != 0) {
-            voiceMap.put(voiceKey + "_" + template, soundPool.load(context, resId, 1));
+            voiceMap.put(key, soundPool.load(context, resId, 1));
         } else {
             Log.w(TAG, "Missing voice resource for " + voiceKey + " / " + template);
         }
@@ -248,9 +252,16 @@ public class AudioManager {
     }
     
     public void stopMusic() {
-        if (backgroundMusicPlayer != null && backgroundMusicPlayer.isPlaying()) {
-            backgroundMusicPlayer.stop();
-            Log.d(TAG, "Background music stopped");
+        if (backgroundMusicPlayer != null) {
+            try {
+                if (backgroundMusicPlayer.isPlaying()) {
+                    backgroundMusicPlayer.pause();
+                }
+                backgroundMusicPlayer.seekTo(0);
+                Log.d(TAG, "Background music stopped");
+            } catch (IllegalStateException e) {
+                Log.e(TAG, "Error stopping background music: " + e.getMessage());
+            }
         }
     }
     
