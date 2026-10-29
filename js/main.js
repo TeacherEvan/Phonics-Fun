@@ -16,7 +16,6 @@ import PerformanceUtils from './performance-utils.js';
 import UIUtils from './ui-utils.js';
 import DisplayManager from './display-manager.js';
 import AndroidBenQInitializer from './android-benq-init.js';
-import { debounce } from './utils.js';
 import {
     PHONICS_FUN_LETTER_DATA,
     getVocabulary,
@@ -339,21 +338,10 @@ class GameState {
             this.handleVisibilityChange();
         });
 
-        // Debounced resize handler for performance
-        const resizeHandler = () => {
-            console.log('📐 Window resized');
-            if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
-                this.resetGameplayState();
-                this.renderGameplayPlanets();
-            }
-        };
-
-        // Debounced resize handler. A single shared implementation is used;
-        // the previous runtime probe picked between two subtly different
-        // copies depending on load order.
-        const debouncedResize = debounce(resizeHandler, 250);
-
-        window.addEventListener('resize', debouncedResize);
+        // Reposition the playfield when the viewport changes, but never reset
+        // the session: a rotation used to call resetGameplayState(), which
+        // deactivated the game and zeroed the score mid-level.
+        window.addEventListener('resize', () => this.schedulePlanetLayout());
     }
 
     /**
@@ -411,16 +399,36 @@ class GameState {
     }
 
     /**
+     * Coalesce viewport changes into one playfield layout pass.
+     *
+     * The HUD is a CSS overlay; its height is only final after the browser has
+     * applied the new media query. Measuring immediately after a resize can
+     * therefore use the previous viewport and leave planets off-screen (the
+     * landscape regression). A zero-delay task lets style/layout settle, while
+     * the handle cancels duplicate resize/orientation events.
+     */
+    schedulePlanetLayout() {
+        if (this.planetLayoutTimer) {
+            clearTimeout(this.planetLayoutTimer);
+        }
+        this.planetLayoutTimer = setTimeout(() => {
+            this.planetLayoutTimer = null;
+            if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
+                this.adjustPlanetPositions();
+            }
+        }, 0);
+    }
+
+    /**
      * Handle display changes from DisplayManager
      * @param {Object} displayInfo - Display information from DisplayManager
      */
     handleDisplayChange(displayInfo) {
         console.log('📱 Display configuration changed:', displayInfo);
 
-        // Adjust game elements based on new display configuration
+        // Reposition planets for the new viewport; never reset the session.
         if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
-            // Reposition planets for new viewport
-            this.adjustPlanetPositions(displayInfo);
+            this.schedulePlanetLayout();
         }
 
         // Update UI scaling
@@ -428,25 +436,124 @@ class GameState {
     }
 
     /**
+     * Radius of a planet's orbit, in pixels. Held to a fraction of the short
+     * viewport edge so a phone does not swing its targets off-screen.
+     * @returns {number}
+     */
+    computeOrbitRadius() {
+        const vmin = Math.min(window.innerWidth, window.innerHeight);
+        return Math.round(Math.min(200, Math.max(44, vmin * 0.22)));
+    }
+
+    /**
+     * Position a planet so that its whole orbit stays inside the part of the
+     * playfield the HUD does not cover, and return the radius actually used.
+     *
+     * The HUD is an opaque overlay anchored to the top of the screen. Planets
+     * used to be scattered over the full window, so on a phone most targets
+     * spawned underneath it — visible to the DOM, invisible and untappable to
+     * the child.
+     *
+     * @param {HTMLElement} planet - Element already mounted, so it has a width
+     * @param {number} requestedRadius - Desired orbit radius in pixels
+     * @param {{ index: number, total: number }} [slot] - Position in the
+     *     playfield grid. The default places a single planet in the centre.
+     * @returns {number} The orbit radius that fits
+     */
+    placePlanetInPlayArea(
+        planet,
+        requestedRadius,
+        slot = { index: 0, total: 1 },
+    ) {
+        const area = document.querySelector('.game-area');
+        if (!area) return requestedRadius;
+
+        const areaRect = area.getBoundingClientRect();
+        const hud = document.querySelector('.game-ui');
+        const hudBottom = hud
+            ? Math.max(0, hud.getBoundingClientRect().bottom - areaRect.top)
+            : 0;
+
+        const size = planet.offsetWidth || 100;
+        const half = size / 2;
+        const pad = 6;
+
+        const freeWidth = Math.max(0, areaRect.width - 2 * (half + pad));
+        const freeHeight = Math.max(
+            0,
+            areaRect.height - hudBottom - 2 * (half + pad),
+        );
+        const radius = Math.max(
+            0,
+            Math.min(requestedRadius, freeWidth / 2, freeHeight / 2),
+        );
+
+        const minX = half + pad + radius;
+        const maxX = areaRect.width - half - pad - radius;
+        const minY = hudBottom + half + pad + radius;
+        const maxY = areaRect.height - half - pad - radius;
+        const rangeX = Math.max(0, maxX - minX);
+        const rangeY = Math.max(0, maxY - minY);
+
+        const total = Math.max(1, Number(slot?.total) || 1);
+        const index = Math.min(
+            Math.max(0, Number(slot?.index) || 0),
+            total - 1,
+        );
+        const aspect = rangeY > 0 ? rangeX / rangeY : 1;
+        const cols = Math.max(
+            1,
+            Math.min(
+                total,
+                Math.round(Math.sqrt(total * Math.max(0.01, aspect))),
+            ),
+        );
+        const rows = Math.ceil(total / cols);
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        const xStep = cols > 1 ? rangeX / (cols - 1) : 0;
+        const yStep = rows > 1 ? rangeY / (rows - 1) : 0;
+        const itemsInRow = Math.min(cols, total - row * cols);
+        const rowOffset = cols > 1 ? ((cols - itemsInRow) * xStep) / 2 : 0;
+        const centreX =
+            cols > 1 ? minX + col * xStep + rowOffset : minX + rangeX / 2;
+        const centreY = rows > 1 ? minY + row * yStep : minY + rangeY / 2;
+
+        planet.style.left = `${Math.round(centreX - half)}px`;
+        planet.style.top = `${Math.round(centreY - half)}px`;
+
+        return Math.round(radius);
+    }
+
+    /**
      * Adjust planet positions for current viewport
      * @param {Object} displayInfo - Display information
      */
-    adjustPlanetPositions(displayInfo) {
-        const planets = document.querySelectorAll('.planet');
-        const { width, height } = displayInfo.viewport;
+    adjustPlanetPositions(_displayInfo) {
+        const orbitRadius = this.computeOrbitRadius();
+        const planets = Array.from(document.querySelectorAll('.planet'));
 
-        planets.forEach((planet, _index) => {
-            // Recalculate position to keep planets visible
-            const currentLeft = parseInt(planet.style.left, 10) || 0;
-            const currentTop = parseInt(planet.style.top, 10) || 0;
+        if (planets.length === 0) {
+            document.documentElement.style.setProperty(
+                '--orbit-radius',
+                `${orbitRadius}px`,
+            );
+            return;
+        }
 
-            // Ensure planet stays within new viewport bounds
-            const newLeft = Math.min(currentLeft, width - 120);
-            const newTop = Math.min(currentTop, height - 120);
-
-            planet.style.left = `${Math.max(10, newLeft)}px`;
-            planet.style.top = `${Math.max(10, newTop)}px`;
+        let usedRadius = orbitRadius;
+        planets.forEach((planet, index) => {
+            usedRadius = this.placePlanetInPlayArea(planet, orbitRadius, {
+                index,
+                total: planets.length,
+            });
+            planet.style.setProperty('--orbit-radius', `${usedRadius}px`);
         });
+
+        document.documentElement.style.setProperty(
+            '--orbit-radius',
+            `${usedRadius}px`,
+        );
     }
 
     /**
@@ -471,6 +578,9 @@ class GameState {
             gameArea.offsetHeight; // Trigger reflow
             gameArea.style.display = '';
         }
+        // Orientationchange does not always emit a resize event; schedule the
+        // same single layout pass used by the resize path.
+        this.schedulePlanetLayout();
     }
 
     /**
@@ -990,7 +1100,26 @@ class GameState {
         const planetsContainer = document.querySelector('.planets-container');
         planetsContainer.innerHTML = '';
 
+        // Drop the previous board from the collision registry before building
+        // the new one. The innerHTML reset detaches those elements, and a
+        // detached planet measures 0x0 at (0,0) while keeping its old radius,
+        // so an asteroid spawning in the top-left corner could still "hit" a
+        // ghost of a letter that is no longer being played.
+        for (const id of Array.from(this.collisionManager.objects.keys())) {
+            if (id.startsWith('planet-')) {
+                this.collisionManager.unregisterObject(id);
+            }
+        }
+
         const letterLower = this.activeLetterLevel.toLowerCase();
+
+        // One orbit radius per board, published to CSS so the planetOrbit
+        // keyframes and the spawn bounds cannot disagree.
+        const orbitRadius = this.computeOrbitRadius();
+        document.documentElement.style.setProperty(
+            '--orbit-radius',
+            `${orbitRadius}px`,
+        );
 
         // Dynamic speed based on adaptive difficulty
         const targetSpeed = 8 / this.difficultySpeedMultiplier;
@@ -1013,11 +1142,9 @@ class GameState {
                 `Target planet with letter ${this.activeLetterLevel}`,
             );
 
-            // Random position within game area
-            const posX = Math.random() * (window.innerWidth - 100);
-            const posY = Math.random() * (window.innerHeight - 100);
-            targetPlanet.style.left = `${posX}px`;
-            targetPlanet.style.top = `${posY}px`;
+            // Mount first; the board is laid out as a grid once every planet
+            // exists (see the adjustPlanetPositions() call at the end).
+            planetsContainer.appendChild(targetPlanet);
 
             // Staggered animation and dynamic speed
             targetPlanet.style.animation = `planetOrbit ${targetSpeed}s linear infinite, planetGlow 2s ease-in-out infinite alternate`;
@@ -1030,8 +1157,6 @@ class GameState {
                     this.activeLetterLevel,
                 );
             });
-
-            planetsContainer.appendChild(targetPlanet);
 
             // Register with collision detection system
             this.collisionManager.registerObject(
@@ -1066,11 +1191,8 @@ class GameState {
                 `Distractor planet with letter ${distractorLetter}`,
             );
 
-            // Random position
-            const posX = Math.random() * (window.innerWidth - 100);
-            const posY = Math.random() * (window.innerHeight - 100);
-            distractorPlanet.style.left = `${posX}px`;
-            distractorPlanet.style.top = `${posY}px`;
+            // Mount first; the board grid is applied after the loop.
+            planetsContainer.appendChild(distractorPlanet);
 
             // Slower animation and dynamic speed
             distractorPlanet.style.animation = `planetOrbit ${distractorSpeed}s linear infinite, planetGlow 3s ease-in-out infinite alternate`;
@@ -1084,8 +1206,6 @@ class GameState {
                 );
             });
 
-            planetsContainer.appendChild(distractorPlanet);
-
             // Register with collision detection
             this.collisionManager.registerObject(
                 `planet-other-${i}`,
@@ -1097,6 +1217,11 @@ class GameState {
                 },
             );
         });
+
+        // Lay the complete board out once. Per-planet random placement made
+        // targets stack on short landscape screens; the grid keeps at least a
+        // planet-sized gap between adjacent centres.
+        this.adjustPlanetPositions();
     }
 
     /**
@@ -1679,6 +1804,7 @@ class GameState {
     updateProgressDisplay() {
         const progressFillElement = document.getElementById('progress-fill');
         const hitsCounterElement = document.getElementById('hits-counter');
+        const progressBarElement = document.querySelector('.progress-bar');
 
         const progressPercentage =
             (this.correctHitsCount / this.requiredHitsToComplete) * 100;
@@ -1689,6 +1815,20 @@ class GameState {
             String(Math.max(0, Math.min(1, progressPercentage / 100))),
         );
         hitsCounterElement.textContent = this.correctHitsCount;
+        if (progressBarElement) {
+            progressBarElement.setAttribute(
+                'aria-valuemax',
+                String(this.requiredHitsToComplete),
+            );
+            progressBarElement.setAttribute(
+                'aria-valuenow',
+                String(this.correctHitsCount),
+            );
+            progressBarElement.setAttribute(
+                'aria-valuetext',
+                `${this.correctHitsCount} of ${this.requiredHitsToComplete} hits`,
+            );
+        }
         this.syncLetterDisplays();
     }
 
