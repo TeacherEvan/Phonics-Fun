@@ -16,7 +16,6 @@ import PerformanceUtils from './performance-utils.js';
 import UIUtils from './ui-utils.js';
 import DisplayManager from './display-manager.js';
 import AndroidBenQInitializer from './android-benq-init.js';
-import { debounce } from './utils.js';
 import {
     PHONICS_FUN_LETTER_DATA,
     getVocabulary,
@@ -339,21 +338,10 @@ class GameState {
             this.handleVisibilityChange();
         });
 
-        // Debounced resize handler for performance
-        const resizeHandler = () => {
-            console.log('📐 Window resized');
-            if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
-                this.resetGameplayState();
-                this.renderGameplayPlanets();
-            }
-        };
-
-        // Debounced resize handler. A single shared implementation is used;
-        // the previous runtime probe picked between two subtly different
-        // copies depending on load order.
-        const debouncedResize = debounce(resizeHandler, 250);
-
-        window.addEventListener('resize', debouncedResize);
+        // Reposition the playfield when the viewport changes, but never reset
+        // the session: a rotation used to call resetGameplayState(), which
+        // deactivated the game and zeroed the score mid-level.
+        window.addEventListener('resize', () => this.schedulePlanetLayout());
     }
 
     /**
@@ -411,16 +399,36 @@ class GameState {
     }
 
     /**
+     * Coalesce viewport changes into one playfield layout pass.
+     *
+     * The HUD is a CSS overlay; its height is only final after the browser has
+     * applied the new media query. Measuring immediately after a resize can
+     * therefore use the previous viewport and leave planets off-screen (the
+     * landscape regression). A zero-delay task lets style/layout settle, while
+     * the handle cancels duplicate resize/orientation events.
+     */
+    schedulePlanetLayout() {
+        if (this.planetLayoutTimer) {
+            clearTimeout(this.planetLayoutTimer);
+        }
+        this.planetLayoutTimer = setTimeout(() => {
+            this.planetLayoutTimer = null;
+            if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
+                this.adjustPlanetPositions();
+            }
+        }, 0);
+    }
+
+    /**
      * Handle display changes from DisplayManager
      * @param {Object} displayInfo - Display information from DisplayManager
      */
     handleDisplayChange(displayInfo) {
         console.log('📱 Display configuration changed:', displayInfo);
 
-        // Adjust game elements based on new display configuration
+        // Reposition planets for the new viewport; never reset the session.
         if (this.currentScreen === 'gameplay' && this.arePlanetsRendered) {
-            // Reposition planets for new viewport
-            this.adjustPlanetPositions(displayInfo);
+            this.schedulePlanetLayout();
         }
 
         // Update UI scaling
@@ -500,10 +508,7 @@ class GameState {
         );
 
         document.querySelectorAll('.planet').forEach((planet) => {
-            const usedRadius = this.placePlanetInPlayArea(
-                planet,
-                orbitRadius,
-            );
+            const usedRadius = this.placePlanetInPlayArea(planet, orbitRadius);
             planet.style.setProperty('--orbit-radius', `${usedRadius}px`);
         });
     }
@@ -530,6 +535,9 @@ class GameState {
             gameArea.offsetHeight; // Trigger reflow
             gameArea.style.display = '';
         }
+        // Orientationchange does not always emit a resize event; schedule the
+        // same single layout pass used by the resize path.
+        this.schedulePlanetLayout();
     }
 
     /**
@@ -1763,6 +1771,7 @@ class GameState {
     updateProgressDisplay() {
         const progressFillElement = document.getElementById('progress-fill');
         const hitsCounterElement = document.getElementById('hits-counter');
+        const progressBarElement = document.querySelector('.progress-bar');
 
         const progressPercentage =
             (this.correctHitsCount / this.requiredHitsToComplete) * 100;
@@ -1773,6 +1782,20 @@ class GameState {
             String(Math.max(0, Math.min(1, progressPercentage / 100))),
         );
         hitsCounterElement.textContent = this.correctHitsCount;
+        if (progressBarElement) {
+            progressBarElement.setAttribute(
+                'aria-valuemax',
+                String(this.requiredHitsToComplete),
+            );
+            progressBarElement.setAttribute(
+                'aria-valuenow',
+                String(this.correctHitsCount),
+            );
+            progressBarElement.setAttribute(
+                'aria-valuetext',
+                `${this.correctHitsCount} of ${this.requiredHitsToComplete} hits`,
+            );
+        }
         this.syncLetterDisplays();
     }
 

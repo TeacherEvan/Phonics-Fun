@@ -107,14 +107,21 @@
                 </div>
                 <div class="game-ui">
                     <div class="hud-cluster">
-                        <div class="active-letter-panel">
-                            <span class="hud-label">Mission Letter</span>
+                        <div class="active-letter-panel" role="group"
+                            aria-labelledby="mission-letter-label">
+                            <span class="hud-label"
+                                id="mission-letter-label">Mission Letter</span>
                             <span id="active-letter-display"
-                                class="active-letter-display">G</span>
+                                class="active-letter-display"
+                                aria-live="polite">G</span>
                         </div>
                         <div class="progress-panel">
-                            <span class="hud-label">Mission Progress</span>
-                            <div class="progress-bar">
+                            <span class="hud-label"
+                                id="mission-progress-label">Mission Progress</span>
+                            <div class="progress-bar" role="progressbar"
+                                aria-labelledby="mission-progress-label"
+                                aria-valuemin="0" aria-valuemax="5"
+                                aria-valuenow="0">
                                 <div class="progress-fill"
                                     id="progress-fill"></div>
                             </div>

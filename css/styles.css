@@ -2892,8 +2892,11 @@ h3,
 @media (max-width: 900px), (max-height: 620px) and (orientation: landscape) {
     .game-ui {
         top: 8px;
+        top: max(8px, env(safe-area-inset-top));
         left: 8px;
+        left: max(8px, env(safe-area-inset-left));
         right: 8px;
+        right: max(8px, env(safe-area-inset-right));
         gap: 0.4rem;
         flex-direction: row;
         align-items: stretch;
@@ -2927,11 +2930,19 @@ h3,
         border-radius: 18px;
     }
 
-    /* The gold tile and the bar explain themselves; the labels were eating
-       a third of the strip's height. */
+    /* Keep the labels in the accessibility tree; `display:none` made the
+       mission context disappear for screen readers on phones. */
     .active-letter-panel .hud-label,
     .progress-panel .hud-label {
-        display: none;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        border: 0;
     }
 
     .active-letter-display {
